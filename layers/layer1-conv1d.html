@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer 1: Conv1D | Temporal Feature Extractor</title>
+    <style>
+        :root {
+            --cyan: #06B6D4;
+            --purple: #8B5CF6;
+            --gold: #F59E0B;
+            --green: #10B981;
+            --blue: #3B82F6;
+            --pink: #EC4899;
+            --bg-dark: #050510;
+            --panel-bg: rgba(5, 5, 20, 0.95);
+            --glass-border: rgba(6, 182, 212, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Outfit', sans-serif;
+            background: #030308;
+            color: #fff;
+        }
+
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+
+        /* Header - Cinematic Style */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.98) 0%, rgba(0, 0, 0, 0.6) 70%, transparent 100%);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .layer-badge {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .layer-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 0 50px rgba(6, 182, 212, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.1);
+            animation: iconGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes iconGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 50px rgba(6, 182, 212, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 80px rgba(139, 92, 246, 0.8);
+            }
+        }
+
+        .layer-title h1 {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(6, 182, 212, 0.5), 0 0 60px rgba(139, 92, 246, 0.3);
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                text-shadow: 0 0 30px rgba(6, 182, 212, 0.5);
+            }
+
+            50% {
+                text-shadow: 0 0 50px rgba(6, 182, 212, 0.8), 0 0 80px rgba(139, 92, 246, 0.5);
+            }
+        }
+
+        .layer-title p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 6px;
+            text-transform: uppercase;
+        }
+
+        .header-metrics {
+            display: flex;
+            gap: 20px;
+        }
+
+        .metric-box {
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid var(--glass-border);
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .metric-label {
+            font-size: 9px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .metric-value {
+            font-size: 22px;
+            font-weight: 200;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .nav-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--cyan);
+        }
+
+        /* Crystalline Panels */
+        .left-panel {
+            position: fixed;
+            left: 30px;
+            top: 110px;
+            width: 340px;
+            max-height: calc(100vh - 130px);
+            background: rgba(10, 10, 25, 0.75);
+            backdrop-filter: blur(30px) saturate(140%);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 30px;
+            padding: 30px;
+            z-index: 50;
+            overflow-y: auto;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s;
+        }
+
+        .left-panel:hover {
+            box-shadow: 0 0 40px rgba(6, 182, 212, 0.15);
+            border-color: rgba(6, 182, 212, 0.5);
+        }
+
+        .right-panel {
+            position: fixed;
+            right: 30px;
+            top: 110px;
+            width: 360px;
+            max-height: calc(100vh - 130px);
+            background: rgba(10, 10, 25, 0.75);
+            backdrop-filter: blur(30px) saturate(140%);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 30px;
+            padding: 30px;
+            z-index: 50;
+            overflow-y: auto;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s;
+        }
+
+        .right-panel:hover {
+            box-shadow: 0 0 40px rgba(6, 182, 212, 0.15);
+            border-color: rgba(6, 182, 212, 0.5);
+        }
+
+        .section-title {
+            font-size: 11px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Feature Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .feature-chip {
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .feature-chip:hover {
+            background: rgba(6, 182, 212, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+        }
+
+        .feature-chip.physics {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .feature-chip.physics:hover {
+            background: rgba(139, 92, 246, 0.2);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .feature-name {
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .feature-desc {
+            font-size: 8px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        /* Info Rows */
+        .info-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            font-size: 13px;
+            color: var(--cyan);
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Control Sliders */
+        .control-row {
+            margin-bottom: 22px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .control-label {
+            font-size: 11px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .control-value {
+            font-size: 12px;
+            color: var(--purple);
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            appearance: none;
+            -webkit-appearance: none;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+        }
+
+        /* Toggle Buttons */
+        .toggle-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(6, 182, 212, 0.1);
+            border-color: var(--cyan);
+            color: #fff;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2));
+            border-color: var(--cyan);
+            color: #fff;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: 200;
+            color: var(--cyan);
+            font-family: 'Courier New', monospace;
+        }
+
+        .stat-label {
+            font-size: 8px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* Kernel Visualization */
+        .kernel-visual {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .kernel-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .kernel-cell {
+            aspect-ratio: 1;
+            background: rgba(6, 182, 212, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: var(--cyan);
+            font-family: 'Courier New', monospace;
+            border: 1px solid rgba(6, 182, 212, 0.4);
+        }
+
+        /* Loading */
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.6s;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-dna {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dna-strand {
+            width: 8px;
+            height: 60px;
+            border-radius: 4px;
+            animation: dnaWave 1.5s ease-in-out infinite;
+        }
+
+        .dna-strand:nth-child(1) {
+            background: var(--cyan);
+            animation-delay: 0s;
+        }
+
+        .dna-strand:nth-child(2) {
+            background: var(--purple);
+            animation-delay: 0.1s;
+        }
+
+        .dna-strand:nth-child(3) {
+            background: var(--cyan);
+            animation-delay: 0.2s;
+        }
+
+        .dna-strand:nth-child(4) {
+            background: var(--purple);
+            animation-delay: 0.3s;
+        }
+
+        .dna-strand:nth-child(5) {
+            background: var(--cyan);
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dnaWave {
+
+            0%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            50% {
+                transform: scaleY(0.4);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--cyan);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Custom Cursor */
+        #cursor {
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--cyan);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1);
+            mix-blend-mode: difference;
+        }
+
+        #cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--purple);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        /* Background Canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cursor"></div>
+    <div id="cursor-dot"></div>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="loading" id="loading">
+        <div class="loading-dna">
+            <div class="dna-strand"></div>
+            <div class="dna-strand"></div>
+            <div class="dna-strand"></div>
+            <div class="dna-strand"></div>
+            <div class="dna-strand"></div>
+        </div>
+        <p style="margin-top: 25px; color: var(--cyan); letter-spacing: 3px;">LOADING CONV1D...</p>
+    </div>
+
+    <header class="header">
+        <div class="layer-badge">
+            <div class="layer-icon">🔬</div>
+            <div class="layer-title">
+                <h1>Conv1D Extractor</h1>
+                <p>Temporal Feature Detection</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <a href="layer0-input.html" class="nav-btn">← PREV</a>
+            <a href="../index.html" class="nav-btn">HOME</a>
+            <a href="layer2-batchnorm.html" class="nav-btn">NEXT →</a>
+        </div>
+
+        <div class="header-metrics">
+            <div class="metric-box">
+                <div class="metric-label">Input</div>
+                <div class="metric-value">24×15</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Filters</div>
+                <div class="metric-value">64</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Output</div>
+                <div class="metric-value">24×64</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Params</div>
+                <div class="metric-value">2.9K</div>
+            </div>
+        </div>
+    </header>
+
+    <div id="canvas-container"></div>
+
+    <!-- Left Panel -->
+    <div class="left-panel">
+        <div class="section-title">📊 Input Features</div>
+
+        <div class="feature-grid">
+            <div class="feature-chip">
+                <div class="feature-name">GHI</div>
+                <div class="feature-desc">W/m²</div>
+            </div>
+            <div class="feature-chip">
+                <div class="feature-name">GHI_cs</div>
+                <div class="feature-desc">W/m²</div>
+            </div>
+            <div class="feature-chip">
+                <div class="feature-name">KT_calc</div>
+                <div class="feature-desc">Index</div>
+            </div>
+            <div class="feature-chip">
+                <div class="feature-name">KT_sat</div>
+                <div class="feature-desc">Index</div>
+            </div>
+            <div class="feature-chip">
+                <div class="feature-name">Vol</div>
+                <div class="feature-desc">Index</div>
+            </div>
+            <div class="feature-chip">
+                <div class="feature-name">DNI</div>
+                <div class="feature-desc">W/m²</div>
+            </div>
+            <div class="feature-chip">
+                <div class="feature-name">DHI</div>
+                <div class="feature-desc">W/m²</div>
+            </div>
+            <div class="feature-chip">
+                <div class="feature-name">RH</div>
+                <div class="feature-desc">%</div>
+            </div>
+            <div class="feature-chip">
+                <div class="feature-name">T_dew</div>
+                <div class="feature-desc">°C</div>
+            </div>
+        </div>
+
+        <div class="section-title">🌤️ Meteorological</div>
+
+        <div class="feature-grid">
+            <div class="feature-chip">
+                <div class="feature-name">T_amb</div>
+                <div class="feature-desc">°C</div>
+            </div>
+            <div class="feature-chip">
+                <div class="feature-name">T_wet</div>
+                <div class="feature-desc">°C</div>
+            </div>
+        </div>
+
+        <div class="section-title">⏰ Temporal Encoding</div>
+
+        <div class="feature-grid">
+            <div class="feature-chip physics">
+                <div class="feature-name">sin(H)</div>
+                <div class="feature-desc">Cyclic</div>
+            </div>
+            <div class="feature-chip physics">
+                <div class="feature-name">cos(H)</div>
+                <div class="feature-desc">Cyclic</div>
+            </div>
+            <div class="feature-chip physics">
+                <div class="feature-name">sin(D)</div>
+                <div class="feature-desc">Cyclic</div>
+            </div>
+            <div class="feature-chip physics">
+                <div class="feature-name">cos(D)</div>
+                <div class="feature-desc">Cyclic</div>
+            </div>
+        </div>
+
+        <div class="section-title">🔲 Kernel Configuration</div>
+
+        <div class="kernel-visual">
+            <div class="info-grid">
+                <div class="info-row">
+                    <span class="info-label">Kernel Size</span>
+                    <span class="info-value">3</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Stride</span>
+                    <span class="info-value">1</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Padding</span>
+                    <span class="info-value">Same</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Activation</span>
+                    <span class="info-value">ReLU</span>
+                </div>
+            </div>
+
+            <div class="kernel-grid">
+                <div class="kernel-cell">W₁</div>
+                <div class="kernel-cell">W₂</div>
+                <div class="kernel-cell">W₃</div>
+            </div>
+        </div>
+
+        <div class="section-title">📐 Mathematical Formula</div>
+
+        <div class="kernel-visual"
+            style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1));">
+            <div
+                style="font-family: 'Courier New', monospace; font-size: 13px; color: var(--cyan); text-align: center; margin-bottom: 15px;">
+                <div style="margin-bottom: 10px; font-size: 11px; color: rgba(255,255,255,0.6);">1D Convolution
+                    Operation:</div>
+                <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px;">
+                    y[t, f] = Σ(W[k, f] × x[t+k-1, :])
+                </div>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 8px;">
+                    k ∈ {0, 1, 2} (kernel size = 3)
+                </div>
+            </div>
+            <div style="display: grid; gap: 8px; font-size: 11px; color: rgba(255,255,255,0.7);">
+                <div
+                    style="display: flex; justify-content: space-between; padding: 6px 10px; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                    <span>Input Shape:</span>
+                    <span style="color: var(--cyan); font-family: monospace;">(24, 15)</span>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding: 6px 10px; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                    <span>Kernel Shape:</span>
+                    <span style="color: var(--gold); font-family: monospace;">(3, 15, 64)</span>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding: 6px 10px; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                    <span>Output Shape:</span>
+                    <span style="color: var(--purple); font-family: monospace;">(24, 64)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+        <div class="section-title">🎮 Controls</div>
+
+        <div class="control-row">
+            <div class="control-header">
+                <span class="control-label">Scanner Speed</span>
+                <span class="control-value" id="speedVal">1.0x</span>
+            </div>
+            <input type="range" id="scanSpeed" min="0.1" max="3.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="control-row">
+            <div class="control-header">
+                <span class="control-label">Camera Rotation</span>
+                <span class="control-value" id="rotationVal">0.5x</span>
+            </div>
+            <input type="range" id="cameraRotation" min="0" max="2" step="0.1" value="0.5">
+        </div>
+
+        <div class="control-row">
+            <div class="control-header">
+                <span class="control-label">Filter View</span>
+                <span class="control-value" id="filterVal">0</span>
+            </div>
+            <input type="range" id="filterSlider" min="0" max="63" step="1" value="0">
+        </div>
+
+        <div class="section-title">⚙️ Visualization</div>
+
+        <div class="toggle-grid">
+            <button class="toggle-btn active" id="kernelToggle">🔲 Kernel Window</button>
+            <button class="toggle-btn active" id="shadowToggle">👻 Kernel Shadow</button>
+            <button class="toggle-btn" id="pauseToggle">⏸ Pause Animation</button>
+            <button class="toggle-btn" id="resetToggle">🔄 Reset Camera</button>
+        </div>
+
+        <div class="section-title">📊 Live Stats</div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="fpsCounter">60</div>
+                <div class="stat-label">FPS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="scanPos">0</div>
+                <div class="stat-label">Scan Position</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        window.onerror = function (msg, url, line) {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.classList.remove('hidden');
+                loading.innerHTML = `
+                    <div style="color: #ff4444; text-align: center; font-family: monospace; padding: 20px; z-index: 9999; position: relative;">
+                        <h3>⚠️ Runtime Error</h3>
+                        <p>${msg}</p>
+                        <p>Line: ${line}</p>
+                    </div>
+                `;
+            }
+        };
+
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const CONFIG = {
+            INPUT: { rows: 24, cols: 15, cellSize: 1.8, gap: 0.4 },
+            OUTPUT: { rows: 24, cols: 64, cellSize: 0.9, gap: 0.2 },
+            KERNEL: { size: 3, features: 15 },
+            SPACING: { inputX: -40, outputX: 40 },
+            COLORS: {
+                input: 0x06B6D4,
+                kernel: 0xF59E0B,
+                output: 0x8B5CF6,
+                flow: 0xEC4899
+            }
+        };
+
+        // ============================================
+        // GLOBAL VARIABLES
+        // ============================================
+        let scene, camera, renderer, controls, clock;
+        let inputGroup, kernelGroup, kernelShadowGroup, outputGroup;
+        let inputCells = [], outputCells = [];
+        let scanSpeed = 1.0, kernelPosition = 0;
+        let isPaused = false, showKernel = true, showShadow = true;
+        let currentFilter = 0;
+        let frameCount = 0, lastTime = performance.now();
+
+        // Generate sample data with "Physics-Informed" Logic
+        const sampleData = [];
+        const physicsCols = [1, 2, 3, 4, 11, 12, 13, 14]; // Indices of physics/derived features
+
+        for (let t = 0; t < 24; t++) {
+            sampleData[t] = [];
+
+            // Simulate a "Cloud Event" (Drop in Irradiance) at hour 14
+            let isCloudy = (t >= 13 && t <= 15);
+
+            for (let f = 0; f < 15; f++) {
+                let baseVal = (Math.sin(t * 0.3 + f * 0.5) * 0.5 + 0.5);
+
+                // Physics Logic:
+                if (f === 0) { // GHI (Target)
+                    if (isCloudy) baseVal *= 0.3; // Sharp drop
+                }
+                if (f === 1) { // GHI_cs (Clear Sky Reference)
+                    // Paradox: Clear Sky remains high even when cloudy!
+                    baseVal = (Math.sin(t * 0.3) * 0.5 + 0.6);
+                }
+                if (f === 4) { // Volatility Index
+                    if (isCloudy) baseVal = 0.9; // High volatility
+                    else baseVal *= 0.2;
+                }
+
+                sampleData[t][f] = baseVal.toFixed(2);
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x030308);
+            scene.fog = new THREE.FogExp2(0x030308, 0.004);
+
+            camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 500);
+            camera.position.set(0, 30, 90);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.5;
+            controls.minDistance = 40;
+            controls.maxDistance = 150;
+
+            clock = new THREE.Clock();
+
+            setupLights();
+            createInputTensor();
+            createKernel();
+            createKernelShadow();
+            createOutputTensor();
+            setupEvents();
+            setupCustomCursor();
+            setupBackgroundCanvas();
+
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 1500);
+
+            animate();
+        }
+
+        // ============================================
+        // LIGHTING
+        // ============================================
+        function setupLights() {
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+            const l1 = new THREE.DirectionalLight(0xffffff, 1.0);
+            l1.position.set(-50, 50, 50);
+            scene.add(l1);
+
+            const l2 = new THREE.PointLight(CONFIG.COLORS.input, 2, 120);
+            l2.position.set(-50, 20, 30);
+            scene.add(l2);
+
+            const l3 = new THREE.PointLight(CONFIG.COLORS.output, 2, 120);
+            l3.position.set(50, 20, 30);
+            scene.add(l3);
+
+            // Ground
+            const groundGeo = new THREE.PlaneGeometry(800, 800);
+            const groundMat = new THREE.MeshStandardMaterial({
+                color: 0x05050a,
+                metalness: 0.9,
+                roughness: 0.1
+            });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -20;
+            scene.add(ground);
+        }
+
+        // ============================================
+        // INPUT TENSOR
+        // ============================================
+        function createInputTensor() {
+            inputGroup = new THREE.Group();
+            const { rows, cols, cellSize, gap } = CONFIG.INPUT;
+
+            // Loop including padding rows (-1 and rows)
+            for (let r = -1; r <= rows; r++) {
+                inputCells[r] = [];
+                const isPadding = r === -1 || r === rows;
+
+                for (let c = 0; c < cols; c++) {
+                    // Determine value and depth
+                    let val = 0;
+                    let depth = 0.2; // Flat for padding
+                    const isPhysics = physicsCols.includes(c);
+
+                    if (!isPadding) {
+                        val = parseFloat(sampleData[r][c]);
+                        depth = 0.4 + val * 1.8; // Exaggerate height for visibility
+                    }
+
+                    // Geometry
+                    const geo = new THREE.BoxGeometry(cellSize, cellSize, depth);
+
+                    // Material Logic
+                    let mat;
+                    if (isPadding) {
+                        mat = new THREE.MeshBasicMaterial({
+                            color: 0x444444,
+                            transparent: true,
+                            opacity: 0.1,
+                            wireframe: true
+                        });
+                    } else {
+                        // Physics features get special "Golden" tint
+                        const baseColor = isPhysics ? 0xFFC107 : CONFIG.COLORS.input;
+                        const opacity = isPhysics ? 0.95 : 0.85;
+
+                        mat = new THREE.MeshPhysicalMaterial({
+                            color: baseColor,
+                            metalness: isPhysics ? 0.6 : 0.3,
+                            roughness: 0.2,
+                            clearcoat: 1.0,
+                            clearcoatRoughness: 0.1,
+                            transparent: true,
+                            opacity: opacity,
+                            emissive: isPhysics ? 0x332200 : 0x000000
+                        });
+                    }
+
+                    const mesh = new THREE.Mesh(geo, mat);
+                    mesh.position.set(
+                        CONFIG.SPACING.inputX + (c - cols / 2 + 0.5) * (cellSize + gap),
+                        (rows / 2 - r - 0.5) * (cellSize + gap), // Position based on row index
+                        0
+                    );
+
+                    mesh.userData = {
+                        type: isPadding ? 'padding' : 'input',
+                        isPhysics: isPhysics,
+                        row: r,
+                        col: c,
+                        value: val
+                    };
+
+                    inputGroup.add(mesh);
+                    inputCells[r][c] = mesh;
+                }
+            }
+
+            // Add Input Label
+            const label = createLabel('INPUT (24 Steps)', CONFIG.COLORS.input);
+            label.position.set(CONFIG.SPACING.inputX, 16, 0);
+            inputGroup.add(label);
+
+            // Add Padding Labels
+            const padLabelTop = createLabel('PAD (t=-1)', 0x666666, 0.7);
+            padLabelTop.position.set(CONFIG.SPACING.inputX - 16, (rows / 2 - (-1) - 0.5) * (cellSize + gap), 0);
+            inputGroup.add(padLabelTop);
+
+            const padLabelBot = createLabel('PAD (t=24)', 0x666666, 0.7);
+            padLabelBot.position.set(CONFIG.SPACING.inputX - 16, (rows / 2 - rows - 0.5) * (cellSize + gap), 0);
+            inputGroup.add(padLabelBot);
+
+            scene.add(inputGroup);
+        }
+
+        // ============================================
+        // KERNEL
+        // ============================================
+        function createKernel() {
+            kernelGroup = new THREE.Group();
+
+            const { size, features } = CONFIG.KERNEL;
+            const { cellSize, gap } = CONFIG.INPUT;
+            const w = features * (cellSize + gap) + 1.5;
+            const h = size * (cellSize + gap) + 1.5;
+
+            const boxGeo = new THREE.BoxGeometry(w, h, 2);
+            const edges = new THREE.EdgesGeometry(boxGeo);
+            const lineMat = new THREE.LineBasicMaterial({
+                color: CONFIG.COLORS.kernel,
+                linewidth: 2
+            });
+            const wireframe = new THREE.LineSegments(edges, lineMat);
+            kernelGroup.add(wireframe);
+
+            const fillMat = new THREE.MeshPhongMaterial({
+                color: CONFIG.COLORS.kernel,
+                transparent: true,
+                opacity: 0.15,
+                emissive: CONFIG.COLORS.kernel,
+                emissiveIntensity: 0.3
+            });
+            const fill = new THREE.Mesh(boxGeo, fillMat);
+            kernelGroup.add(fill);
+
+            kernelGroup.position.set(CONFIG.SPACING.inputX, 12, 1.5);
+            scene.add(kernelGroup);
+        }
+
+        // ============================================
+        // OUTPUT TENSOR (Feature Maps)
+        // ============================================
+        function createOutputTensor() {
+            outputGroup = new THREE.Group();
+            const { rows, cols, cellSize, gap } = CONFIG.OUTPUT;
+
+            for (let r = 0; r < rows; r++) {
+                outputCells[r] = [];
+                for (let c = 0; c < cols; c++) {
+                    // Feature Grouping Colors
+                    let baseColor;
+                    if (c < 24) baseColor = 0x29B6F6;      // Group 1: Low-Freq / Trends (Cyan)
+                    else if (c < 48) baseColor = 0xAB47BC; // Group 2: Mid-Freq / Fluctuations (Purple)
+                    else baseColor = 0xFF7043;             // Group 3: High-Freq / Anomalies (Orange)
+
+                    // Simulate ReLU Activations (Sparse activity)
+                    let activation = Math.random() > 0.6 ? Math.random() : 0;
+                    activation *= (Math.sin(r * 0.5 + c * 0.2) * 0.5 + 0.5);
+
+                    const depth = 0.2 + activation * 1.5;
+                    const geo = new THREE.BoxGeometry(cellSize, cellSize, depth);
+
+                    const mat = new THREE.MeshPhysicalMaterial({
+                        color: baseColor,
+                        metalness: 0.4,
+                        roughness: 0.2,
+                        clearcoat: 1.0,
+                        clearcoatRoughness: 0.1,
+                        transparent: true,
+                        opacity: activation > 0.1 ? 0.9 : 0.3,
+                        emissive: baseColor,
+                        emissiveIntensity: activation * 0.6
+                    });
+
+                    const mesh = new THREE.Mesh(geo, mat);
+                    mesh.position.set(
+                        CONFIG.SPACING.outputX + (c - cols / 2 + 0.5) * (cellSize + gap),
+                        (rows / 2 - r - 0.5) * (cellSize + gap),
+                        0
+                    );
+
+                    outputGroup.add(mesh);
+                    outputCells[r][c] = mesh;
+                }
+            }
+
+            // Main Label
+            const mainLabel = createLabel('FEATURE MAPS (64 Filters)', CONFIG.COLORS.output, 1.2);
+            mainLabel.position.set(CONFIG.SPACING.outputX, 18, 0);
+            outputGroup.add(mainLabel);
+
+            // Helper function for brackets
+            function createBracket(xStart, width, color, text) {
+                const bracketGroup = new THREE.Group();
+                const lineGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(xStart, -13, 0),
+                    new THREE.Vector3(xStart, -14, 0),
+                    new THREE.Vector3(xStart + width, -14, 0),
+                    new THREE.Vector3(xStart + width, -13, 0)
+                ]);
+                const lineMat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.6 });
+                const line = new THREE.Line(lineGeo, lineMat);
+                bracketGroup.add(line);
+
+                const lbl = createLabel(text, color, 0.6);
+                lbl.position.set(xStart + width / 2, -16.5, 0);
+                bracketGroup.add(lbl);
+
+                return bracketGroup;
+            }
+
+            // Calculate widths
+            const groupWidth = 24 * (cellSize + gap);
+            const startX = CONFIG.SPACING.outputX - (cols * (cellSize + gap)) / 2;
+
+            // Add Brackets & Sub-labels
+            const b1 = createBracket(startX, groupWidth - 1, 0x29B6F6, 'Temporal Trends');
+            outputGroup.add(b1);
+
+            const b2 = createBracket(startX + groupWidth, groupWidth - 1, 0xAB47BC, 'Local Pattern Variations');
+            outputGroup.add(b2);
+
+            const b3 = createBracket(startX + 2 * groupWidth, 16 * (cellSize + gap), 0xFF7043, 'High-Freq Anomalies');
+            outputGroup.add(b3);
+
+            scene.add(outputGroup);
+        }
+
+        // ============================================
+        // KERNEL SHADOW (Trailing Window)
+        // ============================================
+        function createKernelShadow() {
+            kernelShadowGroup = new THREE.Group();
+
+            const { size, features } = CONFIG.KERNEL;
+            const { cellSize, gap } = CONFIG.INPUT;
+            const w = features * (cellSize + gap) + 1.5;
+            const h = size * (cellSize + gap) + 1.5;
+
+            const boxGeo = new THREE.BoxGeometry(w, h, 2);
+            const edges = new THREE.EdgesGeometry(boxGeo);
+            const lineMat = new THREE.LineBasicMaterial({
+                color: CONFIG.COLORS.kernel,
+                linewidth: 2,
+                transparent: true,
+                opacity: 0.3
+            });
+            const wireframe = new THREE.LineSegments(edges, lineMat);
+            kernelShadowGroup.add(wireframe);
+
+            const fillMat = new THREE.MeshPhongMaterial({
+                color: CONFIG.COLORS.kernel,
+                transparent: true,
+                opacity: 0.05,
+                emissive: CONFIG.COLORS.kernel,
+                emissiveIntensity: 0.1
+            });
+            const fill = new THREE.Mesh(boxGeo, fillMat);
+            kernelShadowGroup.add(fill);
+
+            kernelShadowGroup.position.set(CONFIG.SPACING.inputX, 12, 1.5);
+            scene.add(kernelShadowGroup);
+        }
+
+        // ============================================
+        // LABEL CREATION
+        // ============================================
+        function createLabel(text, color, scale = 1.0) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            // High-DPI Canvas for crisp text
+            canvas.width = 512;
+            canvas.height = 128;
+
+            ctx.fillStyle = typeof color === 'number' ? '#' + color.toString(16).padStart(6, '0') : color;
+            ctx.font = 'bold 48px "Outfit", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Text Shadow for depth
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 6;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+
+            ctx.fillText(text, 256, 64);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.minFilter = THREE.LinearFilter;
+            tex.magFilter = THREE.LinearFilter;
+
+            const mat = new THREE.SpriteMaterial({
+                map: tex,
+                transparent: true,
+                opacity: 0.9,
+                depthTest: false // Ensure readable on top
+            });
+
+            const spr = new THREE.Sprite(mat);
+            // Base scale adjusted for new resolution (512px width -> ~15 units in world)
+            spr.scale.set(15 * scale, 3.75 * scale, 1);
+            spr.renderOrder = 999; // Always on top
+
+            return spr;
+        }
+
+
+
+        // ============================================
+        // CUSTOM CURSOR
+        // ============================================
+        function setupCustomCursor() {
+            const cursor = document.getElementById('cursor');
+            const cursorDot = document.getElementById('cursor-dot');
+
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+                cursorDot.style.left = (e.clientX - 4) + 'px';
+                cursorDot.style.top = (e.clientY - 4) + 'px';
+            });
+        }
+
+        // ============================================
+        // BACKGROUND CANVAS
+        // ============================================
+        function setupBackgroundCanvas() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    size: Math.random() * 2 + 1
+                });
+            }
+
+            function animateBg() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(6, 182, 212, 0.5)';
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(animateBg);
+            }
+            animateBg();
+        }
+
+        // ============================================
+        // EVENT HANDLERS
+        // ============================================
+        function setupEvents() {
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            document.getElementById('scanSpeed').addEventListener('input', (e) => {
+                scanSpeed = parseFloat(e.target.value);
+                document.getElementById('speedVal').textContent = scanSpeed.toFixed(1) + 'x';
+            });
+
+            document.getElementById('cameraRotation').addEventListener('input', (e) => {
+                controls.autoRotateSpeed = parseFloat(e.target.value);
+                document.getElementById('rotationVal').textContent = controls.autoRotateSpeed.toFixed(1) + 'x';
+            });
+
+            document.getElementById('filterSlider').addEventListener('input', (e) => {
+                currentFilter = parseInt(e.target.value);
+                document.getElementById('filterVal').textContent = currentFilter;
+            });
+
+            document.getElementById('kernelToggle').addEventListener('click', (e) => {
+                showKernel = !showKernel;
+                e.target.classList.toggle('active');
+                kernelGroup.visible = showKernel;
+            });
+
+            document.getElementById('shadowToggle').addEventListener('click', (e) => {
+                showShadow = !showShadow;
+                e.target.classList.toggle('active');
+                kernelShadowGroup.visible = showShadow;
+            });
+
+            document.getElementById('pauseToggle').addEventListener('click', (e) => {
+                isPaused = !isPaused;
+                e.target.classList.toggle('active');
+                controls.autoRotate = !isPaused;
+                e.target.innerHTML = isPaused ? '▶ Resume Animation' : '⏸ Pause Animation';
+            });
+
+            document.getElementById('resetToggle').addEventListener('click', () => {
+                camera.position.set(0, 30, 90);
+                controls.target.set(0, 0, 0);
+                controls.update();
+            });
+        }
+
+        // ============================================
+        // ANIMATION UPDATES
+        // ============================================
+        function updateKernelPosition() {
+            const { rows, cellSize, gap } = CONFIG.INPUT;
+            const stepH = cellSize + gap;
+
+            kernelPosition += 0.012 * scanSpeed;
+            if (kernelPosition > rows) kernelPosition = 0;
+
+            const centerRow = Math.floor(kernelPosition);
+            const y = 12 - kernelPosition * stepH;
+
+            kernelGroup.position.y = y;
+
+            // Kernel Reaction Logic (Cloud Detection)
+            const isEvent = (centerRow >= 13 && centerRow <= 15);
+            const kernelColor = isEvent ? 0xFF5252 : CONFIG.COLORS.kernel; // Red for warning, Orange for normal
+
+            kernelGroup.children.forEach(child => {
+                if (child.material) child.material.color.setHex(kernelColor);
+            });
+
+            // Update Shadow (Lagging behind)
+            if (showShadow) {
+                const shadowY = y + (stepH * 0.8);
+                kernelShadowGroup.position.y = THREE.MathUtils.lerp(kernelShadowGroup.position.y || y, shadowY, 0.1);
+
+                // Shadow also reacts but fainter
+                kernelShadowGroup.children.forEach(child => {
+                    if (child.material && child.material.color) child.material.color.setHex(kernelColor);
+                });
+            } else {
+                kernelShadowGroup.visible = false;
+            }
+
+            document.getElementById('scanPos').textContent = centerRow;
+
+            // Highlight input (including padding)
+            for (let r = -1; r <= rows; r++) {
+                for (let c = 0; c < 15; c++) {
+                    const cell = inputCells[r][c];
+                    if (!cell) continue; // Safety check
+
+                    // Check if row is within the current kernel window (center +/- 1)
+                    if (r >= centerRow - 1 && r <= centerRow + 1) {
+                        // Highlight logic
+                        if (cell.userData.type === 'padding') {
+                            cell.material.color.setHex(0xaaaaaa);
+                            cell.material.opacity = 0.5;
+                        } else {
+                            cell.material.emissive.setHex(0xffffff);
+                            cell.material.emissiveIntensity = 0.5;
+                        }
+                    } else {
+                        // Reset logic
+                        if (cell.userData.type === 'padding') {
+                            cell.material.color.setHex(0x444444);
+                            cell.material.opacity = 0.1;
+                        } else {
+                            cell.material.emissive.setHex(0x000000);
+                            cell.material.emissiveIntensity = 0;
+                        }
+                    }
+                }
+            }
+
+            // Reveal output
+            for (let r = 0; r < rows; r++) {
+                const isRevealed = r < kernelPosition;
+                for (let c = 0; c < 64; c++) {
+                    const cell = outputCells[r][c];
+                    const isHighlighted = c === currentFilter;
+
+                    if (isRevealed) {
+                        if (cell.scale.x < 0.1) {
+                            cell.scale.set(1.2, 1.2, 1.2);
+                            cell.material.opacity = 1.0;
+                        } else {
+                            cell.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+                        }
+
+                        if (isHighlighted) {
+                            cell.material.emissive.setHex(0xffffff);
+                            cell.material.emissiveIntensity = 0.6;
+                        } else {
+                            cell.material.emissive.setHex(CONFIG.COLORS.output);
+                            cell.material.emissiveIntensity = 0.2;
+                        }
+                    } else {
+                        cell.material.opacity = 0;
+                        cell.scale.set(0.01, 0.01, 0.01);
+                    }
+                }
+            }
+        }
+
+        // ============================================
+        // MAIN ANIMATION LOOP
+        // ============================================
+        function animate() {
+            requestAnimationFrame(animate);
+
+            controls.update();
+
+            if (!isPaused) {
+                if (showKernel) {
+                    updateKernelPosition();
+                    kernelGroup.visible = true;
+                } else {
+                    kernelGroup.visible = false;
+                }
+
+                kernelShadowGroup.visible = showShadow && showKernel;
+            }
+
+            renderer.render(scene, camera);
+
+            // FPS
+            frameCount++;
+            if (performance.now() - lastTime >= 1000) {
+                document.getElementById('fpsCounter').textContent = frameCount;
+                frameCount = 0;
+                lastTime = performance.now();
+            }
+        }
+
+        // ============================================
+        // START
+        // ============================================
+        init();
+    </script>
+    <div
+        style="position:fixed; bottom:14px; right:24px; z-index:9999; font-family:'Outfit','Segoe UI',sans-serif; font-weight:600; font-size:13px; color:rgba(6,182,212,0.7); letter-spacing:3px; text-transform:uppercase; pointer-events:none; text-shadow:0 0 8px rgba(6,182,212,0.3);">
+        IZZELDEENM@GMAIL.COM</div>
+</body>
+
+</html>

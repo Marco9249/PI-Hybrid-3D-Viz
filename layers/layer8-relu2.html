@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer 8: ReLU | Rectified Linear Unit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --pass-color: #00f3ff;
+            /* Cyan for Positive */
+            --block-color: #ff0055;
+            /* Magenta for Negative */
+            --zero-plane: rgba(255, 255, 255, 0.1);
+            --bg-dark: #080810;
+            --panel-glass: rgba(10, 15, 30, 0.85);
+            --border-tech: 1px solid rgba(0, 243, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1a1a25 0%, #000000 100%);
+            font-family: 'Rajdhani', sans-serif;
+            color: white;
+        }
+
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+
+        /* Scientific Grid Overlay */
+        .grid-lines {
+            position: fixed;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* HUD Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 90px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            background: linear-gradient(180deg, rgba(8, 8, 16, 0.95), transparent);
+            z-index: 10;
+            border-bottom: var(--border-tech);
+        }
+
+        .layer-title h1 {
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--pass-color);
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+        }
+
+        .layer-title span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            display: block;
+            margin-top: 5px;
+        }
+
+        .nav-btn {
+            background: rgba(0, 243, 255, 0.1);
+            border: var(--border-tech);
+            color: var(--pass-color);
+            padding: 8px 20px;
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--pass-color);
+            color: #000;
+            box-shadow: 0 0 20px var(--pass-color);
+        }
+
+        /* Scientific Control Panel */
+        .panel {
+            position: fixed;
+            top: 120px;
+            width: 320px;
+            background: var(--panel-glass);
+            border: var(--border-tech);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 20;
+        }
+
+        .panel-left {
+            left: 30px;
+        }
+
+        .panel-right {
+            right: 30px;
+        }
+
+        .viz-mode-group {
+            display: flex;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            padding: 4px;
+        }
+
+        .viz-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+
+        .viz-btn.active {
+            background: var(--pass-color);
+            color: #000;
+            font-weight: 700;
+        }
+
+        .math-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 3px solid var(--pass-color);
+            padding: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        .math-eq {
+            font-size: 16px;
+            color: #fff;
+            margin-bottom: 8px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        /* 2D Graph Container */
+        #graph-container {
+            width: 100%;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .stat-val {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--pass-color);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.2), transparent);
+            border: 1px solid var(--pass-color);
+            color: var(--pass-color);
+            text-transform: uppercase;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            letter-spacing: 2px;
+        }
+
+        .action-btn:hover {
+            background: var(--pass-color);
+            color: #000;
+            box-shadow: 0 0 25px var(--pass-color);
+        }
+
+        /* Legend */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-pass {
+            background: var(--pass-color);
+            box-shadow: 0 0 5px var(--pass-color);
+        }
+
+        .dot-block {
+            background: var(--block-color);
+            box-shadow: 0 0 5px var(--block-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grid-lines"></div>
+    <div id="canvas-container"></div>
+
+    <header>
+        <div class="layer-title">
+            <h1>ReLU Activation</h1>
+            <span>Mathematical Rectification</span>
+        </div>
+        <div class="nav-group">
+            <a href="layer7-dense.html" class="nav-btn">← Prev</a>
+            <a href="../index.html" class="nav-btn">HUB</a>
+            <a href="layer9-output.html" class="nav-btn">Next →</a>
+        </div>
+    </header>
+
+    <div class="panel panel-left">
+        <h3>Function Analysis</h3>
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0 20px 0;">
+
+        <div class="math-box">
+            <div class="math-eq">f(x) = max(0, x)</div>
+            <div style="color: rgba(255,255,255,0.7);">
+                Linear for x > 0<br>
+                Zero for x ≤ 0
+            </div>
+        </div>
+
+        <div id="graph-container">
+            <canvas id="reluGraph" width="280" height="150"></canvas>
+        </div>
+
+        <div class="legend-item">
+            <div class="dot dot-pass"></div>
+            <span>Positive: Preserved (Linear)</span>
+        </div>
+        <div class="legend-item">
+            <div class="dot dot-block"></div>
+            <span>Negative: Nullified (Rectified)</span>
+        </div>
+    </div>
+
+    <div class="panel panel-right">
+        <h3>Simulation Control</h3>
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0 20px 0;">
+
+        <div class="viz-mode-group">
+            <div class="viz-btn" id="btnInput" onclick="setMode('input')">RAW INPUT</div>
+            <div class="viz-btn active" id="btnOutput" onclick="setMode('output')">RECTIFIED</div>
+        </div>
+
+        <div class="stat-row">
+            <span>Sparsity (Zeros)</span>
+            <span class="stat-val" id="sparsityVal">52%</span>
+        </div>
+        <div class="stat-row">
+            <span>Mean Activation</span>
+            <span class="stat-val" id="meanVal">0.45</span>
+        </div>
+        <div style="margin: 20px 0;">
+            <label style="font-size: 12px; text-transform: uppercase;">Signal Variance</label>
+            <input type="range" id="varianceSlider" min="0.5" max="3.0" step="0.1" value="1.5"
+                style="width: 100%; margin-top: 8px;">
+        </div>
+
+        <button class="action-btn" id="regenerateBtn">Generate New Batch</button>
+
+        <div style="margin-top: 20px; font-size: 12px; opacity: 0.7; line-height: 1.4;">
+            <strong>Scientific Note:</strong><br>
+            ReLU solves the vanishing gradient problem by maintaining a constant gradient of 1 for positive inputs,
+            enabling deep networks to learn faster.
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // CONFIG
+        const GRID_SIZE = 10;
+        const COUNT = GRID_SIZE * GRID_SIZE;
+        const SPACING = 2.0;
+
+        const COLORS = {
+            pos: 0x00f3ff,
+            neg: 0xff0055,
+            neutral: 0x222233
+        };
+
+        // STATE
+        let scene, camera, renderer, controls;
+        let bars = [];
+        let dataValues = [];
+        let currentMode = 'output'; // input or output
+        let variance = 1.5;
+        let particleSystem, particleGeo;
+        let oiuSatellite; // Group for OIU
+        const PARTICLE_COUNT = 1000;
+
+        // INIT
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.02);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(25, 20, 25);
+            camera.lookAt(0, 0, 0);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.5;
+
+            // Lights
+            const ambi = new THREE.AmbientLight(0xffffff, 0.2);
+            scene.add(ambi);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            dirLight.position.set(10, 20, 10);
+            scene.add(dirLight);
+
+            // Grid Floor (The "Zero Plane")
+            const gridHelper = new THREE.GridHelper(40, 40, 0x444455, 0x111116);
+            scene.add(gridHelper);
+
+            // Function Plane Visual (Transparent Glass at y=0)
+            const planeGeo = new THREE.PlaneGeometry(40, 40);
+            const planeMat = new THREE.MeshPhongMaterial({
+                color: 0x00f3ff,
+                transparent: true,
+                opacity: 0.05,
+                side: THREE.DoubleSide
+            });
+            const zeroPlane = new THREE.Mesh(planeGeo, planeMat);
+            zeroPlane.rotation.x = -Math.PI / 2;
+            scene.add(zeroPlane);
+
+            // Bars
+            createBars();
+            createParticleSystem();
+            createOIUSatellite();
+
+            // Events
+            window.addEventListener('resize', onResize);
+            document.getElementById('regenerateBtn').addEventListener('click', generateData);
+            document.getElementById('varianceSlider').addEventListener('input', (e) => {
+                variance = parseFloat(e.target.value);
+                generateData();
+            });
+
+            // Initial Data
+            generateData();
+            drawGraph();
+            animate();
+        }
+
+        function createBars() {
+            const geometry = new THREE.BoxGeometry(0.8, 1, 0.8);
+            // Translate geometry so scaling happens from bottom (y=0) when positive, 
+            // but we need a clever way to handle negatives.
+            // Actually, best to scale from center? No, scale from 0. 
+            // Let's keep pivot at center but move position.
+
+            for (let x = 0; x < GRID_SIZE; x++) {
+                for (let z = 0; z < GRID_SIZE; z++) {
+                    const material = new THREE.MeshPhongMaterial({
+                        color: 0xffffff,
+                        flatShading: true
+                    });
+                    const mesh = new THREE.Mesh(geometry, material);
+
+                    // Center grid
+                    mesh.position.x = (x - GRID_SIZE / 2) * SPACING + SPACING / 2;
+                    mesh.position.z = (z - GRID_SIZE / 2) * SPACING + SPACING / 2;
+
+                    scene.add(mesh);
+                    bars.push(mesh);
+                }
+            }
+        }
+
+        function createParticleSystem() {
+            particleGeo = new THREE.BufferGeometry();
+            const positions = new Float32Array(PARTICLE_COUNT * 3);
+            const speeds = new Float32Array(PARTICLE_COUNT);
+            const offsets = new Float32Array(PARTICLE_COUNT);
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                positions[i * 3] = 0;
+                positions[i * 3 + 1] = -100; // Start hidden
+                positions[i * 3 + 2] = 0;
+                speeds[i] = 0.05 + Math.random() * 0.1;
+                offsets[i] = Math.random() * 100; // Random start time
+            }
+
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particleGeo.setAttribute('speed', new THREE.BufferAttribute(speeds, 1));
+            particleGeo.setAttribute('offset', new THREE.BufferAttribute(offsets, 1));
+
+            const mat = new THREE.PointsMaterial({
+                color: 0x00f3ff,
+                size: 0.1,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+
+            particleSystem = new THREE.Points(particleGeo, mat);
+            scene.add(particleSystem);
+        }
+
+        function updateParticles() {
+            const positions = particleGeo.attributes.position.array;
+            const speeds = particleGeo.attributes.speed.array;
+
+            // We need to map particles to positive bars
+            // Let's assign chunks of particles to positive indices
+            let positiveIndices = [];
+            dataValues.forEach((val, idx) => {
+                if (val > 0) positiveIndices.push(idx);
+            });
+
+            if (positiveIndices.length === 0) {
+                particleSystem.visible = false;
+                return;
+            }
+            particleSystem.visible = true;
+
+            const time = Date.now() * 0.001;
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                // Determine target bar for this particle
+                const barIndex = positiveIndices[i % positiveIndices.length];
+                const bar = bars[barIndex];
+
+                // Reset logic
+                if (positions[i * 3 + 1] > bar.scale.y + 2 || positions[i * 3 + 1] < 0) {
+                    positions[i * 3] = bar.position.x + (Math.random() - 0.5) * 0.8; // Random spread within bar width
+                    positions[i * 3 + 2] = bar.position.z + (Math.random() - 0.5) * 0.8;
+                    positions[i * 3 + 1] = 0;
+                }
+
+                // Move up
+                positions[i * 3 + 1] += speeds[i];
+
+                // Alpha fade based on height could be done in shader, but here we just accept simple cut.
+            }
+
+            particleGeo.attributes.position.needsUpdate = true;
+        }
+
+        function generateData() {
+            dataValues = [];
+            let zeroCount = 0;
+            let sum = 0;
+
+            bars.forEach((bar, i) => {
+                // Generate Gaussian-ish noise centered at 0
+                const raw = (Math.random() - 0.5) * 2 * variance;
+                dataValues.push(raw);
+            });
+
+            updateBarsVisualization();
+            updateStats();
+            drawGraph();
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+
+            // UI Toggle
+            document.querySelectorAll('.viz-btn').forEach(b => b.classList.remove('active'));
+            if (mode === 'input') document.getElementById('btnInput').classList.add('active');
+            else document.getElementById('btnOutput').classList.add('active');
+
+            updateBarsVisualization();
+        }
+
+        function updateBarsVisualization() {
+            bars.forEach((bar, i) => {
+                const rawVal = dataValues[i];
+                let displayVal = rawVal;
+
+                // If in Output mode, rectify negatives
+                if (currentMode === 'output') {
+                    displayVal = Math.max(0, rawVal);
+                }
+
+                // Visual Update
+                // We want the bar to stretch from 0 to val.
+                // BoxGeometry default height is 1. centered at 0.
+                const height = Math.abs(displayVal);
+
+                // If value is 0 (or close)
+                if (height < 0.01) {
+                    bar.scale.y = 0.05; // flat plate
+                    bar.position.y = 0;
+                    bar.material.color.setHex(0x333333);
+                    bar.material.emissive.setHex(0x000000);
+                    return;
+                }
+
+                bar.scale.y = height;
+
+                // Position based on sign
+                if (displayVal >= 0) {
+                    bar.position.y = height / 2;
+                    bar.material.color.setHex(COLORS.pos);
+                    bar.material.emissive.setHex(0x004455);
+                } else {
+                    bar.position.y = -height / 2;
+                    bar.material.color.setHex(COLORS.neg);
+                    bar.material.emissive.setHex(0x550000);
+                }
+            });
+        }
+
+        function createOIUSatellite() {
+            oiuSatellite = new THREE.Group();
+            scene.add(oiuSatellite);
+
+            // --- 1. The Tech Core (Gyroscopic Structure) ---
+            const coreGroup = new THREE.Group();
+            oiuSatellite.add(coreGroup);
+
+            // Inner Crystal
+            const crystalGeo = new THREE.OctahedronGeometry(2, 0);
+            const crystalMat = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                emissive: 0x00f3ff,
+                emissiveIntensity: 1,
+                shininess: 100,
+                flatShading: true
+            });
+            const crystal = new THREE.Mesh(crystalGeo, crystalMat);
+            coreGroup.add(crystal);
+
+            // Gyro Rings
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.5 });
+
+            const r1 = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.1, 8, 50), ringMat);
+            const r2 = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.1, 8, 50), ringMat);
+            const r3 = new THREE.Mesh(new THREE.TorusGeometry(5.5, 0.1, 8, 50), new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: true }));
+
+            coreGroup.add(r1);
+            coreGroup.add(r2);
+            coreGroup.add(r3);
+
+            // Store refs for animation
+            oiuSatellite.userData = { r1, r2, r3, crystal, angle: 0 };
+
+            // --- 2. Holographic Label "OIU" ---
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            // Glitchy Tech Font Style
+            ctx.font = 'bold 80px "Rajdhani", sans-serif';
+            ctx.fillStyle = 'rgba(0, 243, 255, 0.1)';
+            ctx.fillRect(0, 0, 512, 128); // backing
+
+            ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(10, 10, 492, 108); // border
+
+            ctx.shadowColor = '#00f3ff';
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('OIU • SYSTEM', 256, 64);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            const labelMat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+            const label = new THREE.Sprite(labelMat);
+            label.scale.set(16, 4, 1);
+            label.position.set(0, 6, 0); // Float above core
+            oiuSatellite.add(label);
+
+            // --- 3. Glow Flare ---
+            const flareMat = new THREE.SpriteMaterial({
+                color: 0x00f3ff,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+            const flare = new THREE.Sprite(flareMat);
+            flare.scale.set(15, 15, 1);
+            coreGroup.add(flare);
+        }
+
+        function updateOIUSatellite() {
+            if (!oiuSatellite) return;
+
+            // 1. Orbital Path (Elliptical)
+            const time = Date.now() * 0.0005;
+            const radiusX = 50;
+            const radiusZ = 30;
+
+            oiuSatellite.position.x = Math.cos(time) * radiusX;
+            oiuSatellite.position.z = Math.sin(time) * radiusZ;
+            oiuSatellite.position.y = Math.sin(time * 2) * 5 + 10; // Bobbing up and down
+
+            // Make look at center (or camera? Center is better for "patrol" drone)
+            oiuSatellite.lookAt(0, 0, 0);
+
+            // 2. Gyroscope Animation
+            const d = oiuSatellite.userData;
+            if (d.r1) {
+                d.r1.rotation.x += 0.05;
+                d.r1.rotation.y += 0.02;
+                d.r2.rotation.y -= 0.04;
+                d.r3.rotation.x += 0.02;
+                d.r3.rotation.z += 0.02;
+
+                // Pulse core
+                const s = 1 + Math.sin(time * 10) * 0.2;
+                d.crystal.scale.set(s, s, s);
+            }
+        }
+
+        function updateStats() {
+            let zeros = 0;
+            let sum = 0;
+            let count = dataValues.length;
+
+            dataValues.forEach(v => {
+                const rectified = Math.max(0, v);
+                if (rectified === 0) zeros++;
+                sum += rectified;
+            });
+
+            const sparsity = Math.round((zeros / count) * 100);
+            const mean = (sum / count).toFixed(2);
+
+            document.getElementById('sparsityVal').innerText = sparsity + "%";
+            document.getElementById('meanVal').innerText = mean;
+        }
+
+        // 2D Canvas Graph
+        function drawGraph() {
+            const canvas = document.getElementById('reluGraph');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Clear
+            ctx.clearRect(0, 0, w, h);
+
+            // Axes
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+
+            // X Axis (Center)
+            ctx.beginPath();
+            ctx.moveTo(0, h / 2);
+            ctx.lineTo(w, h / 2);
+            ctx.stroke();
+
+            // Y Axis (Center)
+            ctx.beginPath();
+            ctx.moveTo(w / 2, 0);
+            ctx.lineTo(w / 2, h);
+            ctx.stroke();
+
+            // Function Line: f(x) = max(0, x)
+            ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            // Left side (flat at 0)
+            ctx.moveTo(0, h / 2);
+            ctx.lineTo(w / 2, h / 2);
+
+            // Right side (linear up)
+            // Scale: let's say width goes from -3 to 3
+            ctx.lineTo(w, 0); // goes to top right corner
+            ctx.stroke();
+
+            // Draw Data Points
+            dataValues.forEach(val => {
+                // Map val (-3 to 3) to canvas coordinates
+                // x range: -3 -> 0, +3 -> w
+                const mapX = (val / 3) * (w / 2) + (w / 2);
+
+                // y is output. 
+                // In Input Mode, we plot (x, x)
+                // In Output Mode, we plot (x, max(0, x))
+
+                let outVal = val;
+                if (currentMode === 'output') outVal = Math.max(0, val);
+
+                const mapY = (h / 2) - (outVal / 3) * (h / 2);
+
+                ctx.fillStyle = val >= 0 ? '#00f3ff' : '#ff0055';
+
+                // If rectified to 0 (and originated as negative), distinct look
+                if (currentMode === 'output' && val < 0) {
+                    ctx.fillStyle = '#555'; // Greyed out
+                }
+
+                ctx.beginPath();
+                ctx.arc(mapX, mapY, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Smooth transition for bars could be added here if we wanted animation between modes,
+            // but effectively updateBarsVisualization handles the state snap.
+            // Let's add slight pulse to positive bars
+
+            const time = Date.now() * 0.002;
+            bars.forEach((bar, i) => {
+                if (bar.position.y > 0) {
+                    // It's positive
+                    bar.material.emissiveIntensity = 0.3 + Math.sin(time + i) * 0.1;
+                }
+            });
+
+            updateParticles();
+            updateOIUSatellite();
+
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+    <div
+        style="position:fixed; bottom:14px; right:24px; z-index:9999; font-family:'Outfit','Segoe UI',sans-serif; font-weight:600; font-size:13px; color:rgba(0,243,255,0.7); letter-spacing:3px; text-transform:uppercase; pointer-events:none; text-shadow:0 0 8px rgba(0,243,255,0.3);">
+        IZZELDEENM@GMAIL.COM</div>
+</body>
+
+</html>

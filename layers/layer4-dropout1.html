@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer 4: Dropout (1) | Physics-Informed CNN-BiLSTM</title>
+    <style>
+        :root {
+            --cyan: #00F2FF;
+            --red: #FF3C3C;
+            --gold: #FFD700;
+            --green: #00FF88;
+            --bg-dark: #0A0A0F;
+            --panel-bg: rgba(10, 10, 20, 0.92);
+            --glass-border: rgba(0, 242, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0A0A0F 0%, #0a1015 50%, #0A0A0F 100%);
+            color: #fff;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            border-bottom: 2px solid var(--cyan);
+        }
+
+        .layer-badge {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .layer-num {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--cyan), #0099CC);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 900;
+            color: #000;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 40px rgba(0, 242, 255, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 60px rgba(0, 242, 255, 0.9);
+            }
+        }
+
+        .layer-title h1 {
+            font-size: 28px;
+            background: linear-gradient(90deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .layer-title p {
+            font-size: 14px;
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+
+        .back-btn {
+            padding: 12px 25px;
+            background: rgba(0, 242, 255, 0.1);
+            border: 2px solid var(--cyan);
+            border-radius: 12px;
+            color: var(--cyan);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--cyan);
+            color: #000;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: var(--panel-bg);
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            color: var(--cyan);
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .nav-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover:not(.disabled) {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--cyan);
+        }
+
+        .nav-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .left-panel,
+        .right-panel {
+            position: fixed;
+            top: 100px;
+            width: 340px;
+            max-height: calc(100vh - 120px);
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            z-index: 50;
+            overflow-y: auto;
+        }
+
+        .left-panel {
+            left: 20px;
+        }
+
+        .right-panel {
+            right: 20px;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .rate-display {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(255, 60, 60, 0.1));
+            border: 2px solid var(--cyan);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .rate-value {
+            font-size: 60px;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--cyan), var(--red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .rate-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card.active {
+            border-left: 3px solid var(--green);
+        }
+
+        .stat-card.dropped {
+            border-left: 3px solid var(--red);
+        }
+
+        .stat-card-value {
+            font-size: 26px;
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .stat-card-value.active-color {
+            color: var(--green);
+        }
+
+        .stat-card-value.dropped-color {
+            color: var(--red);
+        }
+
+        .stat-card-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .mode-btn:hover {
+            background: rgba(0, 242, 255, 0.1);
+        }
+
+        .mode-btn.active {
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        .mode-btn-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .mode-btn-desc {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        .control-group {
+            margin-bottom: 18px;
+        }
+
+        .control-label {
+            font-size: 11px;
+            color: var(--cyan);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .control-value {
+            color: var(--gold);
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--cyan), #0099CC);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+        }
+
+        .toggle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--cyan);
+        }
+
+        .toggle-btn.active {
+            background: var(--cyan);
+            color: #000;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--cyan), #0099CC);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 242, 255, 0.4);
+        }
+
+        .equation-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 11px;
+            color: var(--gold);
+            -webkit-background-clip: padding-box;
+            background-clip: padding-box;
+            border-left: 3px solid var(--cyan);
+            line-height: 1.6;
+            font-size: 10px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .equation-label {
+            font-size: 10px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .equation {
+            font-size: 13px;
+            color: var(--gold);
+            margin: 6px 0;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.08), rgba(0, 255, 136, 0.05));
+            padding: 18px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--cyan);
+        }
+
+        .info-card h4 {
+            font-size: 13px;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .info-card p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.7;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 242, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--cyan);
+            border-radius: 3px;
+        }
+
+        /* NEW VISUAL EFFECTS */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        #cursor {
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--red);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1);
+            mix-blend-mode: difference;
+        }
+
+        #cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            box-shadow: 0 0 10px var(--red);
+        }
+
+        .layer-title h1 {
+            text-shadow: 0 0 30px rgba(255, 60, 60, 0.5), 0 0 60px rgba(255, 215, 0, 0.3);
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                text-shadow: 0 0 30px rgba(255, 60, 60, 0.5);
+            }
+
+            50% {
+                text-shadow: 0 0 50px rgba(255, 60, 60, 0.8), 0 0 80px rgba(255, 215, 0, 0.5);
+            }
+        }
+
+        /* Panel Tilt Effect */
+        .left-panel,
+        .right-panel {
+            transition: transform 0.1s;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .left-panel:hover,
+        .right-panel:hover {
+            box-shadow: 0 0 40px rgba(255, 60, 60, 0.15);
+            border-color: rgba(255, 60, 60, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cursor"></div>
+    <div id="cursor-dot"></div>
+    <canvas id="bg-canvas"></canvas>
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <header class="header">
+        <div class="layer-badge">
+            <div class="layer-num">4</div>
+            <div class="layer-title">
+                <h1>Dropout (1) — Post-ReLU</h1>
+                <p>2D Tensor Regularization · BayesOpt-Tuned Rate</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <a href="layer3-relu.html" class="nav-btn">← PREV</a>
+            <a href="../index.html" class="nav-btn">HOME</a>
+            <a href="layer5-bilstm.html" class="nav-btn">NEXT →</a>
+        </div>
+
+        <div class="header-stats">
+            <div class="stat-box">
+                <div class="stat-label">Rate</div>
+                <div class="stat-value">20%</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Input</div>
+                <div class="stat-value">(24,64)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Params</div>
+                <div class="stat-value">0</div>
+            </div>
+        </div>
+        <a href="../index.html" class="back-btn">← Back to Model</a>
+    </header>
+
+    <div id="canvas-container"></div>
+
+    <div class="left-panel">
+        <div class="panel-title">📊 Dropout Rate</div>
+        <div class="rate-display">
+            <div class="rate-value" id="rateDisplay">20%</div>
+            <div class="rate-label">Drop Probability (p)</div>
+            <div
+                style="display:inline-block; padding:3px 10px; background:rgba(255,215,0,0.15); border:1px solid #FFD700; border-radius:20px; font-size:9px; color:#FFD700; letter-spacing:1px; margin-top:8px;">
+                ⚡ BAYESIAN OPTIMIZED (0.1–0.5)</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card active">
+                <div class="stat-card-value active-color" id="activeCount">123</div>
+                <div class="stat-card-label">Active Neurons</div>
+            </div>
+            <div class="stat-card dropped">
+                <div class="stat-card-value dropped-color" id="droppedCount">31</div>
+                <div class="stat-card-label">Dropped Neurons</div>
+            </div>
+        </div>
+
+        <div class="panel-title">🔄 Mode</div>
+        <div class="mode-toggle">
+            <div class="mode-btn active" data-mode="training">
+                <div class="mode-btn-name">Training</div>
+                <div class="mode-btn-desc">Random dropping</div>
+            </div>
+            <div class="mode-btn" data-mode="inference">
+                <div class="mode-btn-name">Inference</div>
+                <div class="mode-btn-desc">All neurons active</div>
+            </div>
+        </div>
+
+        <div class="equation-box">
+            <div class="equation-label">Inverted Dropout</div>
+            <div class="equation">y = x × mask / (1 - p)</div>
+            <div class="equation">mask ~ Bernoulli(1-p)</div>
+        </div>
+
+        <div class="info-card">
+            <h4>🎯 Purpose</h4>
+            <p>Dropout prevents overfitting by randomly deactivating neurons during training, forcing the network to
+                learn redundant representations.</p>
+        </div>
+
+        <div class="info-card">
+            <h4>🔗 Position in Pipeline</h4>
+            <p>Operates on <strong>[64×24] tensor</strong> (64 CNN channels × 24 timesteps) after ReLU activation. This
+                is a 2D dropout — random elements across both channels and time are masked before BiLSTM ingestion.</p>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="panel-title">🎮 Controls</div>
+
+        <button class="action-btn" id="regenerateBtn">🔄 Regenerate Mask</button>
+        <button class="action-btn" id="playBtn" style="background: linear-gradient(135deg, var(--green), #00CC66);">▶️
+            Play Animation</button>
+
+        <div class="control-group">
+            <div class="control-label"><span>Dropout Rate</span><span class="control-value" id="rateValue">0.20</span>
+            </div>
+            <input type="range" id="rateSlider" min="0" max="0.5" step="0.05" value="0.2">
+        </div>
+        <div class="control-group">
+            <div class="control-label"><span>Animation Speed</span><span class="control-value"
+                    id="speedValue">1.0x</span></div>
+            <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+        </div>
+
+        <div class="toggle-grid">
+            <button class="toggle-btn active" id="connectionsToggle">🔗 Connections</button>
+            <button class="toggle-btn" id="rotateToggle">🔄 Auto Rotate</button>
+        </div>
+
+        <div class="panel-title">📐 Scale Factor</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-value" style="color: var(--gold);" id="scaleFactor">1.25</div>
+                <div class="stat-card-label">1 / (1-p)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-value" style="color: var(--cyan);" id="keepProb">0.80</div>
+                <div class="stat-card-label">Keep Prob</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h4>⚖️ Inverted Dropout</h4>
+            <p>Scaling active neurons by 1/(1-p) during training ensures expected values remain consistent at inference
+                time.</p>
+        </div>
+
+        <div class="info-card">
+            <h4>🎭 Ensemble Effect</h4>
+            <p>Training with dropout is like training an ensemble of sub-networks, improving generalization.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        let scene, camera, renderer, controls, clock;
+        let neurons = [], connections = [];
+        let dropoutMask = [];
+        let isPlaying = false, animSpeed = 1.0;
+        let dropoutRate = 0.2;
+        let isTraining = true;
+        let showConnections = true;
+
+        const NEURON_COUNT = 150;
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0f);
+            scene.fog = new THREE.FogExp2(0x0a0a0f, 0.015);
+
+            camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 500);
+            camera.position.set(0, 20, 40);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            clock = new THREE.Clock();
+
+            setupLights();
+            createNeurons();
+            generateMask();
+            setupEventListeners();
+
+            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 500);
+            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 500);
+            setupTheme();
+            animate();
+        }
+
+        function setupLights() {
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            const l1 = new THREE.PointLight(0x00F2FF, 2, 80); l1.position.set(30, 40, 30); scene.add(l1);
+            const l2 = new THREE.PointLight(0xFF3C3C, 1.5, 80); l2.position.set(-30, 30, 30); scene.add(l2);
+        }
+
+        function createNeurons() {
+            const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+
+            for (let i = 0; i < NEURON_COUNT; i++) {
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0x00F2FF,
+                    emissive: 0x00F2FF,
+                    emissiveIntensity: 0.3,
+                    transparent: true,
+                    opacity: 0.9
+                });
+
+                const neuron = new THREE.Mesh(geometry, material);
+
+                // Arrange in a grid-like pattern
+                const row = Math.floor(i / 15);
+                const col = i % 15;
+                neuron.position.set(
+                    (col - 7) * 2,
+                    (row - 5) * 2,
+                    (Math.random() - 0.5) * 3
+                );
+
+                neuron.userData = { index: i, baseY: neuron.position.y };
+                scene.add(neuron);
+                neurons.push(neuron);
+            }
+
+            // Create some sample connections
+            for (let i = 0; i < 50; i++) {
+                const idx1 = Math.floor(Math.random() * NEURON_COUNT);
+                const idx2 = Math.floor(Math.random() * NEURON_COUNT);
+                if (idx1 !== idx2) {
+                    const points = [neurons[idx1].position, neurons[idx2].position];
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const material = new THREE.LineBasicMaterial({
+                        color: 0x00F2FF,
+                        transparent: true,
+                        opacity: 0.15
+                    });
+                    const line = new THREE.Line(geometry, material);
+                    line.userData = { from: idx1, to: idx2 };
+                    scene.add(line);
+                    connections.push(line);
+                }
+            }
+        }
+
+        function generateMask() {
+            dropoutMask = [];
+            let active = 0, dropped = 0;
+
+            neurons.forEach((neuron, i) => {
+                const keep = isTraining ? (Math.random() > dropoutRate) : true;
+                dropoutMask.push(keep);
+
+                if (keep) {
+                    active++;
+                    neuron.material.color.setHex(0x00FF88);
+                    neuron.material.emissive.setHex(0x00FF88);
+                    neuron.material.opacity = 0.9;
+                    neuron.scale.setScalar(1);
+                } else {
+                    dropped++;
+                    neuron.material.color.setHex(0xFF3C3C);
+                    neuron.material.emissive.setHex(0xFF3C3C);
+                    neuron.material.opacity = 0.3;
+                    neuron.scale.setScalar(0.5);
+                }
+            });
+
+            // Update connections visibility
+            connections.forEach(conn => {
+                const fromActive = dropoutMask[conn.userData.from];
+                const toActive = dropoutMask[conn.userData.to];
+                conn.material.opacity = (fromActive && toActive) ? 0.3 : 0.05;
+            });
+
+            document.getElementById('activeCount').textContent = active;
+            document.getElementById('droppedCount').textContent = dropped;
+        }
+
+        function updateDropoutRate() {
+            document.getElementById('rateDisplay').textContent = Math.round(dropoutRate * 100) + '%';
+            document.getElementById('rateValue').textContent = dropoutRate.toFixed(2);
+            document.getElementById('scaleFactor').textContent = (1 / (1 - dropoutRate)).toFixed(2);
+            document.getElementById('keepProb').textContent = (1 - dropoutRate).toFixed(2);
+            generateMask();
+        }
+
+        function setupEventListeners() {
+            window.addEventListener('resize', () => {
+                camera.aspect = innerWidth / innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(innerWidth, innerHeight);
+            });
+
+            document.getElementById('regenerateBtn').addEventListener('click', generateMask);
+
+            document.getElementById('playBtn').addEventListener('click', function () {
+                isPlaying = !isPlaying;
+                this.innerHTML = isPlaying ? '⏸️ Pause' : '▶️ Play Animation';
+            });
+
+            document.getElementById('rateSlider').addEventListener('input', (e) => {
+                dropoutRate = parseFloat(e.target.value);
+                updateDropoutRate();
+            });
+
+            document.getElementById('speedSlider').addEventListener('input', (e) => {
+                animSpeed = parseFloat(e.target.value);
+                document.getElementById('speedValue').textContent = animSpeed.toFixed(1) + 'x';
+            });
+
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    isTraining = this.dataset.mode === 'training';
+                    generateMask();
+                });
+            });
+
+            document.getElementById('connectionsToggle').addEventListener('click', function () {
+                showConnections = !showConnections;
+                connections.forEach(c => c.visible = showConnections);
+                this.classList.toggle('active');
+            });
+
+            document.getElementById('rotateToggle').addEventListener('click', function () {
+                controls.autoRotate = !controls.autoRotate;
+                this.classList.toggle('active');
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsed = clock.getElapsedTime() * animSpeed;
+            controls.update();
+
+            if (isPlaying) {
+                neurons.forEach((neuron, i) => {
+                    if (dropoutMask[i] || !isTraining) {
+                        neuron.position.y = neuron.userData.baseY + Math.sin(elapsed * 2 + i * 0.1) * 0.3;
+                        neuron.material.emissiveIntensity = 0.3 + Math.sin(elapsed * 3 + i * 0.2) * 0.15;
+                    }
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        init();
+        function setupTheme() {
+            // Cursor
+            const cursor = document.getElementById('cursor');
+            const cursorDot = document.getElementById('cursor-dot');
+            document.addEventListener('mousemove', e => {
+                cursor.style.left = e.clientX - 15 + 'px';
+                cursor.style.top = e.clientY - 15 + 'px';
+                cursorDot.style.left = e.clientX - 4 + 'px';
+                cursorDot.style.top = e.clientY - 4 + 'px';
+            });
+
+            // BG Particles
+            const canvas = document.getElementById('bg-canvas');
+            const bgScene = new THREE.Scene();
+            const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const bgRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            bgRenderer.setSize(window.innerWidth, window.innerHeight);
+
+            const particleCount = 200;
+            const particles = new THREE.BufferGeometry();
+            const posArray = new Float32Array(particleCount * 3);
+            const particlesData = [];
+
+            for (let i = 0; i < particleCount; i++) {
+                posArray[i * 3] = (Math.random() - 0.5) * 30;
+                posArray[i * 3 + 1] = (Math.random() - 0.5) * 30;
+                posArray[i * 3 + 2] = (Math.random() - 0.5) * 30;
+                particlesData.push({
+                    velocity: new THREE.Vector3(-0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02)
+                });
+            }
+            particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particleMat = new THREE.PointsMaterial({ size: 0.1, color: 0xFFD700, transparent: true, opacity: 0.6 });
+            const particleMesh = new THREE.Points(particles, particleMat);
+            bgScene.add(particleMesh);
+
+            const lineGeo = new THREE.BufferGeometry();
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xFF3C3C, transparent: true, opacity: 0.15 });
+            const lines = new THREE.LineSegments(lineGeo, lineMat);
+            bgScene.add(lines);
+
+            bgCamera.position.z = 10;
+            let mouseX = 0, mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            function animateBG() {
+                requestAnimationFrame(animateBG);
+                bgScene.rotation.y += 0.001;
+                bgScene.rotation.x += (mouseY * 0.05 - bgScene.rotation.x) * 0.05;
+                bgScene.rotation.y += (mouseX * 0.05 - bgScene.rotation.y) * 0.05;
+
+                const positions = particles.attributes.position.array;
+                const linePositions = [];
+
+                for (let i = 0; i < particleCount; i++) {
+                    positions[i * 3] += particlesData[i].velocity.x;
+                    positions[i * 3 + 1] += particlesData[i].velocity.y;
+                    positions[i * 3 + 2] += particlesData[i].velocity.z;
+
+                    if (positions[i * 3] < -15) positions[i * 3] = 15;
+                    if (positions[i * 3] > 15) positions[i * 3] = -15;
+                    if (positions[i * 3 + 1] < -15) positions[i * 3 + 1] = 15;
+                    if (positions[i * 3 + 1] > 15) positions[i * 3 + 1] = -15;
+                    if (positions[i * 3 + 2] < -15) positions[i * 3 + 2] = 15;
+                    if (positions[i * 3 + 2] > 15) positions[i * 3 + 2] = -15;
+
+                    for (let j = i + 1; j < particleCount; j++) {
+                        const dx = positions[i * 3] - positions[j * 3];
+                        const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
+                        const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
+                        if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 4) {
+                            linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2], positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]);
+                        }
+                    }
+                }
+                particles.attributes.position.needsUpdate = true;
+                lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+                bgRenderer.render(bgScene, bgCamera);
+            }
+            animateBG();
+
+            // Tilt Effect
+            document.querySelectorAll('.left-panel, .right-panel').forEach(panel => {
+                panel.addEventListener('mousemove', (e) => {
+                    const rect = panel.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -2;
+                    const rotateY = ((x - centerX) / centerX) * 2;
+                    panel.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+                panel.addEventListener('mouseleave', () => {
+                    panel.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

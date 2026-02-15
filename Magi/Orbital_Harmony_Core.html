@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI-HYBRID | ORBITAL HARMONY CORE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;400;900&family=Cinzel:wght@900&display=swap');
+
+        :root {
+            --primary: #ffffff;
+            --accent: #8b5cf6;
+            /* Orbital Purple */
+            --bg: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none !important;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+
+        .vignette {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 1));
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .noise {
+            position: fixed;
+            inset: 0;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_p_Nois_6.png');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 1001;
+            mix-blend-mode: overlay;
+        }
+
+        #cursor {
+            width: 30px;
+            height: 30px;
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #cursor::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .scroll-container {
+            position: relative;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 10%;
+        }
+
+        /* Masterpiece Cards (Legibility Focused) */
+        .orbital-card {
+            background: rgba(4, 2, 10, 0.95);
+            backdrop-filter: blur(80px) saturate(160%);
+            -webkit-backdrop-filter: blur(80px) saturate(160%);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            border-radius: 60px;
+            padding: 90px;
+            max-width: 800px;
+            box-shadow: 0 100px 200px rgba(0, 0, 0, 1);
+            opacity: 0;
+            transform: translateY(100px);
+        }
+
+        .orbital-card h2 {
+            font-size: 5rem;
+            letter-spacing: -3px;
+            line-height: 0.95;
+            margin-bottom: 35px;
+            font-weight: 900;
+        }
+
+        .orbital-card p {
+            font-size: 1.45rem;
+            line-height: 1.8;
+            opacity: 0.6;
+            font-weight: 300;
+        }
+
+        .tag {
+            font-family: 'Cinzel';
+            font-size: 11px;
+            letter-spacing: 12px;
+            color: var(--accent);
+            margin-bottom: 25px;
+            display: block;
+        }
+
+        /* Kinetic Typography Intro (Rotation Effect) */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 11vw;
+            font-weight: 900;
+            letter-spacing: -1vw;
+            line-height: 0.8;
+            display: flex;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+
+        .hero h1 span {
+            display: inline-block;
+            transform: rotateY(90deg) translateZ(100px);
+            opacity: 0;
+            filter: blur(30px);
+        }
+
+        #progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--accent);
+            width: 0%;
+            z-index: 2000;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="progress-bar"></div>
+    <div class="vignette"></div>
+    <div class="noise"></div>
+    <div id="cursor"></div>
+
+    <div id="container"></div>
+
+    <div class="scroll-container">
+        <header class="hero">
+            <span class="tag" style="opacity: 0.4;">CYCLICAL HARMONY RESEARCH</span>
+            <h1 id="kinetic-title">
+                <span>C</span><span>Y</span><span>C</span><span>L</span><span>E</span>
+            </h1>
+            <p style="margin-top: 60px; letter-spacing: 15px; opacity: 0.2; font-size: 14px; font-weight: 100;">
+                MATHEMATICAL ORBIT SYNCHRONIZATION</p>
+        </header>
+
+        <section class="section">
+            <div class="orbital-card reveal">
+                <span class="tag">01 / ORBITAL DATA</span>
+                <h2>Harmonic<br>Precision</h2>
+                <p>Solar energy is a dance of cycles. Our <strong>PI-Hybrid model</strong> synchronizes its neural
+                    oscillations with the multi-scale frequencies of the solar constant, achieving harmonic convergence.
+                </p>
+            </div>
+        </section>
+
+        <section class="section" style="justify-content: flex-end;">
+            <div class="orbital-card reveal">
+                <span class="tag">02 / ANGULAR MOMENTUM</span>
+                <h2>Weight<br>Rotation</h2>
+                <p>Every weight in our <strong>CNN-BiLSTM layers</strong> maintains an angular momentum relative to
+                    physical constraints. We don't just optimize; we balance.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="orbital-card reveal">
+                <span class="tag">03 / CONFLUENCE</span>
+                <h2>Numerical<br>Absolute</h2>
+                <p>Perfect symmetry between architecture and physics. 99.8% precision. 0.04 RMSE. The cycle is complete.
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.04);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 30);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        renderer.toneMappingExposure = 2.5;
+        container.appendChild(renderer.domElement);
+
+        // --- MASTERPIECE 05: ORBITAL HARMONY ENGINE ---
+
+        const world = new THREE.Group();
+        scene.add(world);
+
+        // 1. HARMONIC RINGS
+        const ringCount = 5;
+        const rings = [];
+        for (let i = 0; i < ringCount; i++) {
+            const r = (i + 1) * 4;
+            const ringGeo = new THREE.TorusGeometry(r, 0.02, 16, 128);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.3 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            world.add(ring);
+
+            // Sphere on ring
+            const sphereGeo = new THREE.SphereGeometry(0.3, 32, 32);
+            const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0 });
+            const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+            const pivot = new THREE.Group();
+            pivot.add(sphere);
+            sphere.position.x = r;
+            world.add(pivot);
+
+            rings.push({ ring, pivot, speed: (i + 1) * 0.01 });
+        }
+
+        // 2. CENTRAL CORE (Orbital Sun)
+        const coreGeo = new THREE.SphereGeometry(3, 64, 64);
+        const coreMat = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            emissive: 0x8b5cf6,
+            emissiveIntensity: 0.5,
+            metalness: 1,
+            roughness: 0
+        });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        world.add(core);
+
+        // 3. LIGHTING (Cinematic Orbital)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+        scene.add(ambientLight);
+
+        const pLight1 = new THREE.PointLight(0x8b5cf6, 20, 100);
+        pLight1.position.set(15, 15, 15);
+        scene.add(pLight1);
+
+        // --- KINETIC TYPOGRAPHY & SCROLL (GSAP) ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // "Rotation" Entrance Intro
+        window.onload = () => {
+            gsap.to("#kinetic-title span", {
+                opacity: 1, rotateY: 0, translateZ: 0, filter: "blur(0px)",
+                stagger: 0.1, duration: 2.5, ease: "cubic-bezier(0.19, 1, 0.22, 1)", delay: 0.5
+            });
+        };
+
+        // Cinematic Camera Path
+        const curve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 0, 30),
+            new THREE.Vector3(25, 10, 15),
+            new THREE.Vector3(-25, -20, 20),
+            new THREE.Vector3(0, 40, 0)
+        ]);
+
+        const scrollProxy = { val: 0 };
+        gsap.to(scrollProxy, {
+            val: 1,
+            scrollTrigger: { trigger: ".scroll-container", start: "top top", end: "bottom bottom", scrub: 3 },
+            onUpdate: () => {
+                const pt = curve.getPoint(scrollProxy.val);
+                camera.position.copy(pt);
+                camera.lookAt(0, 0, 0);
+
+                // Orbital Acceleration on scroll
+                rings.forEach((r, i) => {
+                    r.pivot.rotation.y += scrollProxy.val * 0.1;
+                    r.ring.scale.setScalar(1 + scrollProxy.val * 0.2);
+                });
+
+                document.getElementById('progress-bar').style.width = (scrollProxy.val * 100) + "%";
+            }
+        });
+
+        // Content Reveal
+        gsap.utils.toArray(".reveal").forEach(el => {
+            gsap.to(el, {
+                scrollTrigger: { trigger: el, start: "top 75%", toggleActions: "play none none reverse" },
+                opacity: 1, y: 0, duration: 1.8, ease: "power4.out"
+            });
+        });
+
+        // Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = performance.now() * 0.001;
+
+            rings.forEach((r, i) => {
+                r.pivot.rotation.y += r.speed;
+            });
+            core.rotation.y = time * 0.2;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Cursor & Parallax
+        document.addEventListener('mousemove', e => {
+            gsap.to('#cursor', { duration: 0.4, left: e.clientX - 15, top: e.clientY - 15, ease: "power2.out" });
+            const x = (e.clientX / window.innerWidth - 0.5) * 5;
+            const y = (e.clientY / window.innerHeight - 0.5) * 5;
+            gsap.to(world.rotation, { x: y * 0.05, y: x * 0.05, duration: 2 });
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

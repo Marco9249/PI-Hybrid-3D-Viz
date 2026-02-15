@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer 0: Input Tensor | Physics-Informed CNN-BiLSTM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --gold: #F59E0B;
+            --cyan: #06B6D4;
+            --purple: #8B5CF6;
+            --green: #10B981;
+            --blue: #3B82F6;
+            --red: #EF4444;
+            --bg-dark: #0A0A0F;
+            --panel-bg: rgba(10, 10, 20, 0.92);
+            --glass-border: rgba(255, 215, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0A0A0F 0%, #1a1510 50%, #0A0A0F 100%);
+            color: #fff;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 70%, transparent 100%);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            border-bottom: 2px solid var(--gold);
+            backdrop-filter: blur(10px);
+        }
+
+        .layer-badge {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .layer-num {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 900;
+            color: #000;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 60px rgba(255, 215, 0, 0.8);
+            }
+        }
+
+        .layer-title h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--gold);
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .layer-title p {
+            font-size: 11px;
+            color: var(--cyan);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .nav-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 12px 22px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 12px;
+            color: var(--gold);
+            font-size: 13px;
+            font-weight: 800;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(5px);
+        }
+
+        .nav-btn:hover {
+            background: var(--gold);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .nav-btn.primary {
+            background: var(--gold);
+            color: #000;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: var(--panel-bg);
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            color: var(--gold);
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Left Panel */
+        .left-panel {
+            position: fixed;
+            left: 20px;
+            top: 100px;
+            width: 340px;
+            max-height: calc(100vh - 120px);
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            z-index: 50;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Feature Categories */
+        .category-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .category-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .category-btn.active {
+            border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .category-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .category-info {
+            flex: 1;
+        }
+
+        .category-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .category-range {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Courier New', monospace;
+        }
+
+        .category-count {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        /* Features List */
+        .features-list {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .feature-item.active {
+            background: rgba(255, 215, 0, 0.1);
+            border-left-color: var(--gold);
+        }
+
+        .feature-idx {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 10px;
+            color: #000;
+        }
+
+        .feature-name {
+            flex: 1;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .feature-unit {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            position: fixed;
+            right: 20px;
+            top: 100px;
+            width: 360px;
+            max-height: calc(100vh - 120px);
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            z-index: 50;
+            overflow-y: auto;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 18px;
+        }
+
+        .control-label {
+            font-size: 11px;
+            color: var(--gold);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-value {
+            color: var(--cyan);
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* Toggle Buttons */
+        .toggle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            padding: 12px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--gold);
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            border-color: transparent;
+            color: #000;
+        }
+
+        /* Statistics Display */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px 10px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+        }
+
+        .stat-card-value {
+            font-size: 18px;
+            color: var(--gold);
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .stat-card-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(0, 242, 255, 0.05));
+            padding: 18px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--gold);
+        }
+
+        .info-card h4 {
+            font-size: 13px;
+            color: var(--gold);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.7;
+        }
+
+        /* Selected Cell Info */
+        .cell-info {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .cell-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cell-info-title {
+            font-size: 12px;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .cell-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 12px;
+        }
+
+        .cell-info-key {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .cell-info-value {
+            color: var(--cyan);
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        /* Equation Box */
+        .equation-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--cyan);
+        }
+
+        .equation-label {
+            font-size: 10px;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .equation {
+            font-size: 13px;
+            color: var(--cyan);
+            margin: 6px 0;
+        }
+
+        /* Play Button */
+        .play-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        /* Loading */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 215, 0, 0.2);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <p style="margin-top: 20px; color: var(--gold);">Loading Input Tensor Visualization...</p>
+    </div>
+
+    <header class="header">
+        <div class="layer-badge">
+            <div class="layer-num">0</div>
+            <div class="layer-title">
+                <h1>Input Tensor</h1>
+                <p>24 Timesteps × 15 Features</p>
+            </div>
+        </div>
+
+        <div class="header-stats">
+            <div class="stat-box">
+                <div class="stat-label">Shape</div>
+                <div class="stat-value">24×15</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total</div>
+                <div class="stat-value">360</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Time</div>
+                <div class="stat-value">2 Hr</div>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <a href="../index.html" class="nav-btn">🏠 Home Portal</a>
+            <a href="layer1-conv1d.html" class="nav-btn primary">Next Layer ➜</a>
+        </div>
+    </header>
+
+    <div id="canvas-container"></div>
+
+    <!-- Left Panel -->
+    <div class="left-panel">
+        <div class="panel-title">📊 Feature Categories</div>
+
+        <div class="category-grid" id="categoryGrid">
+            <div class="category-btn active" data-category="target">
+                <div class="category-color" style="background: #FF3C3C;"></div>
+                <div class="category-info">
+                    <div class="category-name">Target Variable</div>
+                    <div class="category-range">Feature 0</div>
+                </div>
+                <div class="category-count">1</div>
+            </div>
+            <div class="category-btn" data-category="physics">
+                <div class="category-color" style="background: #FFD700;"></div>
+                <div class="category-info">
+                    <div class="category-name">Physics-Derived</div>
+                    <div class="category-range">Features 1-4</div>
+                </div>
+                <div class="category-count">4</div>
+            </div>
+            <div class="category-btn" data-category="solar">
+                <div class="category-color" style="background: #FF9500;"></div>
+                <div class="category-info">
+                    <div class="category-name">Solar Components</div>
+                    <div class="category-range">Features 5-6</div>
+                </div>
+                <div class="category-count">2</div>
+            </div>
+            <div class="category-btn" data-category="meteo">
+                <div class="category-color" style="background: #00F2FF;"></div>
+                <div class="category-info">
+                    <div class="category-name">Meteorological</div>
+                    <div class="category-range">Features 7-10</div>
+                </div>
+                <div class="category-count">4</div>
+            </div>
+            <div class="category-btn" data-category="temporal">
+                <div class="category-color" style="background: #BC00FF;"></div>
+                <div class="category-info">
+                    <div class="category-name">Temporal Encoding</div>
+                    <div class="category-range">Features 11-14</div>
+                </div>
+                <div class="category-count">4</div>
+            </div>
+        </div>
+
+        <div class="panel-title">📋 Features List</div>
+
+        <div class="features-list" id="featuresList">
+            <!-- Populated by JS -->
+        </div>
+
+        <div class="cell-info" id="cellInfo">
+            <div class="cell-info-header">
+                <span class="cell-info-title">Selected Cell</span>
+                <span style="color: var(--cyan); font-size: 11px;">Click to select</span>
+            </div>
+            <div class="cell-info-row">
+                <span class="cell-info-key">Timestep</span>
+                <span class="cell-info-value" id="cellTimestep">-</span>
+            </div>
+            <div class="cell-info-row">
+                <span class="cell-info-key">Feature</span>
+                <span class="cell-info-value" id="cellFeature">-</span>
+            </div>
+            <div class="cell-info-row">
+                <span class="cell-info-key">Value</span>
+                <span class="cell-info-value" id="cellValue">-</span>
+            </div>
+            <div class="cell-info-row">
+                <span class="cell-info-key">Normalized</span>
+                <span class="cell-info-value" id="cellNorm">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+        <div class="panel-title">🎮 Controls</div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <span>Timestep</span>
+                <span class="control-value" id="timestepValue">0 / 23</span>
+            </div>
+            <input type="range" id="timestepSlider" min="0" max="23" value="0">
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <span>Animation Speed</span>
+                <span class="control-value" id="speedValue">1.0x</span>
+            </div>
+            <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+        </div>
+
+        <div class="toggle-grid">
+            <button class="toggle-btn active" id="heatmapToggle">🌡️ Heatmap</button>
+            <button class="toggle-btn" id="waveToggle">🌊 Wave Effect</button>
+            <button class="toggle-btn active" id="gridToggle">🔲 Grid</button>
+            <button class="toggle-btn" id="rotateToggle">🔄 Auto Rotate</button>
+        </div>
+
+        <button class="play-btn" id="playBtn">▶️ Play Animation</button>
+
+        <div class="panel-title" style="margin-top: 20px;">📊 Statistics</div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-value" id="statMin">-1.2</div>
+                <div class="stat-card-label">Min</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-value" id="statMax">1.8</div>
+                <div class="stat-card-label">Max</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-value" id="statMean">0.42</div>
+                <div class="stat-card-label">Mean</div>
+            </div>
+        </div>
+
+        <div class="panel-title">📚 Information</div>
+
+        <div class="info-card">
+            <h4>🎯 Target Variable (GHI)</h4>
+            <p>Total solar radiation received on a horizontal surface. The primary variable we want to predict.</p>
+        </div>
+
+        <div class="info-card">
+            <h4>🔬 Physics-Derived Features</h4>
+            <p>Clear-sky baseline, clearness indices (KT), and volatility. These filter out geometric effects to focus
+                on atmospheric conditions.</p>
+        </div>
+
+        <div class="info-card">
+            <h4>☀️ Solar Components</h4>
+            <p>Direct (DNI) and Diffuse (DHI) irradiance. Critical for distinguishing between cloud types and clear
+                conditions.</p>
+        </div>
+
+        <div class="info-card">
+            <h4>🌤️ Meteorological Data</h4>
+            <p>Temperature, Humidity, Dew Point. These environmental factors strongly influence radiative transfer.</p>
+        </div>
+
+        <div class="equation-box">
+            <div class="equation-label">Normalization</div>
+            <div class="equation">x_norm = (x - μ) / σ</div>
+            <div class="equation">μ = mean, σ = std</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script>
+        // Configuration
+        const CONFIG = {
+            timesteps: 24,
+            featureCount: 15,
+            cellSize: 1.2,
+            gap: 0.15,
+            categories: {
+                target: { start: 0, end: 0, color: 0xFF3C3C, name: 'Target Variable' },
+                physics: { start: 1, end: 4, color: 0xFFD700, name: 'Physics-Derived' },
+                solar: { start: 5, end: 6, color: 0xFF9500, name: 'Solar Components' },
+                meteo: { start: 7, end: 10, color: 0x00F2FF, name: 'Meteorological' },
+                temporal: { start: 11, end: 14, color: 0xBC00FF, name: 'Temporal Encoding' }
+            },
+            features: [
+                { name: 'GHI (Target)', unit: 'W/m²', category: 'target', symbol: 'GHI' },
+                { name: 'Clear-Sky GHI', unit: 'W/m²', category: 'physics', symbol: 'GHI_cs' },
+                { name: 'Clearness Index (Calc)', unit: '-', category: 'physics', symbol: 'KT_calc' },
+                { name: 'Clearness Index (Sat)', unit: '-', category: 'physics', symbol: 'KT_sat' },
+                { name: 'Volatility Index', unit: '-', category: 'physics', symbol: 'Vol' },
+                { name: 'Direct Normal (DNI)', unit: 'W/m²', category: 'solar', symbol: 'DNI' },
+                { name: 'Diffuse (DHI)', unit: 'W/m²', category: 'solar', symbol: 'DHI' },
+                { name: 'Relative Humidity', unit: '%', category: 'meteo', symbol: 'RH' },
+                { name: 'Dew Point Temp', unit: '°C', category: 'meteo', symbol: 'T_dew' },
+                { name: 'Ambient Temp', unit: '°C', category: 'meteo', symbol: 'T_amb' },
+                { name: 'Wet Bulb Temp', unit: '°C', category: 'meteo', symbol: 'T_wet' },
+                { name: 'Hour Sin', unit: '-', category: 'temporal', symbol: 'sin(H)' },
+                { name: 'Hour Cos', unit: '-', category: 'temporal', symbol: 'cos(H)' },
+                { name: 'Day Sin', unit: '-', category: 'temporal', symbol: 'sin(D)' },
+                { name: 'Day Cos', unit: '-', category: 'temporal', symbol: 'cos(D)' }
+            ]
+        };
+
+        let scene, camera, renderer, controls, clock;
+        let tensorCells = [];
+        let tensorData = [];
+        let selectedCell = null;
+        let currentTimestep = 0;
+        let animSpeed = 1.0;
+        let isPlaying = false;
+        let showHeatmap = true;
+        let showWave = false;
+        let activeCategory = 'all';
+
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0f);
+            scene.fog = new THREE.FogExp2(0x0a0a0f, 0.015);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+            camera.position.set(20, 25, 35);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.target.set(8, 0, 8);
+
+            clock = new THREE.Clock();
+
+            setupLights();
+            generateData();
+            createTensor();
+            createGrid();
+            populateFeaturesList();
+            setupPost();
+            setupEventListeners();
+
+            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 500);
+            animate();
+        }
+
+        function setupPost() {
+            composer = new THREE.EffectComposer(renderer);
+            composer.addPass(new THREE.RenderPass(scene, camera));
+            const bloom = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.2, 0.4, 0.85);
+            composer.addPass(bloom);
+        }
+
+        function setupLights() {
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+            const light1 = new THREE.PointLight(0xFFD700, 2, 80);
+            light1.position.set(30, 40, 30);
+            scene.add(light1);
+
+            const light2 = new THREE.PointLight(0x00F2FF, 1.5, 80);
+            light2.position.set(-20, 30, 30);
+            scene.add(light2);
+
+            const light3 = new THREE.PointLight(0xBC00FF, 1.2, 60);
+            light3.position.set(20, 20, -30);
+            scene.add(light3);
+        }
+
+        function generateData() {
+            tensorData = [];
+            for (let t = 0; t < CONFIG.timesteps; t++) {
+                const row = [];
+                for (let f = 0; f < CONFIG.featureCount; f++) {
+                    // Generate realistic-looking normalized data
+                    let value = Math.sin(t * 0.3 + f * 0.5) * 0.5 + (Math.random() - 0.5) * 0.5;
+                    if (f < 6) value += 0.3; // Physics features tend higher
+                    row.push(value);
+                }
+                tensorData.push(row);
+            }
+            updateStats();
+        }
+
+        function createTensor() {
+            const group = new THREE.Group();
+            const cellTotal = CONFIG.cellSize + CONFIG.gap;
+
+            for (let t = 0; t < CONFIG.timesteps; t++) {
+                for (let f = 0; f < CONFIG.featureCount; f++) {
+                    const value = tensorData[t][f];
+                    const normalizedHeight = Math.abs(value) * 2 + 0.3;
+
+                    // Determine category and color
+                    let categoryKey = 'temporal';
+                    if (f === 0) categoryKey = 'target';
+                    else if (f <= 4) categoryKey = 'physics';
+                    else if (f <= 6) categoryKey = 'solar';
+                    else if (f <= 10) categoryKey = 'meteo';
+
+                    const baseColor = new THREE.Color(CONFIG.categories[categoryKey].color);
+
+                    // Heatmap color
+                    const heatColor = new THREE.Color();
+                    const heatVal = (value + 1) / 2; // normalize to 0-1
+                    heatColor.setHSL(0.6 - heatVal * 0.6, 0.9, 0.5);
+
+                    const geometry = new THREE.BoxGeometry(CONFIG.cellSize, normalizedHeight, CONFIG.cellSize);
+                    const material = new THREE.MeshPhongMaterial({
+                        color: showHeatmap ? heatColor : baseColor,
+                        emissive: showHeatmap ? heatColor : baseColor,
+                        emissiveIntensity: 0.2,
+                        transparent: true,
+                        opacity: 0.85
+                    });
+
+                    const cell = new THREE.Mesh(geometry, material);
+                    cell.position.set(
+                        f * cellTotal,
+                        normalizedHeight / 2,
+                        t * cellTotal
+                    );
+
+                    cell.userData = {
+                        timestep: t,
+                        feature: f,
+                        value: value,
+                        category: categoryKey,
+                        baseColor: baseColor.clone(),
+                        heatColor: heatColor.clone(),
+                        baseHeight: normalizedHeight
+                    };
+
+                    group.add(cell);
+                    tensorCells.push(cell);
+                }
+            }
+
+            scene.add(group);
+        }
+
+        function createGrid() {
+            const gridSize = Math.max(CONFIG.timesteps, CONFIG.features) * (CONFIG.cellSize + CONFIG.gap);
+            const grid = new THREE.GridHelper(gridSize * 1.5, 30, 0x333344, 0x222233);
+            grid.position.set(gridSize / 2.5, 0, gridSize / 2.5);
+            scene.add(grid);
+        }
+
+        function populateFeaturesList() {
+            const list = document.getElementById('featuresList');
+            list.innerHTML = '';
+
+            CONFIG.features.forEach((feat, i) => {
+                const item = document.createElement('div');
+                item.className = 'feature-item';
+                item.dataset.feature = i;
+
+                let color = CONFIG.categories.temporal.color;
+                if (feat.category === 'target') color = CONFIG.categories.target.color;
+                else if (feat.category === 'physics') color = CONFIG.categories.physics.color;
+                else if (feat.category === 'solar') color = CONFIG.categories.solar.color;
+                else if (feat.category === 'meteo') color = CONFIG.categories.meteo.color;
+
+                item.innerHTML = `
+                    <div class="feature-idx" style="background: #${color.toString(16).padStart(6, '0')}">${i}</div>
+                    <div style="flex:1">
+                        <div class="feature-name">${feat.name}</div>
+                        <div style="font-size:9px; color:rgba(255,255,255,0.4);">${feat.symbol}</div>
+                    </div>
+                    <div class="feature-unit">${feat.unit}</div>
+                `;
+
+                item.addEventListener('click', () => selectFeature(i));
+                list.appendChild(item);
+            });
+        }
+
+        function selectFeature(featureIdx) {
+            // Update UI
+            document.querySelectorAll('.feature-item').forEach((el, i) => {
+                el.classList.toggle('active', i === featureIdx);
+            });
+
+            // Highlight cells
+            tensorCells.forEach(cell => {
+                if (cell.userData.feature === featureIdx) {
+                    cell.material.emissiveIntensity = 0.6;
+                    cell.scale.setScalar(1.1);
+                } else {
+                    cell.material.emissiveIntensity = 0.2;
+                    cell.scale.setScalar(1);
+                }
+            });
+        }
+
+        function updateStats() {
+            const flat = tensorData.flat();
+            const min = Math.min(...flat).toFixed(2);
+            const max = Math.max(...flat).toFixed(2);
+            const mean = (flat.reduce((a, b) => a + b, 0) / flat.length).toFixed(2);
+
+            document.getElementById('statMin').textContent = min;
+            document.getElementById('statMax').textContent = max;
+            document.getElementById('statMean').textContent = mean;
+        }
+
+        function setupEventListeners() {
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // Timestep slider
+            document.getElementById('timestepSlider').addEventListener('input', (e) => {
+                currentTimestep = parseInt(e.target.value);
+                document.getElementById('timestepValue').textContent = currentTimestep + ' / 23';
+                highlightTimestep(currentTimestep);
+            });
+
+            // Speed slider
+            document.getElementById('speedSlider').addEventListener('input', (e) => {
+                animSpeed = parseFloat(e.target.value);
+                document.getElementById('speedValue').textContent = animSpeed.toFixed(1) + 'x';
+            });
+
+            // Toggle buttons
+            document.getElementById('heatmapToggle').addEventListener('click', function () {
+                showHeatmap = !showHeatmap;
+                this.classList.toggle('active');
+                updateCellColors();
+            });
+
+            document.getElementById('waveToggle').addEventListener('click', function () {
+                showWave = !showWave;
+                this.classList.toggle('active');
+            });
+
+            document.getElementById('rotateToggle').addEventListener('click', function () {
+                controls.autoRotate = !controls.autoRotate;
+                this.classList.toggle('active');
+            });
+
+            // Play button
+            document.getElementById('playBtn').addEventListener('click', function () {
+                isPlaying = !isPlaying;
+                this.innerHTML = isPlaying ? '⏸️ Pause Animation' : '▶️ Play Animation';
+            });
+
+            // Category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    filterByCategory(this.dataset.category);
+                });
+            });
+
+            // Mouse click on cells
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            renderer.domElement.addEventListener('click', (e) => {
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(tensorCells);
+
+                if (intersects.length > 0) {
+                    const cell = intersects[0].object;
+                    selectCell(cell);
+                }
+            });
+        }
+
+        function highlightTimestep(t) {
+            tensorCells.forEach(cell => {
+                if (cell.userData.timestep === t) {
+                    cell.material.emissiveIntensity = 0.5;
+                } else {
+                    cell.material.emissiveIntensity = 0.2;
+                }
+            });
+        }
+
+        function filterByCategory(category) {
+            activeCategory = category;
+            tensorCells.forEach(cell => {
+                const cat = cell.userData.category;
+                if (category === 'all' || cat === category) {
+                    cell.material.opacity = 0.85;
+                    cell.visible = true;
+                } else {
+                    cell.material.opacity = 0.2;
+                }
+            });
+        }
+
+        function selectCell(cell) {
+            selectedCell = cell;
+            const data = cell.userData;
+            const feat = CONFIG.features[data.feature];
+
+            document.getElementById('cellTimestep').textContent = data.timestep;
+            document.getElementById('cellFeature').textContent = feat.name;
+            document.getElementById('cellValue').textContent = data.value.toFixed(3);
+            document.getElementById('cellNorm').textContent = ((data.value + 1) / 2).toFixed(3);
+
+            // Visual feedback
+            tensorCells.forEach(c => c.scale.setScalar(1));
+            cell.scale.setScalar(1.2);
+        }
+
+        function updateCellColors() {
+            tensorCells.forEach(cell => {
+                const color = showHeatmap ? cell.userData.heatColor : cell.userData.baseColor;
+                cell.material.color.copy(color);
+                cell.material.emissive.copy(color);
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const elapsed = clock.getElapsedTime() * animSpeed;
+            controls.update();
+
+            // Auto-play timesteps
+            if (isPlaying) {
+                const newTimestep = Math.floor(elapsed * 2) % CONFIG.timesteps;
+                if (newTimestep !== currentTimestep) {
+                    currentTimestep = newTimestep;
+                    document.getElementById('timestepSlider').value = currentTimestep;
+                    document.getElementById('timestepValue').textContent = currentTimestep + ' / 23';
+                    highlightTimestep(currentTimestep);
+                }
+            }
+
+            // Wave effect
+            if (showWave) {
+                tensorCells.forEach((cell, i) => {
+                    const wave = Math.sin(elapsed * 2 + i * 0.05) * 0.3;
+                    const baseHeight = cell.userData.baseHeight;
+                    cell.scale.y = 1 + wave * 0.3;
+                    cell.position.y = (baseHeight * cell.scale.y) / 2;
+                });
+            }
+
+            composer.render();
+        }
+
+        init();
+    </script>
+    <div
+        style="position:fixed; bottom:14px; right:24px; z-index:9999; font-family:'Outfit','Segoe UI',sans-serif; font-weight:600; font-size:13px; color:rgba(255,215,0,0.7); letter-spacing:3px; text-transform:uppercase; pointer-events:none; text-shadow:0 0 8px rgba(255,215,0,0.3);">
+        IZZELDEENM@GMAIL.COM</div>
+</body>
+
+</html>

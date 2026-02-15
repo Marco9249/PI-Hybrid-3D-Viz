@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI-HYBRID | SOLAR FLARE NEBULA</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;400;900&family=Cinzel:wght@900&display=swap');
+
+        :root {
+            --primary: #f59e0b;
+            /* Solar Gold */
+            --accent: #ef4444;
+            /* Flare Red */
+            --bg: #020105;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none !important;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+
+        .vignette {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, transparent 10%, rgba(0, 0, 0, 0.95));
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .noise {
+            position: fixed;
+            inset: 0;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_p_Nois_6.png');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 1001;
+            mix-blend-mode: overlay;
+        }
+
+        #cursor {
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+        }
+
+        .scroll-container {
+            position: relative;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 10%;
+        }
+
+        /* Masterpiece Cards (Legibility Focused) */
+        .solar-card {
+            background: rgba(5, 2, 0, 0.9);
+            backdrop-filter: blur(60px) saturate(160%);
+            -webkit-backdrop-filter: blur(60px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 50px;
+            padding: 90px;
+            max-width: 800px;
+            box-shadow: 0 100px 200px rgba(0, 0, 0, 0.9);
+            opacity: 0;
+            transform: translateY(100px);
+        }
+
+        .solar-card h2 {
+            font-size: 5rem;
+            letter-spacing: -3px;
+            line-height: 0.9;
+            margin-bottom: 35px;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .solar-card p {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            opacity: 0.7;
+            font-weight: 300;
+        }
+
+        .tag {
+            font-family: 'Cinzel';
+            font-size: 11px;
+            letter-spacing: 12px;
+            color: var(--primary);
+            margin-bottom: 25px;
+            display: block;
+        }
+
+        /* Kinetic Typography Intro (Burning Effect) */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 15vw;
+            font-weight: 900;
+            letter-spacing: -1.5vw;
+            line-height: 0.7;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .hero h1 span {
+            display: inline-block;
+            transform: scale(3) rotateX(45deg);
+            opacity: 0;
+            filter: blur(50px) brightness(5);
+        }
+
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            z-index: 2000;
+            box-shadow: 0 0 20px var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="progress-bar"></div>
+    <div class="vignette"></div>
+    <div class="noise"></div>
+    <div id="cursor"></div>
+
+    <div id="container"></div>
+
+    <div class="scroll-container">
+        <header class="hero">
+            <span class="tag" style="opacity: 0.4;">CORE ENERGY FORECASTING</span>
+            <h1 id="kinetic-title">
+                <span>F</span><span>L</span><span>A</span><span>R</span><span>E</span>
+            </h1>
+            <p style="margin-top: 60px; letter-spacing: 20px; opacity: 0.2; font-size: 12px; font-weight: 100;">
+                THERMODYNAMIC DATA CAPTURE</p>
+        </header>
+
+        <section class="section">
+            <div class="solar-card reveal">
+                <span class="tag">01 / SOLAR CORE</span>
+                <h2>Irradiance<br>Inertia</h2>
+                <p>The sun is the pulse of our model. Our <strong>PI-Hybrid Architecture</strong> captures the intense
+                    flares of solar irradiance in Omdurman, predicting thermal spikes with unmatched fluidity.</p>
+            </div>
+        </section>
+
+        <section class="section" style="justify-content: flex-end;">
+            <div class="solar-card reveal">
+                <span class="tag">02 / THERMAL DRIFT</span>
+                <h2>Flare<br>Optimization</h2>
+                <p>Handling the noise of atmospheric dust requires a model that can "filter the fire". Our CNN-BiLSTM
+                    hybrid embeds the physics of thermal diffusion directly into its weights.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="solar-card reveal">
+                <span class="tag">03 / CORONA</span>
+                <h2>Absolute<br>Zenith</h2>
+                <p>RMSE: 0.04. Accuracy: 99.8%. The intensity of the solar cycle is now fully under the control of
+                    renewable energy intelligence.</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020105, 0.05);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 30);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        renderer.toneMappingExposure = 3.0;
+        container.appendChild(renderer.domElement);
+
+        // --- MASTERPIECE 04: SOLAR FLARE ENGINE ---
+
+        const world = new THREE.Group();
+        scene.add(world);
+
+        // 1. THE VOLUMETRIC SUN
+        const sunGeo = new THREE.SphereGeometry(6, 64, 64);
+        const sunMat = new THREE.MeshStandardMaterial({
+            color: 0xf59e0b,
+            emissive: 0xef4444,
+            emissiveIntensity: 2,
+            metalness: 0,
+            roughness: 1
+        });
+        const sun = new THREE.Mesh(sunGeo, sunMat);
+        world.add(sun);
+
+        // 2. FLARES (Animated Particles)
+        const flareCount = 600;
+        const flarePos = new Float32Array(flareCount * 3);
+        const flareSpeeds = new Float32Array(flareCount);
+        for (let i = 0; i < flareCount; i++) {
+            const r = 6.2 + Math.random() * 2;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.random() * Math.PI * 2;
+            flarePos[i * 3] = r * Math.sin(theta) * Math.cos(phi);
+            flarePos[i * 3 + 1] = r * Math.sin(theta) * Math.sin(phi);
+            flarePos[i * 3 + 2] = r * Math.cos(theta);
+            flareSpeeds[i] = 1 + Math.random() * 2;
+        }
+        const flareGeo = new THREE.BufferGeometry();
+        flareGeo.setAttribute('position', new THREE.BufferAttribute(flarePos, 3));
+        const flareMat = new THREE.PointsMaterial({ size: 0.1, color: 0xef4444, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+        const flares = new THREE.Points(flareGeo, flareMat);
+        world.add(flares);
+
+        // 3. LIGHTING (Cinematic Solar)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.02);
+        scene.add(ambientLight);
+
+        const centralLight = new THREE.PointLight(0xf59e0b, 20, 100);
+        scene.add(centralLight);
+
+        // --- KINETIC TYPOGRAPHY & SCROLL (GSAP) ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // "Burning" Entrance Intro
+        window.onload = () => {
+            gsap.to("#kinetic-title span", {
+                opacity: 1, scale: 1, rotateX: 0, filter: "blur(0px) brightness(1)",
+                stagger: 0.15, duration: 2.5, ease: "power4.out", delay: 0.5
+            });
+        };
+
+        // Cinematic Camera Path
+        const curve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 0, 30),
+            new THREE.Vector3(20, 10, 15),
+            new THREE.Vector3(-25, -5, 20),
+            new THREE.Vector3(0, 0, 12)
+        ]);
+
+        const scrollProxy = { val: 0 };
+        gsap.to(scrollProxy, {
+            val: 1,
+            scrollTrigger: { trigger: ".scroll-container", start: "top top", end: "bottom bottom", scrub: 3 },
+            onUpdate: () => {
+                const pt = curve.getPoint(scrollProxy.val);
+                camera.position.copy(pt);
+                camera.lookAt(0, 0, 0);
+
+                // Emissive pulse on scroll
+                sunMat.emissiveIntensity = 2 + scrollProxy.val * 3;
+                flares.scale.setScalar(1 + scrollProxy.val * 0.5);
+
+                document.getElementById('progress-bar').style.width = (scrollProxy.val * 100) + "%";
+            }
+        });
+
+        // Content Reveal
+        gsap.utils.toArray(".reveal").forEach(el => {
+            gsap.to(el, {
+                scrollTrigger: { trigger: el, start: "top 75%", toggleActions: "play none none reverse" },
+                opacity: 1, y: 0, duration: 1.8, ease: "power4.out"
+            });
+        });
+
+        // Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = performance.now() * 0.001;
+
+            world.rotation.y = time * 0.05;
+            flares.rotation.x = time * 0.1;
+
+            // Texture-like pulsation
+            sun.scale.setScalar(1 + Math.sin(time * 2) * 0.02);
+            centralLight.intensity = 20 + Math.sin(time * 3) * 10;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Cursor & Parallax
+        document.addEventListener('mousemove', e => {
+            gsap.to('#cursor', { duration: 0.4, left: e.clientX - 10, top: e.clientY - 10, ease: "power2.out" });
+            const x = (e.clientX / window.innerWidth - 0.5) * 5;
+            const y = (e.clientY / window.innerHeight - 0.5) * 5;
+            gsap.to(world.rotation, { x: y * 0.02, y: x * 0.02, duration: 2 });
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

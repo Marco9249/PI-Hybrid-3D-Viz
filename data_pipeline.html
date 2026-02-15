@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI-Hybrid: Data Pipeline</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@200;300;400;600;800&family=Outfit:wght@200;400;600;900&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #06B6D4;
+            --purple: #8B5CF6;
+            --gold: #F59E0B;
+            --green: #10B981;
+            --red: #EF4444;
+            --blue: #3B82F6;
+            --bg: #030308;
+            --card-bg: rgba(10, 10, 25, 0.6);
+            --border: rgba(255, 255, 255, 0.08)
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--purple);
+            border-radius: 3px
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(circle at center, #0a0a1a 0%, #030308 100%);
+        }
+
+        .top-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(3, 3, 8, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border)
+        }
+
+        .top-nav .logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 20px;
+            background: linear-gradient(45deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(6, 182, 212, 0.5);
+        }
+
+        .back-btn {
+            color: var(--cyan);
+            text-decoration: none;
+            font-size: 13px;
+            letter-spacing: 2px;
+            font-family: 'Space Mono', monospace;
+            transition: all .3s
+        }
+
+        .back-btn:hover {
+            color: var(--gold);
+            text-shadow: 0 0 10px var(--gold)
+        }
+
+        .section {
+            min-height: 100vh;
+            padding: 120px 60px 80px;
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2
+        }
+
+        .section-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: var(--gold);
+            margin-bottom: 15px;
+            display: block
+        }
+
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #fff, var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .section p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.05rem;
+            max-width: 700px;
+            margin-bottom: 15px
+        }
+
+        .section h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+            color: #fff
+        }
+
+        .glass {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 35px;
+            backdrop-filter: blur(30px);
+            transition: all .4s
+        }
+
+        .glass:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4)
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all .8s cubic-bezier(0.19, 1, 0.22, 1)
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        /* Stage indicator */
+        .stage-num {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-right: 20px
+        }
+
+        .stage-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px
+        }
+
+        /* Terminal */
+        .terminal {
+            background: #0a0a12;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 16px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            overflow: hidden
+        }
+
+        .terminal-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: rgba(6, 182, 212, 0.05);
+            border-bottom: 1px solid rgba(6, 182, 212, 0.1)
+        }
+
+        .terminal-body {
+            padding: 15px;
+            height: 280px;
+            overflow-y: auto;
+            line-height: 1.8
+        }
+
+        .terminal-body .line {
+            opacity: 0;
+            animation: fadeIn .3s forwards
+        }
+
+        .t-cyan {
+            color: var(--cyan)
+        }
+
+        .t-green {
+            color: var(--green)
+        }
+
+        .t-red {
+            color: var(--red)
+        }
+
+        .t-gold {
+            color: var(--gold)
+        }
+
+        .t-dim {
+            color: rgba(255, 255, 255, 0.4)
+        }
+
+        /* Canvas */
+        .chart-canvas {
+            width: 100%;
+            height: 280px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border)
+        }
+
+        /* Buttons */
+        .btn-action {
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: 1px solid var(--cyan);
+            background: transparent;
+            color: var(--cyan);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all .3s;
+            letter-spacing: 1px
+        }
+
+        .btn-action:hover {
+            background: rgba(6, 182, 212, 0.15);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.3)
+        }
+
+        .btn-action:disabled {
+            opacity: 0.3;
+            cursor: not-allowed
+        }
+
+        .btn-action.done {
+            border-color: var(--green);
+            color: var(--green)
+        }
+
+        /* Sun Arc */
+        #sun-arc-canvas {
+            width: 100%;
+            height: 300px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border)
+        }
+
+        /* Feature grid */
+        .feat-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px
+        }
+
+        .feat-cell {
+            padding: 6px 4px;
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.3);
+            transition: all .4s
+        }
+
+        .feat-cell.highlight {
+            border-color: var(--cyan);
+            background: rgba(6, 182, 212, 0.1)
+        }
+
+        /* Norm comparison */
+        .norm-box {
+            text-align: center;
+            padding: 25px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border)
+        }
+
+        /* Sliding window */
+        #window-canvas {
+            width: 100%;
+            height: 350px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border)
+        }
+
+        /* Warning badge */
+        .warning-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 30px;
+            font-size: 12px;
+            color: var(--red);
+            font-weight: 600;
+            margin-top: 15px
+        }
+
+        /* Stats counters */
+        .live-stat {
+            text-align: center;
+            padding: 15px
+        }
+
+        .live-stat .val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 900
+        }
+
+        .live-stat .lbl {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 3px
+        }
+
+        /* Insight */
+        .insight-box {
+            padding: 25px 30px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            margin-top: 25px
+        }
+
+        .insight-box .tag {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--green);
+            margin-bottom: 8px;
+            font-weight: 700
+        }
+
+        .page-footer {
+            text-align: center;
+            padding: 60px 40px;
+            border-top: 1px solid var(--border);
+            z-index: 2;
+            position: relative
+        }
+
+        @media(max-width:900px) {
+            .grid-2 {
+                grid-template-columns: 1fr
+            }
+
+            .section {
+                padding: 100px 25px 60px
+            }
+
+            .section h2 {
+                font-size: 2.2rem
+            }
+
+            .feat-grid {
+                grid-template-columns: repeat(3, 1fr)
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px var(--cyan)
+            }
+
+            50% {
+                box-shadow: 0 0 20px var(--cyan)
+            }
+        }
+    </style>
+    <!-- Arabic Panel CSS -->
+    <link rel="stylesheet" href="ar-panel.css">
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <nav class="top-nav">
+        <div class="logo">PI-HYBRID // DATA PIPELINE</div>
+        <a href="index.html" class="back-btn">← BACK TO HUB</a>
+    </nav>
+
+    <!-- ARABIC PANEL HTML -->
+    <div id="ar-panel-overlay" onclick="closeArPanel()"></div>
+    <div id="ar-panel">
+        <div class="ar-close">
+            <div style="font-family:'Courier New'; font-size:11px; letter-spacing:3px; color:var(--cyan);">الشرح
+                التفصيلي</div>
+            <div class="ar-close-btn" onclick="closeArPanel()">✕</div>
+        </div>
+        <div class="ar-panel-content" id="ar-panel-inner"></div>
+    </div>
+    <script src="ar-panel.js"></script>
+
+    <!-- =============================== -->
+    <!-- STAGE 0: Hero + Data Source -->
+    <!-- =============================== -->
+    <section class="section" style="display:flex;flex-direction:column;justify-content:center">
+        <div class="reveal">
+            <span class="section-badge">CHAPTER 05 // THE PIPELINE</span>
+            <h2>The Data Odyssey <span onclick="openArPanel('dp_hero')"
+                    style="font-size:0.5em; vertical-align:middle; cursor:pointer;" class="ar-mini-btn">ℹ️</span></h2>
+            <p>From raw NASA satellite data to model-ready tensors — a rigorous, physics-guided preprocessing pipeline
+                that transforms noisy observations into clean, structured intelligence.</p>
+            <div style="margin-top:30px;display:flex;gap:12px;flex-wrap:wrap">
+                <div onclick="openModal('nasa_power')"
+                    style="cursor:pointer;padding:10px 18px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);border-radius:30px;font-size:11px;letter-spacing:1px;color:var(--cyan)">
+                    NASA POWER API</div>
+                <div onclick="openModal('omdurman')"
+                    style="cursor:pointer;padding:10px 18px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:30px;font-size:11px;letter-spacing:1px;color:var(--purple);font-family:'Outfit',sans-serif;font-weight:700">
+                    OMDURMAN 14.7°N</div>
+                <div onclick="openModal('timespan')"
+                    style="cursor:pointer;padding:10px 18px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:30px;font-size:11px;letter-spacing:1px;color:var(--gold)">
+                    2010–2024</div>
+                <div onclick="openModal('resolution')"
+                    style="cursor:pointer;padding:10px 18px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:30px;font-size:11px;letter-spacing:1px;color:var(--green)">
+                    HOURLY RESOLUTION</div>
+            </div>
+        </div>
+        <div class="grid-2 reveal" style="margin-top:50px">
+            <div class="terminal">
+                <div class="terminal-bar">
+                    <span style="color:var(--cyan)">nasa_power_stream.py</span>
+                    <span style="color:var(--green);animation:blink 1s infinite">● LIVE</span>
+                </div>
+                <div class="terminal-body" id="api-terminal"></div>
+            </div>
+            <div>
+                <div class="glass">
+                    <div onclick="openModal('profile')"
+                        style="cursor:pointer;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:15px">
+                        DATASET PROFILE
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+                        <div class="live-stat">
+                            <div class="val" style="color:var(--cyan)">131,400</div>
+                            <div class="lbl">Total Records</div>
+                        </div>
+                        <div class="live-stat">
+                            <div class="val" style="color:var(--purple)">15</div>
+                            <div class="lbl">Features</div>
+                        </div>
+                        <div class="live-stat">
+                            <div class="val" style="color:var(--gold)">15 yrs</div>
+                            <div class="lbl">Time Span</div>
+                        </div>
+                        <div class="live-stat">
+                            <div class="val" style="color:var(--green)">1 hr</div>
+                            <div class="lbl">Resolution</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- STAGE 1: Statistical Cleaning -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <div class="stage-header">
+                <div class="stage-num"
+                    style="background:rgba(239,68,68,0.15);color:var(--red);border:2px solid var(--red)">1</div>
+                <div><span class="section-badge">STAGE 01</span>
+                    <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage1')">Statistical Cleaning
+                    </h2>
+                </div>
+            </div>
+            <p>Raw satellite data contains errors: negative irradiance values, sensor dropout codes (-999), and missing
+                gaps. We clean everything before physics enters the picture.</p>
+        </div>
+        <div class="grid-2 reveal" style="margin-top:30px">
+            <div>
+                <canvas id="clean-canvas" class="chart-canvas"></canvas>
+                <div style="display:flex;gap:15px;margin-top:15px;align-items:center">
+                    <button class="btn-action" id="btn-clean" onclick="runCleaning()">▶ RUN CLEANING</button>
+                    <span id="clean-status" style="font-size:12px;color:rgba(255,255,255,0.4)">Showing raw data with
+                        errors</span>
+                </div>
+            </div>
+            <div>
+                <div class="glass" style="text-align:center">
+                    <div style="font-size:10px;letter-spacing:2px;color:var(--red);margin-bottom:20px">CLEANING RESULTS
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+                        <div class="live-stat">
+                            <div class="val" id="stat-errors" style="color:var(--red)">—</div>
+                            <div class="lbl">Errors Detected</div>
+                        </div>
+                        <div class="live-stat">
+                            <div class="val" id="stat-fixed" style="color:var(--green)">—</div>
+                            <div class="lbl">Fixed</div>
+                        </div>
+                        <div class="live-stat">
+                            <div class="val" id="stat-neg" style="color:var(--gold)">—</div>
+                            <div class="lbl">Negatives Removed</div>
+                        </div>
+                        <div class="live-stat">
+                            <div class="val" id="stat-quality" style="color:var(--cyan)">—</div>
+                            <div class="lbl">Data Quality</div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    style="margin-top:15px;padding:15px 20px;background:rgba(0,0,0,0.3);border-radius:12px;border:1px solid var(--border);font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.6)">
+                    <div style="color:var(--cyan);margin-bottom:8px">RULES APPLIED:</div>
+                    <div>① Remove GHI &lt; 0 (non-physical)</div>
+                    <div>② Replace -999 error codes → NaN</div>
+                    <div>③ Linear interpolation for gaps</div>
+                    <div>④ Temporal alignment → Δt = 3600s</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- STAGE 2: Night Masking -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <div class="stage-header">
+                <div class="stage-num"
+                    style="background:rgba(139,92,246,0.15);color:var(--purple);border:2px solid var(--purple)">2</div>
+                <div><span class="section-badge">STAGE 02</span>
+                    <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage2')">Physics-Guided Night
+                        Masking</h2>
+                </div>
+            </div>
+            <p>At night, solar sensors still read noise. We use the Clear-Sky GHI model to identify nighttime and
+                <strong>force all radiative variables to zero</strong>. Drag the slider to move through a 24-hour cycle.
+            </p>
+        </div>
+        <div class="grid-2 reveal" style="margin-top:30px">
+            <div>
+                <canvas id="sun-arc-canvas"></canvas>
+                <div style="margin-top:15px">
+                    <div
+                        style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:5px">
+                        <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+                    </div>
+                    <input type="range" id="hour-slider" min="0" max="240" value="120"
+                        style="width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:linear-gradient(90deg,rgba(139,92,246,0.3),var(--gold),var(--gold),rgba(139,92,246,0.3));outline:none"
+                        oninput="updateSunArc()">
+                </div>
+            </div>
+            <div>
+                <div class="glass" id="mask-info">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                        <div>
+                            <div style="font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:5px">CURRENT
+                                TIME</div>
+                            <div id="mask-time"
+                                style="font-family:'Outfit',sans-serif;font-size:2.5rem;font-weight:900">12:00</div>
+                        </div>
+                        <div id="mask-status"
+                            style="padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;background:rgba(245,158,11,0.15);border:1px solid var(--gold);color:var(--gold)">
+                            ☀️ DAYTIME</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px">
+                        <div onclick="openModal('ghi_cs')"
+                            style="cursor:pointer;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;text-align:center">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px">GHI_cs</div>
+                            <div id="mask-ghi"
+                                style="font-family:'Space Mono',monospace;font-size:18px;color:var(--gold)">850</div>
+                            <div style="font-size:9px;color:rgba(255,255,255,0.3)">W/m²</div>
+                        </div>
+                        <div onclick="openModal('zenith')"
+                            style="cursor:pointer;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;text-align:center">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px">ZENITH</div>
+                            <div id="mask-zen"
+                                style="font-family:'Space Mono',monospace;font-size:18px;color:var(--cyan)">15°</div>
+                        </div>
+                    </div>
+                    <div id="mask-rule"
+                        style="padding:12px 15px;border-radius:10px;font-size:12px;font-family:'Space Mono',monospace;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--green)">
+                        ✓ GHI_cs ≥ 5 W/m² → Data passes through</div>
+                </div>
+                <div class="insight-box" style="margin-top:15px">
+                    <div class="tag">💡 WHY NIGHT MASKING?</div>
+                    <p style="font-size:13px;color:rgba(255,255,255,0.7);margin:0">Without masking, the model wastes
+                        capacity "learning" that nighttime GHI is zero. By explicitly clamping, we give the AI a
+                        <strong>free physics constraint</strong> — reducing noise and improving sunrise/sunset accuracy
+                        by 23%.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- STAGE 3: Hybrid Normalization -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <div class="stage-header">
+                <div class="stage-num"
+                    style="background:rgba(6,182,212,0.15);color:var(--cyan);border:2px solid var(--cyan)">3</div>
+                <div><span class="section-badge">STAGE 03</span>
+                    <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage3')">Hybrid Normalization
+                    </h2>
+                </div>
+            </div>
+            <p>Two different normalization strategies for two different roles. Click a feature to see its raw vs
+                normalized distribution.</p>
+        </div>
+        <div class="grid-2 reveal" style="margin-top:30px">
+            <div class="norm-box" style="border-color:rgba(6,182,212,0.3)">
+                <div onclick="openModal('zscore')"
+                    style="cursor:pointer;font-size:10px;letter-spacing:2px;color:var(--cyan);margin-bottom:15px">INPUT
+                    FEATURES →
+                    Z-SCORE</div>
+                <canvas id="zscore-canvas" class="chart-canvas" style="height:200px"></canvas>
+                <div style="margin-top:15px;font-family:'Space Mono',monospace;font-size:14px;color:var(--cyan)">z = (x
+                    − μ<sub>train</sub>) / σ<sub>train</sub></div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:5px">Zero mean, unit variance</div>
+            </div>
+            <div class="norm-box" style="border-color:rgba(245,158,11,0.3)">
+                <div onclick="openModal('minmax')"
+                    style="cursor:pointer;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:15px">TARGET
+                    (GHI) →
+                    MIN-MAX</div>
+                <canvas id="minmax-canvas" class="chart-canvas" style="height:200px"></canvas>
+                <div style="margin-top:15px;font-family:'Space Mono',monospace;font-size:14px;color:var(--gold)">x̂ = (x
+                    − min) / (max − min)</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:5px">Scaled to [0, 1]</div>
+            </div>
+        </div>
+        <div class="reveal" style="margin-top:20px">
+            <div class="warning-badge">⚠️ LEAKAGE PREVENTION: μ and σ computed ONLY on training set, frozen for
+                validation and test</div>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- STAGE 4: Sliding Window  -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <div class="stage-header">
+                <div class="stage-num"
+                    style="background:rgba(245,158,11,0.15);color:var(--gold);border:2px solid var(--gold)">4</div>
+                <div><span class="section-badge">STAGE 04</span>
+                    <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage4')">Sliding Window
+                        Formation
+                    </h2>
+                </div>
+            </div>
+            <p>The final step: slice the clean, normalized data into <strong>24-hour lookback windows</strong>. Each
+                window forms a <strong>24×15 tensor</strong> — the exact input shape the neural network expects.</p>
+        </div>
+        <div class="reveal" style="margin-top:30px">
+            <canvas id="window-canvas"></canvas>
+            <div style="display:flex;gap:15px;margin-top:15px;align-items:center">
+                <button class="btn-action" id="btn-step" onclick="stepWindow()">→ STEP FORWARD</button>
+                <button class="btn-action" onclick="autoWindow()" id="btn-auto">▶ AUTO PLAY</button>
+                <span style="font-size:12px;color:rgba(255,255,255,0.4)">Window: <span id="win-pos"
+                        style="color:var(--cyan);font-weight:bold">t=0</span> → Predicting: <span id="win-target"
+                        style="color:var(--gold);font-weight:bold">GHI<sub>t+1</sub></span></span>
+            </div>
+        </div>
+        <div class="grid-2 reveal" style="margin-top:25px">
+            <div class="glass" style="text-align:center">
+                <div onclick="openModal('tensor_shape')"
+                    style="cursor:pointer;font-size:10px;letter-spacing:2px;color:var(--cyan);margin-bottom:10px">INPUT
+                    TENSOR SHAPE
+                </div>
+                <div style="font-family:'Outfit',sans-serif;font-size:3rem;font-weight:900">24 × 15</div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:5px">timesteps × features</div>
+            </div>
+            <div class="glass" style="text-align:center">
+                <div onclick="openModal('target_shape')"
+                    style="cursor:pointer;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:10px">OUTPUT
+                    TARGET</div>
+                <div style="font-family:'Outfit',sans-serif;font-size:3rem;font-weight:900">GHI<sub
+                        style="font-size:1.5rem">t+1</sub></div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:5px">Next-hour forecast
+                    (Sequence-to-One)</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- STAGE 5: Chronological Split -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <div class="stage-header">
+                <div class="stage-num"
+                    style="background:rgba(16,185,129,0.15);color:var(--green);border:2px solid var(--green)">5</div>
+                <div><span class="section-badge">STAGE 05</span>
+                    <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage5')">Chronological Split
+                    </h2>
+                </div>
+            </div>
+            <p>The final safeguard: <strong>No random shuffling</strong>. The data is split strictly by time to prevent
+                any future information from leaking into the training set.</p>
+        </div>
+        <div class="reveal" style="margin-top:30px">
+            <div class="glass">
+                <div style="font-size:10px;letter-spacing:2px;color:var(--green);margin-bottom:25px">TEMPORAL SPLIT
+                    STRATEGY</div>
+                <!-- Train block -->
+                <div style="margin-bottom:20px">
+                    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:8px">MODEL DEVELOPMENT
+                        (2010–2015)</div>
+                    <div style="display:flex;height:45px;border-radius:12px;overflow:hidden">
+                        <div
+                            style="width:70%;background:linear-gradient(90deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold">
+                            TRAIN 70%</div>
+                        <div
+                            style="width:15%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold">
+                            VAL 15%</div>
+                        <div
+                            style="width:15%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:#000">
+                            TEST 15%</div>
+                    </div>
+                </div>
+                <!-- Gap -->
+                <div style="text-align:center;padding:10px 0">
+                    <div style="border-left:2px dashed rgba(239,68,68,0.3);height:25px;margin:0 auto;width:0"></div>
+                    <div
+                        style="display:inline-block;padding:6px 18px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:20px;font-size:10px;color:var(--red);letter-spacing:2px;font-weight:bold">
+                        5-YEAR TEMPORAL GAP</div>
+                    <div style="border-left:2px dashed rgba(239,68,68,0.3);height:25px;margin:0 auto;width:0"></div>
+                </div>
+                <!-- Test block -->
+                <div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:8px">STRESS TEST (2020–2024)
+                    </div>
+                    <div
+                        style="height:45px;border-radius:12px;overflow:hidden;background:linear-gradient(90deg,var(--red),#B91C1C);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold">
+                        INDEPENDENT EXTERNAL TEST 100%</div>
+                </div>
+            </div>
+            <div class="insight-box">
+                <div class="tag">💡 WHY CHRONOLOGICAL SPLIT?</div>
+                <p style="font-size:13px;color:rgba(255,255,255,0.7);margin:0">Random shuffling creates <strong>temporal
+                        leakage</strong> — the model sees "future" data during training. The 5-year gap proves the model
+                    learned <strong>true physical laws</strong>, not temporary weather patterns. Result: R² > 0.995
+                    across all 5 test years.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="page-footer">
+        <a href="index.html" class="back-btn" style="font-size:16px">← RETURN TO MAIN PRESENTATION</a>
+    </div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+        document.querySelectorAll('.reveal').forEach(el => {
+            ScrollTrigger.create({ trigger: el, start: 'top 85%', onEnter: () => el.classList.add('active') });
+        });
+
+        // ---- Terminal Animation ----
+        const termLines = [
+            { t: '$ python nasa_power_stream.py --location=Omdurman', c: 't-dim' },
+            { t: '[INFO] Connecting to NASA POWER API...', c: 't-cyan' },
+            { t: '[INFO] Endpoint: https://power.larc.nasa.gov/api/temporal/hourly', c: 't-dim' },
+            { t: '[INFO] Parameters: GHI, DNI, DHI, T2M, RH2M, ...', c: 't-dim' },
+            { t: '[OK] Connection established. Streaming...', c: 't-green' },
+            { t: '[STREAM] 2010-01-01 → 2024-12-31 (15 years)', c: 't-cyan' },
+            { t: '[FETCH] Year 2010... 8760 records ✓', c: 't-green' },
+            { t: '[FETCH] Year 2011... 8760 records ✓', c: 't-green' },
+            { t: '[FETCH] Year 2012... 8784 records ✓ (leap)', c: 't-green' },
+            { t: '[WARN] 2013-07-15: Sensor dropout detected (-999)', c: 't-gold' },
+            { t: '[FETCH] Year 2013... 8760 records ✓', c: 't-green' },
+            { t: '[WARN] 2015-03-22: Negative GHI (-12.4 W/m²)', c: 't-red' },
+            { t: '[FETCH] Year 2014-2015... 17520 records ✓', c: 't-green' },
+            { t: '···', c: 't-dim' },
+            { t: '[DONE] Total: 131,400 hourly records loaded.', c: 't-green' },
+            { t: '[INFO] Feature Vector Constructed [15×24]', c: 't-cyan' },
+            { t: '[NEXT] → Statistical Cleaning Pipeline...', c: 't-gold' },
+        ];
+        const termEl = document.getElementById('api-terminal');
+        let tIdx = 0;
+        function addTermLine() {
+            if (tIdx >= termLines.length) return;
+            const l = termLines[tIdx++];
+            const div = document.createElement('div');
+            div.className = 'line ' + l.c;
+            div.textContent = l.t;
+            div.style.animationDelay = (tIdx * 0.05) + 's';
+            termEl.appendChild(div);
+            termEl.scrollTop = termEl.scrollHeight;
+            setTimeout(addTermLine, 300 + Math.random() * 400);
+        }
+        setTimeout(addTermLine, 1000);
+
+        // ---- Statistical Cleaning ----
+        const cleanCanvas = document.getElementById('clean-canvas');
+        const cleanCtx = cleanCanvas.getContext('2d');
+        let rawData = [], cleanedData = [], isCleaned = false;
+        // Generate raw data with errors
+        (function () {
+            for (let i = 0; i < 100; i++) {
+                const h = i % 24;
+                const base = h < 6 || h > 18 ? 0 : Math.max(0, 800 * Math.sin(Math.PI * (h - 6) / 12));
+                const noise = (Math.random() - 0.5) * 50;
+                let val = base + noise;
+                // Inject errors
+                if (i === 15) val = -999; // error code
+                if (i === 32) val = -45; // negative
+                if (i === 55) val = null; // gap
+                if (i === 71) val = -999;
+                if (i === 88) val = -20;
+                rawData.push(val);
+            }
+        })();
+
+        function resizeClean() { cleanCanvas.width = cleanCanvas.offsetWidth; cleanCanvas.height = cleanCanvas.offsetHeight; drawCleanChart(); }
+        window.addEventListener('resize', resizeClean); setTimeout(resizeClean, 100);
+
+        function drawCleanChart() {
+            const W = cleanCanvas.width, H = cleanCanvas.height, pad = 40, gW = W - 2 * pad, gH = H - 2 * pad;
+            cleanCtx.clearRect(0, 0, W, H);
+            // Grid
+            cleanCtx.strokeStyle = 'rgba(255,255,255,0.04)'; cleanCtx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) { const y = pad + gH * i / 5; cleanCtx.beginPath(); cleanCtx.moveTo(pad, y); cleanCtx.lineTo(pad + gW, y); cleanCtx.stroke(); }
+            // Data
+            const data = isCleaned ? cleanedData : rawData;
+            const mx = x => pad + (x / data.length) * gW, my = v => {
+                const clamped = Math.max(-200, Math.min(900, v || 0));
+                return pad + gH - (clamped + 200) / (900 + 200) * gH;
+            };
+            // Draw line
+            cleanCtx.strokeStyle = isCleaned ? 'var(--green)' : 'var(--cyan)'; cleanCtx.lineWidth = 2; cleanCtx.beginPath();
+            let started = false;
+            data.forEach((v, i) => {
+                if (v === null || v === -999) return;
+                const px = mx(i), py = my(v);
+                if (!started) { cleanCtx.moveTo(px, py); started = true; } else cleanCtx.lineTo(px, py);
+            });
+            cleanCtx.stroke();
+            // Highlight errors
+            if (!isCleaned) {
+                rawData.forEach((v, i) => {
+                    if (v === null || v === -999 || v < 0) {
+                        const px = mx(i), py = v === null ? my(0) : my(v);
+                        cleanCtx.beginPath(); cleanCtx.arc(px, py, 6, 0, Math.PI * 2);
+                        cleanCtx.fillStyle = 'rgba(239,68,68,0.8)'; cleanCtx.fill();
+                        cleanCtx.beginPath(); cleanCtx.arc(px, py, 12, 0, Math.PI * 2);
+                        cleanCtx.strokeStyle = 'rgba(239,68,68,0.3)'; cleanCtx.lineWidth = 2; cleanCtx.stroke();
+                    }
+                });
+            }
+            // Labels
+            cleanCtx.fillStyle = 'rgba(255,255,255,0.3)'; cleanCtx.font = '10px Space Mono';
+            cleanCtx.fillText('GHI (W/m²)', 5, pad - 8); cleanCtx.fillText('Hour', pad + gW / 2 - 10, H - 5);
+        }
+
+        function runCleaning() {
+            if (isCleaned) return;
+            isCleaned = true;
+            cleanedData = rawData.map((v, i) => {
+                if (v === null || v === -999) {
+                    const prev = rawData[i - 1] || 0, next = rawData[i + 1] || 0;
+                    return (prev + next) / 2;
+                }
+                if (v < 0) return 0;
+                return v;
+            });
+            document.getElementById('btn-clean').classList.add('done');
+            document.getElementById('btn-clean').textContent = '✓ CLEANED';
+            document.getElementById('clean-status').textContent = 'Data cleaned successfully!';
+            document.getElementById('clean-status').style.color = 'var(--green)';
+            document.getElementById('stat-errors').textContent = '5';
+            document.getElementById('stat-fixed').textContent = '5';
+            document.getElementById('stat-neg').textContent = '2';
+            document.getElementById('stat-quality').textContent = '99.8%';
+            drawCleanChart();
+        }
+
+        // ---- Night Masking (Sun Arc) ----
+        const sunCanvas = document.getElementById('sun-arc-canvas');
+        const sunCtx = sunCanvas.getContext('2d');
+        function resizeSun() { sunCanvas.width = sunCanvas.offsetWidth; sunCanvas.height = sunCanvas.offsetHeight; updateSunArc(); }
+        window.addEventListener('resize', resizeSun); setTimeout(resizeSun, 100);
+
+        function updateSunArc() {
+            const val = parseInt(document.getElementById('hour-slider').value);
+            const hour = val / 10;
+            const W = sunCanvas.width, H = sunCanvas.height, pad = 40;
+            sunCtx.clearRect(0, 0, W, H);
+            const horizon = H * 0.65;
+            // Horizon line
+            sunCtx.strokeStyle = 'rgba(255,255,255,0.15)'; sunCtx.lineWidth = 1; sunCtx.setLineDash([4, 4]);
+            sunCtx.beginPath(); sunCtx.moveTo(pad, horizon); sunCtx.lineTo(W - pad, horizon); sunCtx.stroke(); sunCtx.setLineDash([]);
+            sunCtx.fillStyle = 'rgba(255,255,255,0.2)'; sunCtx.font = '10px Space Mono'; sunCtx.fillText('HORIZON', W - pad - 50, horizon - 8);
+            // Sun arc
+            const arcW = W - 2 * pad, arcH = horizon - pad - 20;
+            sunCtx.strokeStyle = 'rgba(245,158,11,0.2)'; sunCtx.lineWidth = 1; sunCtx.beginPath();
+            for (let i = 0; i <= 100; i++) {
+                const t = (i / 100); const x = pad + t * arcW;
+                const y = horizon - Math.sin(Math.PI * t) * arcH;
+                i === 0 ? sunCtx.moveTo(x, y) : sunCtx.lineTo(x, y);
+            }
+            sunCtx.stroke();
+            // Sun position
+            const sunT = Math.max(0, Math.min(1, (hour - 5) / 14));  // sunrise ~5, sunset ~19
+            const sunX = pad + sunT * arcW;
+            const sunY = horizon - Math.sin(Math.PI * sunT) * arcH;
+            const isDay = hour >= 5.5 && hour <= 18.5;
+            const ghiCs = isDay ? Math.max(0, Math.round(1000 * Math.sin(Math.PI * sunT))) : 0;
+            const zenith = isDay ? Math.round(90 - 90 * Math.sin(Math.PI * sunT)) : 90;
+            // Night zone
+            if (!isDay) {
+                sunCtx.fillStyle = 'rgba(139,92,246,0.05)';
+                sunCtx.fillRect(pad, pad, arcW, H - 2 * pad);
+            }
+            // Sun glow
+            if (isDay) {
+                const grad = sunCtx.createRadialGradient(sunX, sunY, 5, sunX, sunY, 40);
+                grad.addColorStop(0, 'rgba(245,158,11,0.6)'); grad.addColorStop(1, 'rgba(245,158,11,0)');
+                sunCtx.fillStyle = grad; sunCtx.fillRect(sunX - 40, sunY - 40, 80, 80);
+            }
+            // Sun circle
+            sunCtx.beginPath(); sunCtx.arc(sunX, sunY, isDay ? 12 : 8, 0, Math.PI * 2);
+            sunCtx.fillStyle = isDay ? 'var(--gold)' : 'rgba(139,92,246,0.5)'; sunCtx.fill();
+            // Masked zone indicator
+            if (!isDay) {
+                sunCtx.fillStyle = 'rgba(139,92,246,0.15)'; sunCtx.font = 'bold 14px Inter';
+                sunCtx.fillText('MASKED ZONE', W / 2 - 50, horizon + 40);
+                sunCtx.font = '11px Space Mono'; sunCtx.fillStyle = 'rgba(239,68,68,0.6)';
+                sunCtx.fillText('GHI_cs < 5 W/m² → All solar vars = 0', W / 2 - 120, horizon + 60);
+            }
+            // Threshold line at 5 W/m²
+            const thY = horizon - 5 / 1000 * arcH;
+            sunCtx.strokeStyle = 'rgba(239,68,68,0.4)'; sunCtx.lineWidth = 1; sunCtx.setLineDash([2, 2]);
+            sunCtx.beginPath(); sunCtx.moveTo(pad, thY); sunCtx.lineTo(W - pad, thY); sunCtx.stroke(); sunCtx.setLineDash([]);
+            sunCtx.fillStyle = 'rgba(239,68,68,0.4)'; sunCtx.font = '9px Space Mono'; sunCtx.fillText('5 W/m² threshold', pad + 5, thY - 5);
+            // Update info
+            document.getElementById('mask-time').textContent = String(Math.floor(hour)).padStart(2, '0') + ':' + String(Math.round((hour % 1) * 60)).padStart(2, '0');
+            document.getElementById('mask-ghi').textContent = ghiCs;
+            document.getElementById('mask-zen').textContent = zenith + '°';
+            const statusEl = document.getElementById('mask-status');
+            const ruleEl = document.getElementById('mask-rule');
+            if (isDay) {
+                statusEl.innerHTML = '☀️ DAYTIME'; statusEl.style.borderColor = 'var(--gold)'; statusEl.style.color = 'var(--gold)'; statusEl.style.background = 'rgba(245,158,11,0.15)';
+                ruleEl.innerHTML = '✓ GHI_cs ≥ 5 W/m² → Data passes through'; ruleEl.style.borderColor = 'rgba(16,185,129,0.2)'; ruleEl.style.color = 'var(--green)'; ruleEl.style.background = 'rgba(16,185,129,0.1)';
+            } else {
+                statusEl.innerHTML = '🌙 NIGHTTIME'; statusEl.style.borderColor = 'var(--purple)'; statusEl.style.color = 'var(--purple)'; statusEl.style.background = 'rgba(139,92,246,0.15)';
+                ruleEl.innerHTML = '✗ GHI_cs < 5 W/m² → MASKED (All solar → 0)'; ruleEl.style.borderColor = 'rgba(239,68,68,0.2)'; ruleEl.style.color = 'var(--red)'; ruleEl.style.background = 'rgba(239,68,68,0.1)';
+            }
+        }
+
+        // ---- Normalization Canvases ----
+        const zsCanvas = document.getElementById('zscore-canvas');
+        const zsCtx = zsCanvas.getContext('2d');
+        const mmCanvas = document.getElementById('minmax-canvas');
+        const mmCtx = mmCanvas.getContext('2d');
+        function resizeNorm() { zsCanvas.width = zsCanvas.offsetWidth; zsCanvas.height = zsCanvas.offsetHeight; mmCanvas.width = mmCanvas.offsetWidth; mmCanvas.height = mmCanvas.offsetHeight; drawNorm(); }
+        window.addEventListener('resize', resizeNorm); setTimeout(resizeNorm, 200);
+
+        function drawNorm() {
+            // Z-Score: bell curve
+            const W = zsCanvas.width, H = zsCanvas.height, pad = 20;
+            zsCtx.clearRect(0, 0, W, H);
+            zsCtx.strokeStyle = 'var(--cyan)'; zsCtx.lineWidth = 2; zsCtx.fillStyle = 'rgba(6,182,212,0.1)';
+            zsCtx.beginPath();
+            for (let i = 0; i <= 100; i++) {
+                const x = pad + (i / 100) * (W - 2 * pad);
+                const t = (i - 50) / 15;
+                const y = H - pad - Math.exp(-t * t / 2) * ((H - 2 * pad) * 0.85);
+                i === 0 ? zsCtx.moveTo(x, y) : zsCtx.lineTo(x, y);
+            }
+            zsCtx.stroke(); zsCtx.lineTo(W - pad, H - pad); zsCtx.lineTo(pad, H - pad); zsCtx.closePath(); zsCtx.fill();
+            // Labels
+            zsCtx.fillStyle = 'rgba(255,255,255,0.3)'; zsCtx.font = '10px Space Mono';
+            zsCtx.fillText('-3σ', pad + 5, H - 5); zsCtx.fillText('μ=0', W / 2 - 10, H - 5); zsCtx.fillText('+3σ', W - pad - 25, H - 5);
+            // Zero line
+            zsCtx.strokeStyle = 'rgba(255,255,255,0.1)'; zsCtx.setLineDash([3, 3]); zsCtx.beginPath(); zsCtx.moveTo(W / 2, pad); zsCtx.lineTo(W / 2, H - pad); zsCtx.stroke(); zsCtx.setLineDash([]);
+
+            // Min-Max: uniform-ish
+            const W2 = mmCanvas.width, H2 = mmCanvas.height;
+            mmCtx.clearRect(0, 0, W2, H2);
+            mmCtx.fillStyle = 'rgba(245,158,11,0.15)'; mmCtx.strokeStyle = 'var(--gold)'; mmCtx.lineWidth = 2;
+            mmCtx.beginPath();
+            for (let i = 0; i <= 100; i++) {
+                const x = pad + (i / 100) * (W2 - 2 * pad);
+                const base = 0.3 + 0.4 * Math.sin(Math.PI * i / 100);
+                const y = H2 - pad - base * (H2 - 2 * pad) * 0.8;
+                i === 0 ? mmCtx.moveTo(x, y) : mmCtx.lineTo(x, y);
+            }
+            mmCtx.stroke(); mmCtx.lineTo(W2 - pad, H2 - pad); mmCtx.lineTo(pad, H2 - pad); mmCtx.closePath(); mmCtx.fill();
+            mmCtx.fillStyle = 'rgba(255,255,255,0.3)'; mmCtx.font = '10px Space Mono';
+            mmCtx.fillText('0', pad + 5, H2 - 5); mmCtx.fillText('1.0', W2 - pad - 20, H2 - 5);
+        }
+
+        // ---- Sliding Window ----
+        const winCanvas = document.getElementById('window-canvas');
+        const winCtx = winCanvas.getContext('2d');
+        let winPos = 0, winAuto = false, winTimer = null;
+        const featureNames = ['GHI', 'GHI_cs', 'KT', 'KT_sat', 'Vol', 'DNI', 'DHI', 'RH', 'T_dew', 'T_amb', 'T_wet', 'H_sin', 'H_cos', 'D_sin', 'D_cos'];
+        function resizeWin() { winCanvas.width = winCanvas.offsetWidth; winCanvas.height = winCanvas.offsetHeight; drawWindow(); }
+        window.addEventListener('resize', resizeWin); setTimeout(resizeWin, 200);
+
+        function drawWindow() {
+            const W = winCanvas.width, H = winCanvas.height, pad = 50;
+            winCtx.clearRect(0, 0, W, H);
+            const cols = 48, rows = 15, cellW = (W - 2 * pad) / cols, cellH = (H - 2 * pad - 30) / rows;
+            // Feature labels
+            winCtx.fillStyle = 'rgba(255,255,255,0.3)'; winCtx.font = '9px Space Mono';
+            for (let r = 0; r < rows; r++) {
+                winCtx.fillText(featureNames[r], 2, pad + 30 + r * cellH + cellH / 2 + 3);
+            }
+            // Time labels
+            for (let c = 0; c < cols; c += 4) {
+                winCtx.fillText('t' + (c - 24 + winPos), pad + c * cellW, pad + 15);
+            }
+            // Cells
+            for (let c = 0; c < cols; c++) {
+                for (let r = 0; r < rows; r++) {
+                    const x = pad + c * cellW, y = pad + 30 + r * cellH;
+                    const inWindow = c >= 12 && c < 36;
+                    const isTarget = c === 36;
+                    // Generate pseudo data
+                    const seed = (c + winPos) * 17 + r * 31;
+                    const val = Math.abs(Math.sin(seed)) * 0.8 + 0.1;
+                    if (inWindow) {
+                        const hue = val > 0.6 ? 'var(--cyan)' : val > 0.3 ? 'var(--purple)' : 'rgba(255,255,255,0.2)';
+                        winCtx.fillStyle = `rgba(6,182,212,${val * 0.3})`;
+                        winCtx.fillRect(x + 1, y + 1, cellW - 2, cellH - 2);
+                        winCtx.strokeStyle = 'rgba(6,182,212,0.3)'; winCtx.lineWidth = 1;
+                        winCtx.strokeRect(x + 1, y + 1, cellW - 2, cellH - 2);
+                    } else if (c === 36 && r === 0) {
+                        winCtx.fillStyle = 'rgba(245,158,11,0.3)';
+                        winCtx.fillRect(x + 1, y + 1, cellW - 2, cellH * rows - 2);
+                        winCtx.strokeStyle = 'var(--gold)'; winCtx.lineWidth = 2;
+                        winCtx.strokeRect(x + 1, y + 1, cellW - 2, cellH * rows - 2);
+                        winCtx.fillStyle = 'var(--gold)'; winCtx.font = 'bold 10px Inter';
+                        winCtx.save(); winCtx.translate(x + cellW / 2, y + cellH * rows / 2); winCtx.rotate(-Math.PI / 2);
+                        winCtx.fillText('TARGET', 0, 0); winCtx.restore();
+                        break;
+                    } else {
+                        winCtx.fillStyle = 'rgba(255,255,255,0.02)';
+                        winCtx.fillRect(x + 1, y + 1, cellW - 2, cellH - 2);
+                    }
+                }
+            }
+            // Window bracket
+            const wx = pad + 12 * cellW, wy = pad + 25, ww = 24 * cellW, wh = rows * cellH + 10;
+            winCtx.strokeStyle = 'var(--cyan)'; winCtx.lineWidth = 2;
+            winCtx.strokeRect(wx, wy, ww, wh);
+            winCtx.fillStyle = 'rgba(6,182,212,0.8)'; winCtx.font = 'bold 11px Inter';
+            winCtx.fillText('INPUT WINDOW (24×15)', wx + ww / 2 - 70, wy - 5);
+            // Arrow
+            const ax = pad + 36 * cellW - 5, ay = pad + 25 + rows * cellH / 2;
+            winCtx.fillStyle = 'var(--gold)'; winCtx.font = '20px Inter'; winCtx.fillText('→', wx + ww + 5, ay + 5);
+            // Update labels
+            document.getElementById('win-pos').textContent = 't=' + winPos;
+        }
+
+        function stepWindow() {
+            winPos++; if (winPos > 20) winPos = 0;
+            drawWindow();
+        }
+        function autoWindow() {
+            winAuto = !winAuto;
+            document.getElementById('btn-auto').textContent = winAuto ? '⏸ PAUSE' : '▶ AUTO PLAY';
+            if (winAuto) { winTimer = setInterval(stepWindow, 500); } else { clearInterval(winTimer); }
+        }
+    </script>
+
+    <!-- Three.js Starry Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, bgParticles;
+        function initPortal() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 2000);
+            camera.position.z = 1000;
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true, alpha: true });
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            const geo = new THREE.BufferGeometry();
+            const pos = new Float32Array(2500 * 3);
+            for (let i = 0; i < 2500 * 3; i++) pos[i] = (Math.random() - 0.5) * 2000;
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            const mat = new THREE.PointsMaterial({ color: 0x06B6D4, size: 2, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending });
+            bgParticles = new THREE.Points(geo, mat);
+            scene.add(bgParticles);
+            animateBg();
+        }
+        function animateBg() { requestAnimationFrame(animateBg); bgParticles.rotation.y += 0.0005; bgParticles.rotation.x += 0.0002; renderer.render(scene, camera); }
+        window.addEventListener('load', initPortal);
+        window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+        document.addEventListener('mousemove', e => { if (bgParticles) { bgParticles.rotation.y += (e.clientX - innerWidth / 2) * 0.000001; bgParticles.rotation.x += (e.clientY - innerHeight / 2) * 0.000001; } });
+    </script>
+
+    <!-- ARABIC MODAL POPUP SYSTEM -->
+    <style>
+        #equation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            z-index: 2147483647;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity .3s
+        }
+
+        #equation-modal.active {
+            opacity: 1
+        }
+
+        #equation-modal .modal-card {
+            background: rgba(18, 18, 28, 0.90);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.02);
+            width: 90%;
+            max-width: 480px;
+            padding: 35px;
+            border-radius: 24px;
+            position: relative;
+            transform: scale(0.92) translateY(10px);
+            transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden
+        }
+
+        #equation-modal.active .modal-card {
+            transform: scale(1) translateY(0)
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all .2s
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transform: rotate(90deg)
+        }
+
+        #modal-title {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            opacity: 0.9
+        }
+
+        #modal-eq {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            font-size: 26px;
+            margin-bottom: 25px;
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.07));
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3)
+        }
+
+        #modal-desc {
+            font-family: 'Dubai', 'Segoe UI', Tahoma, sans-serif;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 15px;
+            line-height: 1.8;
+            text-align: right;
+            direction: rtl;
+            font-weight: 300
+        }
+
+        #modal-desc strong {
+            color: #fff;
+            font-weight: 600
+        }
+    </style>
+
+    <div id="equation-modal">
+        <div class="modal-card">
+            <div class="modal-close-btn" onclick="closeModal()">&times;</div>
+            <div id="modal-title"></div>
+            <div id="modal-eq"></div>
+            <div id="modal-desc"></div>
+        </div>
+    </div>
+
+    <script>
+        const equations = {
+            'NASA_POWER': { color: 'var(--cyan)', title: 'NASA POWER API', eq: 'Prediction Of Worldwide Energy Resources', desc: '<strong>مصدر البيانات:</strong><br>واجهة برمجية تابعة لوكالة ناسا توفر بيانات الأرصاد الجوية الشمسية بدقة عالية، تم استخدامها لاستخراج 15 متغيراً فيزيائياً لكل ساعة.' },
+            'OMDURMAN': { color: 'var(--purple)', title: 'OMDURMAN, SUDAN', eq: '<span style="font-family:\'Outfit\', sans-serif; font-style:normal; font-weight:700;">Lat: 14.7°N, Lon: 33.2°E</span>', desc: '<strong>موقع الدراسة:</strong><br>مدينة أم درمان في السودان، تتميز بمناخ صحراوي حار وتحديات بيئية فريدة مثل العواصف الغبارية والسحب المفاجئة، مما يجعلها بيئة اختبار مثالية للنموذج.' },
+            'TIMESPAN': { color: 'var(--gold)', title: '15-YEAR DATASET', eq: '2010 — 2024', desc: '<strong>الفترة الزمنية:</strong><br>تمتد البيانات على مدى 15 عاماً لضمان تغطية شاملة لجميع الفصول والدورات المناخية، مما يعزز قدرة النموذج على التعميم والتنبؤ طويل الأمد.' },
+            'RESOLUTION': { color: 'var(--green)', title: 'HOURLY RESOLUTION', eq: 'dt = 1 Hour', desc: '<strong>الدقة الزمنية:</strong><br>تم استخدام دقة ساعة واحدة لتلبية متطلبات إدارة الشبكات الكهربائية الذكية، حيث تتغير الأحمال والإنتاج الشمسي بشكل ديناميكي سريع.' },
+            'PROFILE': { color: '#fff', title: 'DATASET PROFILE', eq: 'Results & Metrics', desc: '<strong>ملخص مجموعة البيانات:</strong><br>تحتوي على 131,400 سجل (ساعة)، و15 ميزة فيزيائية مدخلة، وتغطي فترة زمنية طويلة لضمان موثوقية النموذج في مختلف الظروف.' },
+            'GHI_CS': { color: 'var(--gold)', title: 'CLEAR-SKY GHI', eq: 'GHI_cs = I_sc × cos(θz)', desc: '<strong>الإشعاع الشمسي للنقاء النظري:</strong><br>هو كمية الإشعاع المتوقعة في حالة عدم وجود غيوم أو غبار. يُستخدم كخط أساس (Baseline) لاكتشاف الشذوذ الجوي وتدريب النموذج على فهم الفيزياء أولاً.' },
+            'ZENITH': { color: 'var(--cyan)', title: 'ZENITH ANGLE', eq: 'θz = arccos(sinφ sinδ + ...)', desc: '<strong>زاوية السمت الشمسية:</strong><br>الزاوية بين أشعة الشمس والخط العمودي. تحدد هذه الزاوية مسار الشمس في السماء وتؤثر بشكل مباشر على شدة الإشعاع الواصل للألواح.' },
+            'ZSCORE': { color: 'var(--cyan)', title: 'Z-SCORE NORMALIZATION', eq: 'z = (x − μ) / σ', desc: '<strong>التقييس المعياري (Z-Score):</strong><br>تحويل البيانات لتكون بمتوسط 0 وانحراف معياري 1. هذا ضروري للشبكات العصبية لضمان تقارب سريع ومنع سيطرة القيم الكبيرة على النموذج.' },
+            'MINMAX': { color: 'var(--gold)', title: 'MIN-MAX SCALING', eq: 'x_norm = (x - min) / (max - min)', desc: '<strong>التقييس الأدنى-الأقصى:</strong><br>تحويل البيانات إلى نطاق [0, 1]. يُستخدم عادةً مع المخرج النهائي (GHI) لأنه قيمة موجبة ومحدودة، مما يسهل تفسير النتائج.' },
+            'TENSOR_SHAPE': { color: 'var(--cyan)', title: 'INPUT TENSOR SHAPE', eq: '(Batch, 24, 15)', desc: '<strong>شكل المصفوفة المدخلة:</strong><br>كل عينة تدريبية عبارة عن نافذة زمنية بطول 24 ساعة، وكل ساعة تحتوي على 15 ميزة فيزيائية. هذا الهيكل الثنائي الأبعاد يسمح للنموذج بفهم السياق الزمني والخصائص معاً.' },
+            'TARGET_SHAPE': { color: 'var(--gold)', title: 'OUTPUT TARGET', eq: 'GHI at t+1', desc: '<strong>الهدف المتوقع:</strong><br>قيمة الإشعاع الشمسي (GHI) للساعة القادمة مباشرة. هذه تنبؤات "خطوة واحدة للأمام" (One-Step Ahead) وهي الأكثر أهمية لتشغيل الشبكات.' },
+            'nasa_power': { color: 'var(--cyan)', title: 'NASA POWER API', eq: 'Prediction Of Worldwide Energy Resources', desc: '<strong>مصدر البيانات:</strong><br>واجهة برمجية تابعة لوكالة ناسا توفر بيانات الأرصاد الجوية الشمسية بدقة عالية، تم استخدامها لاستخراج 15 متغيراً فيزيائياً لكل ساعة.' },
+            'omdurman': { color: 'var(--purple)', title: 'OMDURMAN, SUDAN', eq: '<span style="font-family:\'Outfit\', sans-serif; font-style:normal; font-weight:700;">Lat: 14.7°N, Lon: 33.2°E</span>', desc: '<strong>موقع الدراسة:</strong><br>مدينة أم درمان في السودان، تتميز بمناخ صحراوي حار وتحديات بيئية فريدة مثل العواصف الغبارية والسحب المفاجئة، مما يجعلها بيئة اختبار مثالية للنموذج.' },
+            'timespan': { color: 'var(--gold)', title: '15-YEAR DATASET', eq: '2010 — 2024', desc: '<strong>الفترة الزمنية:</strong><br>تمتد البيانات على مدى 15 عاماً لضمان تغطية شاملة لجميع الفصول والدورات المناخية، مما يعزز قدرة النموذج على التعميم والتنبؤ طويل الأمد.' },
+            'resolution': { color: 'var(--green)', title: 'HOURLY RESOLUTION', eq: 'dt = 1 Hour', desc: '<strong>الدقة الزمنية:</strong><br>تم استخدام دقة ساعة واحدة لتلبية متطلبات إدارة الشبكات الكهربائية الذكية، حيث تتغير الأحمال والإنتاج الشمسي بشكل ديناميكي سريع.' },
+            'profile': { color: '#fff', title: 'DATASET PROFILE', eq: 'Results & Metrics', desc: '<strong>ملخص مجموعة البيانات:</strong><br>تحتوي على 131,400 سجل (ساعة)، و15 ميزة فيزيائية مدخلة، وتغطي فترة زمنية طويلة لضمان موثوقية النموذج في مختلف الظروف.' },
+            'ghi_cs': { color: 'var(--gold)', title: 'CLEAR-SKY GHI', eq: 'GHI_cs = I_sc × cos(θz)', desc: '<strong>الإشعاع الشمسي للنقاء النظري:</strong><br>هو كمية الإشعاع المتوقعة في حالة عدم وجود غيوم أو غبار. يُستخدم كخط أساس (Baseline) لاكتشاف الشذوذ الجوي وتدريب النموذج على فهم الفيزياء أولاً.' },
+            'zenith': { color: 'var(--cyan)', title: 'ZENITH ANGLE', eq: 'θz = arccos(sinφ sinδ + ...)', desc: '<strong>زاوية السمت الشمسية:</strong><br>الزاوية بين أشعة الشمس والخط العمودي. تحدد هذه الزاوية مسار الشمس في السماء وتؤثر بشكل مباشر على شدة الإشعاع الواصل للألواح.' },
+            'zscore': { color: 'var(--cyan)', title: 'Z-SCORE NORMALIZATION', eq: 'z = (x − μ) / σ', desc: '<strong>التقييس المعياري (Z-Score):</strong><br>تحويل البيانات لتكون بمتوسط 0 وانحراف معياري 1. هذا ضروري للشبكات العصبية لضمان تقارب سريع ومنع سيطرة القيم الكبيرة على النموذج.' },
+            'minmax': { color: 'var(--gold)', title: 'MIN-MAX SCALING', eq: 'x_norm = (x - min) / (max - min)', desc: '<strong>التقييس الأدنى-الأقصى:</strong><br>تحويل البيانات إلى نطاق [0, 1]. يُستخدم عادةً مع المخرج النهائي (GHI) لأنه قيمة موجبة ومحدودة، مما يسهل تفسير النتائج.' },
+            'tensor_shape': { color: 'var(--cyan)', title: 'INPUT TENSOR SHAPE', eq: '(Batch, 24, 15)', desc: '<strong>شكل المصفوفة المدخلة:</strong><br>كل عينة تدريبية عبارة عن نافذة زمنية بطول 24 ساعة، وكل ساعة تحتوي على 15 ميزة فيزيائية. هذا الهيكل الثنائي الأبعاد يسمح للنموذج بفهم السياق الزمني والخصائص معاً.' },
+            'target_shape': { color: 'var(--gold)', title: 'OUTPUT TARGET', eq: 'GHI at t+1', desc: '<strong>الهدف المتوقع:</strong><br>قيمة الإشعاع الشمسي (GHI) للساعة القادمة مباشرة. هذه تنبؤات "خطوة واحدة للأمام" (One-Step Ahead) وهي الأكثر أهمية لتشغيل الشبكات.' },
+            'cleanup': { color: '#fff', title: 'STATISTICAL CLEANING', eq: 'x = max(0, x)', desc: '<strong>التنظيف الإحصائي:</strong><br>إزالة القيم السالبة الناتجة عن أخطاء المستشعرات، واستكمال البيانات المفقودة خطياً لضمان استمرارية السلاسل الزمنية.<br><br><strong>القواعد:</strong><br>① إزالة GHI < 0 (غير فيزيائي)<br>② استبدال رمز -999 بـ NaN<br>③ الاستكمال الخطي للفجوات<br>④ محاذاة زمنية Δt = 3600 ثانية' },
+            'masking': { color: 'var(--cyan)', title: 'NIGHT MASKING', eq: 'if (Elevation < 0) → x = 0', desc: '<strong>القناع الليلي الفيزيائي:</strong><br>إجبار جميع قيم الإشعاع على الصفر عندما تكون الشمس تحت الأفق.<br><br><strong>الفائدة:</strong> يمنع النموذج من محاولة "تعلم" الضجيج الليلي، مما يحسّن دقة شروق/غروب الشمس بنسبة 23%.<br><br><strong>الشرط:</strong> GHI_cs < 5 W/m² → كل المتغيرات الشمسية = 0' },
+            'norm': { color: 'var(--purple)', title: 'HYBRID NORMALIZATION', eq: 'z = (x − μ) / σ', desc: '<strong>التطبيع الهجين:</strong><br>استخدام Z-Score لتوحيد المقاييس للمدخلات (14 خاصية)، و Min-Max لتطبيع المخرجات (GHI) في النطاق [0,1].<br><br><strong>تحذير مهم:</strong> يتم حساب μ و σ من بيانات التدريب فقط ويتم تجميدها — لمنع تسرب المعلومات من المستقبل.' },
+            'window': { color: 'var(--gold)', title: 'SLIDING WINDOW', eq: 'Input ∈ ℝ²⁴ˣ¹⁵', desc: '<strong>نافذة الانزلاق:</strong><br>تقسيم البيانات النظيفة إلى نوافذ متراكبة بطول 24 ساعة. كل نافذة تشكل مصفوفة بأبعاد 24×15 — وهو الشكل الذي تتوقعه الشبكة العصبية كمدخل.<br><br><strong>المخرج:</strong> قيمة GHI للساعة التالية (Sequence-to-One)' },
+            'split': { color: 'var(--green)', title: 'CHRONOLOGICAL SPLIT', eq: 'Train → Val → Test (temporal)', desc: '<strong>التقسيم الزمني:</strong><br>لا يوجد خلط عشوائي. يتم تقسيم البيانات حسب الزمن بشكل صارم.<br><br><strong>التطوير:</strong> 2010-2015 (تدريب 70% / تحقق 15% / اختبار 15%)<br><strong>اختبار الإجهاد:</strong> 2020-2024 (فجوة 5 سنوات للتأكد من تعلم القوانين الفيزيائية الحقيقية)<br><br><strong>النتيجة:</strong> R² > 0.995 عبر جميع سنوات الاختبار' }
+        };
+        function openModal(type) {
+            if (!equations[type]) return;
+            const d = equations[type];
+            document.getElementById('modal-title').innerHTML = d.title;
+            document.getElementById('modal-title').style.color = d.color;
+            document.getElementById('modal-eq').innerHTML = d.eq;
+            document.getElementById('modal-eq').style.color = d.color;
+            document.getElementById('modal-desc').innerHTML = d.desc;
+            const m = document.getElementById('equation-modal');
+            m.style.display = 'flex';
+            setTimeout(() => m.classList.add('active'), 10);
+        }
+        function closeModal() {
+            const m = document.getElementById('equation-modal');
+            m.classList.remove('active');
+            setTimeout(() => m.style.display = 'none', 300);
+        }
+        document.getElementById('equation-modal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
+    </script>
+</body>
+
+</html>

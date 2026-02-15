@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer 2: BatchNorm | Physics-Informed CNN-BiLSTM</title>
+    <style>
+        :root {
+            --orange: #FF9500;
+            --cyan: #00F2FF;
+            --gold: #FFD700;
+            --green: #00FF88;
+            --bg-dark: #0A0A0F;
+            --panel-bg: rgba(10, 10, 20, 0.92);
+            --glass-border: rgba(255, 149, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Outfit', sans-serif;
+            background: #030308;
+            color: #fff;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        #cursor {
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--orange);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1);
+            mix-blend-mode: difference;
+        }
+
+        #cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            box-shadow: 0 0 10px var(--orange);
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            border-bottom: 2px solid var(--orange);
+        }
+
+        .layer-badge {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .layer-num {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--orange), #CC7700);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 900;
+            color: #000;
+            box-shadow: 0 0 40px rgba(255, 149, 0, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 40px rgba(255, 149, 0, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 60px rgba(255, 149, 0, 0.9);
+            }
+        }
+
+        .layer-title h1 {
+            font-size: 28px;
+            background: linear-gradient(90deg, var(--orange), var(--gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .layer-title p {
+            font-size: 14px;
+            color: var(--cyan);
+            letter-spacing: 2px;
+        }
+
+        .back-btn {
+            padding: 12px 25px;
+            background: rgba(255, 149, 0, 0.1);
+            border: 2px solid var(--orange);
+            border-radius: 12px;
+            color: var(--orange);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--orange);
+            color: #000;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: var(--panel-bg);
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            color: var(--orange);
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .nav-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover:not(.disabled) {
+            background: var(--orange);
+            color: #000;
+            box-shadow: 0 0 20px var(--orange);
+        }
+
+        .nav-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Crystalline Panels */
+        .left-panel {
+            position: fixed;
+            left: 20px;
+            top: 100px;
+            width: 360px;
+            max-height: calc(100vh - 120px);
+            background: rgba(10, 5, 5, 0.75);
+            backdrop-filter: blur(30px) saturate(140%);
+            border: 1px solid rgba(255, 149, 0, 0.2);
+            border-radius: 30px;
+            padding: 30px;
+            z-index: 50;
+            overflow-y: auto;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+        }
+
+        .right-panel {
+            position: fixed;
+            right: 20px;
+            top: 100px;
+            width: 360px;
+            max-height: calc(100vh - 120px);
+            background: rgba(10, 5, 5, 0.75);
+            backdrop-filter: blur(30px) saturate(140%);
+            border: 1px solid rgba(255, 149, 0, 0.2);
+            border-radius: 30px;
+            padding: 30px;
+            z-index: 50;
+            overflow-y: auto;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+        }
+
+        .panel-title {
+            font-size: 13px;
+            color: var(--orange);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .stats-display {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 18px 15px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 3px solid var(--orange);
+        }
+
+        .stat-card-icon {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card-value {
+            font-size: 22px;
+            color: var(--cyan);
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .stat-card-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 149, 0, 0.1);
+        }
+
+        .mode-btn.active {
+            border-color: var(--orange);
+            box-shadow: 0 0 20px rgba(255, 149, 0, 0.3);
+        }
+
+        .mode-btn-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .mode-btn-desc {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        .control-group {
+            margin-bottom: 18px;
+        }
+
+        .control-label {
+            font-size: 11px;
+            color: var(--orange);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .control-value {
+            color: var(--cyan);
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--orange), #CC7700);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 149, 0, 0.5);
+        }
+
+        .toggle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 149, 0, 0.2);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--orange);
+        }
+
+        .toggle-btn.active {
+            background: var(--orange);
+            color: #000;
+        }
+
+        .play-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--orange), #CC7700);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 149, 0, 0.4);
+        }
+
+        .equation-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 12px;
+            font-family: monospace;
+            border-left: 4px solid var(--cyan);
+            margin-bottom: 15px;
+        }
+
+        .equation-label {
+            font-size: 10px;
+            color: var(--orange);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .equation {
+            font-size: 13px;
+            color: var(--cyan);
+            margin: 6px 0;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, rgba(255, 149, 0, 0.08), rgba(0, 242, 255, 0.05));
+            padding: 18px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--orange);
+        }
+
+        .info-card h4 {
+            font-size: 13px;
+            color: var(--cyan);
+            margin-bottom: 10px;
+        }
+
+        .info-card p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.7;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 149, 0, 0.2);
+            border-top-color: var(--orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--orange);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <header class="header">
+        <div class="layer-badge">
+            <div class="layer-num">2</div>
+            <div class="layer-title">
+                <h1>Batch Normalization</h1>
+                <p>Feature Standardization</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <a href="layer1-conv1d.html" class="nav-btn">← PREV</a>
+            <a href="../index.html" class="nav-btn">HOME</a>
+            <a href="layer3-relu.html" class="nav-btn">NEXT →</a>
+        </div>
+
+        <div class="header-stats">
+            <div class="stat-box">
+                <div class="stat-label">Input</div>
+                <div class="stat-value">(24,64)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Features</div>
+                <div class="stat-value">64</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Params</div>
+                <div class="stat-value">256</div>
+            </div>
+        </div>
+    </header>
+
+    <div id="cursor"></div>
+    <div id="cursor-dot"></div>
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="canvas-container"></div>
+
+    <div class="left-panel">
+        <div class="panel-title">📊 Statistics</div>
+        <div class="stats-display">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-icon">μ</div>
+                    <div class="stat-card-value" id="muVal">0.00</div>
+                    <div class="stat-card-label">Mean (μ)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">σ²</div>
+                    <div class="stat-card-value" id="sigmaVal">1.00</div>
+                    <div class="stat-card-label">Variance (σ²)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">γ</div>
+                    <div class="stat-card-value" id="gammaVal">1.00</div>
+                    <div class="stat-card-label">Scale (γ)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">β</div>
+                    <div class="stat-card-value" id="betaVal">0.00</div>
+                    <div class="stat-card-label">Shift (β)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-title">🔄 Mode</div>
+        <div class="mode-toggle">
+            <div class="mode-btn active" data-mode="training">
+                <div class="mode-btn-name">Training</div>
+                <div class="mode-btn-desc">Batch statistics</div>
+            </div>
+            <div class="mode-btn" data-mode="inference">
+                <div class="mode-btn-name">Inference</div>
+                <div class="mode-btn-desc">Running statistics</div>
+            </div>
+        </div>
+
+        <div class="equation-box">
+            <div class="equation-label">Normalization Formula</div>
+            <div class="equation">x̂ = (x - μ) / √(σ² + ε)</div>
+            <div class="equation">y = γ × x̂ + β</div>
+        </div>
+
+        <div class="info-card">
+            <h4>🎯 Purpose</h4>
+            <p>BatchNorm stabilizes training by normalizing layer inputs. It reduces internal covariate shift and allows
+                higher learning rates.</p>
+            <p style="margin-top: 10px; color: var(--gold);"><strong>Effect:</strong> Notice how the "wild" orange data
+                is centered and standardized into the blue distribution.</p>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="panel-title">🎮 Controls</div>
+        <button class="play-btn" id="playBtn">▶️ Play Animation</button>
+
+        <div class="control-group">
+            <div class="control-label"><span>Scale (γ)</span><span class="control-value" id="gammaSliderVal">1.00</span>
+            </div>
+            <input type="range" id="gammaSlider" min="0.1" max="3" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+            <div class="control-label"><span>Shift (β)</span><span class="control-value" id="betaSliderVal">0.00</span>
+            </div>
+            <input type="range" id="betaSlider" min="-2" max="2" step="0.1" value="0">
+        </div>
+        <div class="control-group">
+            <div class="control-label"><span>Animation Speed</span><span class="control-value"
+                    id="speedValue">1.0x</span></div>
+            <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+        </div>
+
+        <div class="toggle-grid">
+            <button class="toggle-btn active" id="beforeToggle">📊 Before</button>
+            <button class="toggle-btn active" id="afterToggle">✅ After</button>
+            <button class="toggle-btn" id="rotateToggle">🔄 Auto Rotate</button>
+            <button class="toggle-btn active" id="flowToggle">✨ Flow</button>
+        </div>
+
+        <div class="panel-title">📐 Running Stats</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-value" id="runMean">0.12</div>
+                <div class="stat-card-label">Running Mean</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-value" id="runVar">0.95</div>
+                <div class="stat-card-label">Running Var</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h4>📈 During Training</h4>
+            <p>Uses batch mean/variance. Updates running statistics with momentum for inference.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script>
+        let scene, camera, renderer, controls, clock, composer;
+        let flowParticles, bgParticles;
+        let isPlaying = false, animSpeed = 1.0;
+        let gamma = 1, beta = 0;
+        let isTraining = true;
+        let inputData = [];
+        let beforeBars = [], afterBars = [];
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0f);
+            scene.fog = new THREE.FogExp2(0x0a0a0f, 0.012);
+
+            camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 500);
+            camera.position.set(0, 25, 50);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            clock = new THREE.Clock();
+
+            setupLights();
+            generateData();
+            createBars();
+            createFlow();
+            setupPostProcessing();
+            setupTheme();
+
+            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 500);
+            animate();
+        }
+
+        function setupPostProcessing() {
+            composer = new THREE.EffectComposer(renderer);
+            composer.addPass(new THREE.RenderPass(scene, camera));
+            composer.addPass(new THREE.UnrealBloomPass(
+                new THREE.Vector2(innerWidth, innerHeight),
+                1.2, // Strength
+                0.4, // Radius
+                0.85 // Threshold
+            ));
+        }
+
+        function setupLights() {
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            const l1 = new THREE.PointLight(0xFFD700, 3, 100); l1.position.set(30, 40, 30); scene.add(l1);
+            const l2 = new THREE.PointLight(0x00F2FF, 2, 100); l2.position.set(-30, 30, 30); scene.add(l2);
+
+            // Reflector Ground Plane
+            const groundGeo = new THREE.PlaneGeometry(1000, 1000);
+            const groundMat = new THREE.MeshStandardMaterial({
+                color: 0x020205,
+                metalness: 0.95,
+                roughness: 0.05
+            });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -5;
+            scene.add(ground);
+        }
+
+        function generateData() {
+            inputData = [];
+            for (let i = 0; i < 64; i++) {
+                // Generate clustered data with offset mean and high variance
+                const cluster = Math.random() > 0.5 ? 5 : -5;
+                inputData.push(cluster + (Math.random() - 0.5) * 8);
+            }
+        }
+
+        function createBars() {
+            const spacing = 0.7, width = 0.4;
+
+            // Calculate batch statistics
+            const mean = inputData.reduce((a, b) => a + b, 0) / inputData.length;
+            const variance = inputData.reduce((a, b) => a + (b - mean) ** 2, 0) / inputData.length;
+
+            // Before bars
+            for (let i = 0; i < 32; i++) {
+                const value = inputData[i];
+                const height = Math.abs(value) + 0.3;
+                const geometry = new THREE.BoxGeometry(width, height, width);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0xFF9500, emissive: 0xFF9500, emissiveIntensity: 0.2,
+                    transparent: true, opacity: 0.85
+                });
+                const bar = new THREE.Mesh(geometry, material);
+                bar.position.set(-22 + i * spacing, height / 2 * (value >= 0 ? 1 : -1), -5);
+                bar.userData = { value, height };
+                scene.add(bar);
+                beforeBars.push(bar);
+            }
+
+            // Connection Lines
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.2 });
+            for (let i = 0; i < 32; i++) {
+                const geometry = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(-22 + i * spacing, 0, -5),
+                    new THREE.Vector3(-22 + i * spacing, 0, 5)
+                ]);
+                const line = new THREE.Line(geometry, lineMat);
+                scene.add(line);
+            }
+
+            // After bars (normalized)
+            for (let i = 0; i < 32; i++) {
+                const value = inputData[i];
+                const normalized = (value - mean) / Math.sqrt(variance + 1e-5);
+                const transformed = gamma * normalized + beta;
+                const height = Math.abs(transformed) * 2 + 0.3;
+
+                const geometry = new THREE.BoxGeometry(width, height, width);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0x00F2FF, emissive: 0x00F2FF, emissiveIntensity: 0.3,
+                    transparent: true, opacity: 0.85
+                });
+                const bar = new THREE.Mesh(geometry, material);
+                bar.position.set(-22 + i * spacing, height / 2, 5);
+                bar.userData = { value, normalized, height };
+                scene.add(bar);
+                afterBars.push(bar);
+            }
+
+            // Labels
+            createLabel('Before BatchNorm', -10, 8, -5);
+            createLabel('After BatchNorm', -10, 8, 5);
+
+            updateStats(mean, variance);
+        }
+
+        function createLabel(text, x, y, z) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256; canvas.height = 64;
+            ctx.font = 'bold 28px Arial';
+            ctx.fillStyle = '#00F2FF';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, 128, 40);
+            const texture = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture }));
+            sprite.position.set(x, y, z);
+            sprite.scale.set(15, 4, 1);
+            scene.add(sprite);
+        }
+
+        function createFlow() {
+            const count = 300;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = -25 + Math.random() * 25;
+                positions[i * 3 + 1] = Math.random() * 6;
+                positions[i * 3 + 2] = -5 + Math.random() * 10;
+            }
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({ color: 0xFF9500, size: 0.15, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending });
+            flowParticles = new THREE.Points(geometry, material);
+            scene.add(flowParticles);
+        }
+
+        function updateStats(mean, variance) {
+            document.getElementById('muVal').textContent = mean.toFixed(2);
+            document.getElementById('sigmaVal').textContent = variance.toFixed(2);
+            document.getElementById('gammaVal').textContent = gamma.toFixed(2);
+            document.getElementById('betaVal').textContent = beta.toFixed(2);
+        }
+
+        function updateAfterBars() {
+            const mean = inputData.reduce((a, b) => a + b, 0) / inputData.length;
+            const variance = inputData.reduce((a, b) => a + (b - mean) ** 2, 0) / inputData.length;
+
+            afterBars.forEach((bar, i) => {
+                const value = inputData[i];
+                const normalized = (value - mean) / Math.sqrt(variance + 1e-5);
+                const transformed = gamma * normalized + beta;
+                const height = Math.abs(transformed) * 2 + 0.3;
+
+                bar.scale.y = height / bar.userData.height;
+                bar.position.y = height / 2;
+            });
+
+            updateStats(mean, variance);
+        }
+
+        function setupEventListeners() {
+            window.addEventListener('resize', () => {
+                camera.aspect = innerWidth / innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(innerWidth, innerHeight);
+            });
+
+            document.getElementById('playBtn').addEventListener('click', function () {
+                isPlaying = !isPlaying;
+                this.innerHTML = isPlaying ? '⏸️ Pause' : '▶️ Play Animation';
+            });
+
+            document.getElementById('gammaSlider').addEventListener('input', (e) => {
+                gamma = parseFloat(e.target.value);
+                document.getElementById('gammaSliderVal').textContent = gamma.toFixed(2);
+                updateAfterBars();
+            });
+
+            document.getElementById('betaSlider').addEventListener('input', (e) => {
+                beta = parseFloat(e.target.value);
+                document.getElementById('betaSliderVal').textContent = beta.toFixed(2);
+                updateAfterBars();
+            });
+
+            document.getElementById('speedSlider').addEventListener('input', (e) => {
+                animSpeed = parseFloat(e.target.value);
+                document.getElementById('speedValue').textContent = animSpeed.toFixed(1) + 'x';
+            });
+
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    isTraining = this.dataset.mode === 'training';
+                });
+            });
+
+            document.getElementById('beforeToggle').addEventListener('click', function () {
+                beforeBars.forEach(b => b.visible = !b.visible);
+                this.classList.toggle('active');
+            });
+
+            document.getElementById('afterToggle').addEventListener('click', function () {
+                afterBars.forEach(b => b.visible = !b.visible);
+                this.classList.toggle('active');
+            });
+
+            document.getElementById('rotateToggle').addEventListener('click', function () {
+                controls.autoRotate = !controls.autoRotate;
+                this.classList.toggle('active');
+            });
+
+            document.getElementById('flowToggle').addEventListener('click', function () {
+                flowParticles.visible = !flowParticles.visible;
+                this.classList.toggle('active');
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsed = clock.getElapsedTime() * animSpeed;
+            controls.update();
+
+            if (isPlaying) {
+                beforeBars.forEach((bar, i) => {
+                    bar.scale.y = 1 + Math.sin(elapsed * 2 + i * 0.2) * 0.2;
+                });
+                afterBars.forEach((bar, i) => {
+                    bar.scale.y = 1 + Math.sin(elapsed * 3 + i * 0.15) * 0.05;
+                });
+
+                // Animate stats
+                document.getElementById('runMean').textContent = (Math.sin(elapsed * 0.5) * 0.2).toFixed(2);
+                document.getElementById('runVar').textContent = (0.9 + Math.sin(elapsed * 0.3) * 0.1).toFixed(2);
+            }
+
+            if (flowParticles.visible) {
+                const pos = flowParticles.geometry.attributes.position.array;
+                for (let i = 0; i < pos.length / 3; i++) {
+                    pos[i * 3 + 2] += 0.05;
+                    if (pos[i * 3 + 2] > 10) {
+                        pos[i * 3 + 2] = -5;
+                        pos[i * 3] = -25 + Math.random() * 25;
+                    }
+                }
+                flowParticles.geometry.attributes.position.needsUpdate = true;
+            }
+
+            if (composer) {
+                composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
+        }
+
+        function setupTheme() {
+            // Cursor
+            const cursor = document.getElementById('cursor');
+            const cursorDot = document.getElementById('cursor-dot');
+            document.addEventListener('mousemove', e => {
+                cursor.style.left = e.clientX - 15 + 'px';
+                cursor.style.top = e.clientY - 15 + 'px';
+                cursorDot.style.left = e.clientX - 4 + 'px';
+                cursorDot.style.top = e.clientY - 4 + 'px';
+            });
+
+            // BG Particles
+            const canvas = document.getElementById('bg-canvas');
+            const bgScene = new THREE.Scene();
+            const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const bgRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            bgRenderer.setSize(window.innerWidth, window.innerHeight);
+
+            const particleCount = 200;
+            const particles = new THREE.BufferGeometry();
+            const posArray = new Float32Array(particleCount * 3);
+            const particlesData = [];
+
+            for (let i = 0; i < particleCount; i++) {
+                posArray[i * 3] = (Math.random() - 0.5) * 40;
+                posArray[i * 3 + 1] = (Math.random() - 0.5) * 40;
+                posArray[i * 3 + 2] = (Math.random() - 0.5) * 40;
+                particlesData.push({
+                    velocity: new THREE.Vector3(-0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02)
+                });
+            }
+            particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particleMat = new THREE.PointsMaterial({ size: 0.15, color: 0xFF9500, transparent: true, opacity: 0.6 });
+            const particleMesh = new THREE.Points(particles, particleMat);
+            bgScene.add(particleMesh);
+
+            const lineGeo = new THREE.BufferGeometry();
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x00F2FF, transparent: true, opacity: 0.15 });
+            const lines = new THREE.LineSegments(lineGeo, lineMat);
+            bgScene.add(lines);
+
+            bgCamera.position.z = 10;
+            let mouseX = 0, mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            function animateBG() {
+                requestAnimationFrame(animateBG);
+                bgScene.rotation.y += 0.001;
+                bgScene.rotation.x += (mouseY * 0.05 - bgScene.rotation.x) * 0.05;
+                bgScene.rotation.y += (mouseX * 0.05 - bgScene.rotation.y) * 0.05;
+
+                const positions = particles.attributes.position.array;
+                const linePositions = [];
+
+                for (let i = 0; i < particleCount; i++) {
+                    positions[i * 3] += particlesData[i].velocity.x;
+                    positions[i * 3 + 1] += particlesData[i].velocity.y;
+                    positions[i * 3 + 2] += particlesData[i].velocity.z;
+
+                    if (positions[i * 3] < -20) positions[i * 3] = 20;
+                    if (positions[i * 3] > 20) positions[i * 3] = -20;
+                    if (positions[i * 3 + 1] < -20) positions[i * 3 + 1] = 20;
+                    if (positions[i * 3 + 1] > 20) positions[i * 3 + 1] = -20;
+                    if (positions[i * 3 + 2] < -20) positions[i * 3 + 2] = 20;
+                    if (positions[i * 3 + 2] > 20) positions[i * 3 + 2] = -20;
+
+                    for (let j = i + 1; j < particleCount; j++) {
+                        const dx = positions[i * 3] - positions[j * 3];
+                        const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
+                        const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
+                        if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 6) {
+                            linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2], positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]);
+                        }
+                    }
+                }
+                particles.attributes.position.needsUpdate = true;
+                lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+                bgRenderer.render(bgScene, bgCamera);
+            }
+            animateBG();
+
+            // Tilt Effect
+            document.querySelectorAll('.left-panel, .right-panel').forEach(panel => {
+                panel.addEventListener('mousemove', (e) => {
+                    const rect = panel.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -2;
+                    const rotateY = ((x - centerX) / centerX) * 2;
+                    panel.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+                panel.addEventListener('mouseleave', () => {
+                    panel.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                });
+            });
+
+            setupEventListeners();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

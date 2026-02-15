@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer 6: Dropout | Stochastic Regularization</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;600;700&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F72585;
+            /* Neon Pink */
+            --secondary: #7209B7;
+            /* Deep Purple */
+            --accent: #4CC9F0;
+            /* Cyan */
+            --dark-bg: #050510;
+            /* Deep Space */
+            --panel-bg: rgba(10, 10, 25, 0.85);
+            --border: rgba(247, 37, 133, 0.3);
+            --text-main: #FFFFFF;
+            --text-dim: rgba(255, 255, 255, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--text-main);
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Ambient Background Elements */
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(76, 201, 240, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(76, 201, 240, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.2) 51%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.3;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            background: linear-gradient(180deg, rgba(5, 5, 16, 0.95) 0%, rgba(5, 5, 16, 0) 100%);
+            z-index: 100;
+            border-bottom: 2px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .title-block {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .layer-id {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(247, 37, 133, 0.2), rgba(114, 9, 183, 0.2));
+            box-shadow: 0 0 20px rgba(247, 37, 133, 0.4);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .layer-info h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .layer-info p {
+            font-size: 14px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 600;
+        }
+
+        /* Navigation */
+        .nav-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 10px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(247, 37, 133, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 15px var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Panels */
+        .panel {
+            position: fixed;
+            top: 120px;
+            width: 360px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            overflow-y: auto;
+            max-height: calc(100vh - 140px);
+        }
+
+        .panel-left {
+            left: 40px;
+        }
+
+        .panel-right {
+            right: 40px;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Stats Grid */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .stat-val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .stat-val.highlight {
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .stat-val.dim {
+            color: var(--text-dim);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        /* Toggle Switch */
+        .mode-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 25px;
+        }
+
+        .mode-opt {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0.6;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .mode-opt.active {
+            background: var(--primary);
+            opacity: 1;
+            color: white;
+            box-shadow: 0 0 15px rgba(247, 37, 133, 0.4);
+        }
+
+        /* Controls */
+        .control-row {
+            margin-bottom: 25px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            appearance: none;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--primary);
+            transition: transform 0.2s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(114, 9, 183, 0.4);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(247, 37, 133, 0.6);
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(76, 201, 240, 0.05);
+            border-left: 3px solid var(--accent);
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .info-box h4 {
+            color: var(--accent);
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Effects -->
+    <div class="grid-overlay"></div>
+    <div class="scanline"></div>
+
+    <div id="canvas-container"></div>
+
+    <header>
+        <div class="title-block">
+            <div class="layer-id">06</div>
+            <div class="layer-info">
+                <h1>Dropout Layer</h1>
+                <p>Topological Regularization Engine</p>
+            </div>
+        </div>
+        <div class="nav-group">
+            <a href="layer5-dense.html" class="nav-btn">&larr; Dense</a>
+            <a href="../index.html" class="nav-btn">Home</a>
+            <a href="layer7-dense.html" class="nav-btn">Dense &rarr;</a>
+        </div>
+        <div class="nav-group" style="gap: 20px;">
+            <div>
+                <div class="stat-label">Active Neurons</div>
+                <div class="stat-val highlight" style="font-size: 18px; text-align: right;" id="headActive">0</div>
+            </div>
+            <div>
+                <div class="stat-label">System State</div>
+                <div class="stat-val" style="font-size: 18px; text-align: right; color: var(--accent);" id="headState">
+                    TRAINING</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="panel panel-left">
+        <div class="section-title">Network Statistics</div>
+
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div class="stat-val highlight" id="activeCount">210</div>
+                <div class="stat-label">Active Units</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val dim" id="droppedCount">210</div>
+                <div class="stat-label">Dropped Units</div>
+            </div>
+        </div>
+
+        <div class="section-title">Operation Mode</div>
+        <div class="mode-switch">
+            <div class="mode-opt active" data-mode="training" onclick="setMode('training')">Training</div>
+            <div class="mode-opt" data-mode="inference" onclick="setMode('inference')">Inference</div>
+        </div>
+
+        <div class="info-box">
+            <h4>Algorithm Logic</h4>
+            <p>During training, each neuron is retained with probability <em>p</em>. This prevents units from
+                co-adapting too much.</p>
+        </div>
+
+        <div class="info-box" style="margin-top: 10px; border-color: var(--primary);">
+            <h4>Visual Key</h4>
+            <p>
+                <span style="color: var(--primary)">● Active:</span> Signal propagates (Solid Core).<br>
+                <span style="color: var(--text-dim)">○ Dropped:</span> Output forced to zero (Wireframe).
+            </p>
+        </div>
+    </div>
+
+    <div class="panel panel-right">
+        <div class="section-title">Hyperparameters</div>
+
+        <button class="action-btn" id="regenerateBtn">Reroll Mask (Space)</button>
+
+        <div class="control-row" style="margin-top: 25px;">
+            <div class="control-header">
+                <span>Dropout Rate (p)</span>
+                <span style="color: var(--primary)" id="rateDisplay">0.50</span>
+            </div>
+            <input type="range" id="rateSlider" min="0" max="0.95" step="0.05" value="0.50">
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div class="stat-val" style="color: var(--accent);" id="scaleDisplay">2.00x</div>
+                <div class="stat-label">Inverted Scale</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val" style="color: #F72585;" id="keepProbDisplay">50%</div>
+                <div class="stat-label">Retention Probability</div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h4>Inverted Dropout</h4>
+            <p>We scale active neurons by <strong>1/(1-p)</strong> during training so no scaling is needed at test time.
+            </p>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // CONFIG
+        const NEURON_COUNT = 420;
+        const COLORS = {
+            active: 0xF72585,    // Neon Pink
+            dropped: 0x2A2A40,   // Dark Grey/Blue
+            bg: 0x050510
+        };
+
+        // SCENE GLOBAL
+        let scene, camera, renderer, controls, clock;
+        let neurons = [];
+        let dropMask = []; // Renamed to avoid confusion
+        let isTraining = true;
+        let dropoutRate = 0.5;
+
+        // INIT
+        function init() {
+            // Scene Setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(COLORS.bg, 0.02);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 45);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.8;
+
+            clock = new THREE.Clock();
+
+            // Lighting
+            const ambient = new THREE.AmbientLight(0xffffff, 0.2);
+            scene.add(ambient);
+
+            const pointLight = new THREE.PointLight(COLORS.active, 1.5, 100);
+            pointLight.position.set(20, 20, 20);
+            scene.add(pointLight);
+
+            const pointLight2 = new THREE.PointLight(0x4CC9F0, 1, 100);
+            pointLight2.position.set(-20, -20, 20);
+            scene.add(pointLight2);
+
+            // Objects
+            createNeurons();
+            createGrid();
+            createParticles();
+
+            // Init Logic
+            generateMask();
+            updateUI(NEURON_COUNT / 2); // Init UI
+
+            // Events
+            window.addEventListener('resize', onResize);
+            document.getElementById('rateSlider').addEventListener('input', updateHyperparams);
+            document.getElementById('regenerateBtn').addEventListener('click', generateMask);
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') generateMask();
+            });
+
+            animate();
+        }
+
+        function createNeurons() {
+            const geometry = new THREE.IcosahedronGeometry(0.6, 1);
+
+            // Sphere distribution (Fibonacci Sphere)
+            const radius = 20;
+
+            for (let i = 0; i < NEURON_COUNT; i++) {
+                // Golden Angle
+                const phi = Math.acos(1 - 2 * (i + 0.5) / NEURON_COUNT);
+                const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.sin(phi) * Math.sin(theta);
+                const z = radius * Math.cos(phi);
+
+                // Main Mesh (Core)
+                const material = new THREE.MeshPhongMaterial({
+                    color: COLORS.active,
+                    emissive: COLORS.active,
+                    emissiveIntensity: 0.5,
+                    shininess: 100,
+                    flatShading: true
+                });
+
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(x, y, z);
+
+                // Wireframe shell (visual accent)
+                const wireGeo = new THREE.WireframeGeometry(geometry);
+                const wireMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1 });
+                const wireframe = new THREE.LineSegments(wireGeo, wireMat);
+                mesh.add(wireframe);
+
+                mesh.userData = {
+                    basePos: new THREE.Vector3(x, y, z),
+                    id: i,
+                    active: true,
+                    pulseOffset: Math.random() * 10,
+                    targetScale: 1.0,
+                    currentScale: 1.0
+                };
+
+                neurons.push(mesh);
+                scene.add(mesh);
+            }
+        }
+
+        function createGrid() {
+            const gridHelper = new THREE.GridHelper(100, 50, COLORS.active, 0x1a1a2e);
+            gridHelper.position.y = -30;
+            scene.add(gridHelper);
+        }
+
+        function createParticles() {
+            const geom = new THREE.BufferGeometry();
+            const vertices = [];
+            for (let i = 0; i < 600; i++) {
+                vertices.push((Math.random() - 0.5) * 120);
+                vertices.push((Math.random() - 0.5) * 120);
+                vertices.push((Math.random() - 0.5) * 120);
+            }
+            geom.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            const mat = new THREE.PointsMaterial({ color: 0x4CC9F0, size: 0.2, transparent: true, opacity: 0.4 });
+            const particles = new THREE.Points(geom, mat);
+            scene.add(particles);
+        }
+
+        function generateMask() {
+            if (!isTraining) return;
+
+            dropMask = [];
+            let activeCount = 0;
+
+            for (let i = 0; i < NEURON_COUNT; i++) {
+                const keep = Math.random() >= dropoutRate;
+                dropMask[i] = keep;
+                if (keep) activeCount++;
+            }
+
+            updateVisuals();
+            updateUI(activeCount);
+        }
+
+        function updateVisuals() {
+            neurons.forEach((n, i) => {
+                const isActive = isTraining ? dropMask[i] : true;
+                n.userData.active = isActive;
+            });
+        }
+
+        function updateUI(active) {
+            const count = isTraining ? active : NEURON_COUNT;
+            document.getElementById('activeCount').innerText = count;
+            document.getElementById('droppedCount').innerText = NEURON_COUNT - count;
+            document.getElementById('headActive').innerText = count;
+        }
+
+        function updateHyperparams(e) {
+            dropoutRate = parseFloat(e.target.value);
+            document.getElementById('rateDisplay').innerText = dropoutRate.toFixed(2);
+            document.getElementById('keepProbDisplay').innerText = Math.round((1 - dropoutRate) * 100) + "%";
+
+            const scale = dropoutRate >= 1 ? "∞" : (1 / (1 - dropoutRate)).toFixed(2);
+            document.getElementById('scaleDisplay').innerText = scale + "x";
+
+            if (isTraining) generateMask();
+        }
+
+        window.setMode = function (mode) {
+            isTraining = (mode === 'training');
+
+            // Update Visual Toggle
+            document.querySelectorAll('.mode-opt').forEach(el => el.classList.remove('active'));
+            document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+
+            document.getElementById('headState').innerText = mode.toUpperCase();
+            document.getElementById('rateSlider').disabled = !isTraining;
+            document.getElementById('regenerateBtn').disabled = !isTraining;
+
+            if (isTraining) {
+                generateMask();
+            } else {
+                updateVisuals();
+                updateUI(NEURON_COUNT);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            neurons.forEach(n => {
+                // Determine target state
+                const isActive = n.userData.active;
+                const targetScale = isActive ? 1.0 : 0.5;
+                const targetOpacity = isActive ? 0.5 : 0.05;
+                const targetEmissive = isActive ? 0.5 : 0.0;
+
+                // Lerp scale for smooth transition
+                n.userData.currentScale += (targetScale - n.userData.currentScale) * 0.1;
+                n.scale.setScalar(n.userData.currentScale);
+
+                // Material Animation
+                if (isActive) {
+                    n.material.color.setHex(COLORS.active);
+                    n.material.emissive.setHex(COLORS.active);
+                    // Pulse
+                    const pulse = Math.sin(time * 3 + n.userData.pulseOffset) * 0.2 + 0.5;
+                    n.material.emissiveIntensity = pulse;
+                    n.material.wireframe = false;
+                    n.children[0].visible = true; // Show shell
+
+                    // Gentle float
+                    n.position.y = n.userData.basePos.y + Math.sin(time + n.userData.pulseOffset) * 0.5;
+                } else {
+                    n.material.color.setHex(COLORS.dropped);
+                    n.material.emissive.setHex(0x000000);
+                    n.material.emissiveIntensity = 0;
+                    n.material.wireframe = true; // Turn to wireframe
+                    n.children[0].visible = false; // Hide shell
+
+                    // Rotation for dropped elements
+                    n.rotation.x += 0.02;
+                    n.rotation.y += 0.02;
+
+                    n.position.copy(n.userData.basePos); // Reset float
+                }
+            });
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Add initial call
+        init();
+    </script>
+    <div
+        style="position:fixed; bottom:14px; right:24px; z-index:9999; font-family:'Outfit','Segoe UI',sans-serif; font-weight:600; font-size:13px; color:rgba(247,37,133,0.7); letter-spacing:3px; text-transform:uppercase; pointer-events:none; text-shadow:0 0 8px rgba(247,37,133,0.3);">
+        IZZELDEENM@GMAIL.COM</div>
+</body>
+
+</html>

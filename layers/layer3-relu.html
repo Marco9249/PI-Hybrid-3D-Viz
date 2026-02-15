@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer 3: ReLU Activation | Physics-Informed CNN-BiLSTM</title>
+    <style>
+        :root {
+            --green: #00FF88;
+            --cyan: #00F2FF;
+            --red: #FF3C3C;
+            --gold: #FFD700;
+            --bg-dark: #0A0A0F;
+            --panel-bg: rgba(10, 10, 20, 0.92);
+            --glass-border: rgba(0, 255, 136, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Outfit', sans-serif;
+            background: #030308;
+            color: #fff;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            border-bottom: 2px solid var(--green);
+        }
+
+        .layer-badge {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .layer-num {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--green), #00CC66);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 900;
+            color: #000;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 40px rgba(0, 255, 136, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 60px rgba(0, 255, 136, 0.9);
+            }
+        }
+
+        .layer-title h1 {
+            font-size: 28px;
+            background: linear-gradient(90deg, var(--green), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .layer-title p {
+            font-size: 14px;
+            color: var(--cyan);
+            letter-spacing: 2px;
+        }
+
+        .back-btn {
+            padding: 12px 25px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid var(--green);
+            border-radius: 12px;
+            color: var(--green);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--green);
+            color: #000;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover:not(.disabled) {
+            background: var(--green);
+            color: #000;
+            box-shadow: 0 0 20px var(--green);
+        }
+
+        .nav-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .stat-box {
+            background: var(--panel-bg);
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            color: var(--green);
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        /* Crystalline Panels */
+        .left-panel {
+            position: fixed;
+            left: 20px;
+            top: 100px;
+            width: 340px;
+            max-height: calc(100vh - 120px);
+            background: rgba(10, 10, 25, 0.75);
+            backdrop-filter: blur(30px) saturate(140%);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 30px;
+            padding: 30px;
+            z-index: 50;
+            overflow-y: auto;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+        }
+
+        .panel-title {
+            font-size: 13px;
+            color: var(--green);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        /* Function Graph */
+        .function-graph {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .graph-canvas {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .graph-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .graph-axis {
+            stroke: rgba(255, 255, 255, 0.3);
+            stroke-width: 1;
+        }
+
+        .graph-line {
+            fill: none;
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        .graph-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Comparison Buttons */
+        .activation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .activation-btn {
+            padding: 12px 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .activation-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .activation-btn.active {
+            border-color: var(--green);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .activation-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .activation-eq {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: monospace;
+            margin-top: 4px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 3px solid var(--green);
+        }
+
+        .stat-card-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .stat-card-value.positive {
+            color: var(--green);
+        }
+
+        .stat-card-value.negative {
+            color: var(--red);
+        }
+
+        .stat-card-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            position: fixed;
+            right: 20px;
+            top: 100px;
+            width: 340px;
+            max-height: calc(100vh - 120px);
+            background: rgba(10, 10, 25, 0.75);
+            backdrop-filter: blur(30px) saturate(140%);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 30px;
+            padding: 30px;
+            z-index: 50;
+            overflow-y: auto;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+        }
+
+        .control-group {
+            margin-bottom: 18px;
+        }
+
+        .control-label {
+            font-size: 11px;
+            color: var(--green);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .control-value {
+            color: var(--cyan);
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--green), #00CC66);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .toggle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--green);
+        }
+
+        .toggle-btn.active {
+            background: var(--green);
+            color: #000;
+        }
+
+        .play-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--green), #00CC66);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4);
+        }
+
+        /* Histogram */
+        .histogram-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .histogram-title {
+            font-size: 11px;
+            color: var(--cyan);
+            margin-bottom: 10px;
+        }
+
+        .histogram {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 80px;
+        }
+
+        .hist-bar {
+            flex: 1;
+            background: var(--green);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.3s;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(0, 242, 255, 0.05));
+            padding: 18px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--green);
+        }
+
+        .info-card h4 {
+            font-size: 13px;
+            color: var(--cyan);
+            margin-bottom: 10px;
+        }
+
+        .info-card p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.7;
+        }
+
+        .equation-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 12px;
+            font-family: monospace;
+            border-left: 4px solid var(--cyan);
+            margin-bottom: 15px;
+        }
+
+        .equation-label {
+            font-size: 10px;
+            color: var(--green);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .equation {
+            font-size: 14px;
+            color: var(--cyan);
+            margin: 6px 0;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 136, 0.2);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--green);
+            border-radius: 3px;
+        }
+
+        /* NEW VISUAL EFFECTS */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        #cursor {
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--green);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1);
+            mix-blend-mode: difference;
+        }
+
+        #cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            box-shadow: 0 0 10px var(--green);
+        }
+
+        .layer-title h1 {
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.5), 0 0 60px rgba(0, 242, 255, 0.3);
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            }
+
+            50% {
+                text-shadow: 0 0 50px rgba(0, 255, 136, 0.8), 0 0 80px rgba(0, 242, 255, 0.5);
+            }
+        }
+
+        /* Panel Tilt Effect */
+        .left-panel,
+        .right-panel {
+            transition: transform 0.1s;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .left-panel:hover,
+        .right-panel:hover {
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.15);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cursor"></div>
+    <div id="cursor-dot"></div>
+    <canvas id="bg-canvas"></canvas>
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <header class="header">
+        <div class="layer-badge">
+            <div class="layer-num">3</div>
+            <div class="layer-title">
+                <h1>ReLU Activation</h1>
+                <p>Rectified Linear Unit</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <a href="layer2-batchnorm.html" class="nav-btn">← PREV</a>
+            <a href="../index.html" class="nav-btn">HOME</a>
+            <a href="layer4-dropout1.html" class="nav-btn">NEXT →</a>
+        </div>
+
+        <div class="header-stats">
+            <div class="stat-box">
+                <div class="stat-label">Input</div>
+                <div class="stat-value">(24,64)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Output</div>
+                <div class="stat-value">(24,64)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Params</div>
+                <div class="stat-value">0</div>
+            </div>
+        </div>
+    </header>
+
+    <div id="canvas-container"></div>
+
+    <div class="left-panel">
+        <div class="panel-title">📈 Activation Function</div>
+
+        <div class="function-graph">
+            <div class="graph-canvas">
+                <svg class="graph-svg" viewBox="0 0 280 200">
+                    <!-- Axes -->
+                    <line x1="140" y1="0" x2="140" y2="200" class="graph-axis" />
+                    <line x1="0" y1="100" x2="280" y2="200" class="graph-axis" />
+
+                    <!-- ReLU line -->
+                    <path id="reluPath" class="graph-line" stroke="#00FF88" d="M 0 100 L 140 100 L 280 0" />
+
+                    <!-- Comparison line -->
+                    <path id="comparePath" class="graph-line" stroke="rgba(255,255,255,0.3)" d="" />
+
+                    <!-- Labels -->
+                    <text x="270" y="110" fill="rgba(255,255,255,0.5)" font-size="10">x</text>
+                    <text x="145" y="15" fill="rgba(255,255,255,0.5)" font-size="10">y</text>
+                    <text x="145" y="97" fill="rgba(255,255,255,0.5)" font-size="8">0</text>
+                </svg>
+            </div>
+            <div class="graph-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--green);"></div>
+                    <span>ReLU</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255,255,255,0.3);"></div>
+                    <span id="compareName">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-title">🔄 Compare Activations</div>
+
+        <div class="activation-grid">
+            <div class="activation-btn active" data-type="relu">
+                <div class="activation-name">ReLU</div>
+                <div class="activation-eq">max(0,x)</div>
+            </div>
+            <div class="activation-btn" data-type="leaky">
+                <div class="activation-name">Leaky</div>
+                <div class="activation-eq">αx if x &lt; 0</div>
+            </div>
+            <div class="activation-btn" data-type="elu">
+                <div class="activation-name">ELU</div>
+                <div class="activation-eq">α(eˣ-1)</div>
+            </div>
+            <div class="activation-btn" data-type="sigmoid">
+                <div class="activation-name">Sigmoid</div>
+                <div class="activation-eq">1/(1+e⁻ˣ)</div>
+            </div>
+            <div class="activation-btn" data-type="tanh">
+                <div class="activation-name">Tanh</div>
+                <div class="activation-eq">(eˣ-e⁻ˣ)/...</div>
+            </div>
+            <div class="activation-btn" data-type="gelu">
+                <div class="activation-name">GELU</div>
+                <div class="activation-eq">x·Φ(x)</div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-value positive" id="positiveCount">856</div>
+                <div class="stat-card-label">Positive Values</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-value negative" id="negativeCount">680</div>
+                <div class="stat-card-label">Zeroed (Negative)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-value" style="color: var(--cyan);" id="sparsity">44%</div>
+                <div class="stat-card-label">Sparsity</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-value" style="color: var(--gold);" id="meanOutput">0.42</div>
+                <div class="stat-card-label">Mean Output</div>
+            </div>
+        </div>
+
+        <div class="equation-box">
+            <div class="equation-label">ReLU Formula</div>
+            <div class="equation">f(x) = max(0, x)</div>
+            <div class="equation">f'(x) = 1 if x > 0, else 0</div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="panel-title">🎮 Controls</div>
+
+        <button class="play-btn" id="playBtn">▶️ Play Animation</button>
+
+        <div class="control-group">
+            <div class="control-label">
+                <span>Threshold</span>
+                <span class="control-value" id="thresholdValue">0.00</span>
+            </div>
+            <input type="range" id="thresholdSlider" min="-1" max="1" step="0.01" value="0">
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <span>Animation Speed</span>
+                <span class="control-value" id="speedValue">1.0x</span>
+            </div>
+            <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+        </div>
+
+        <div class="toggle-grid">
+            <button class="toggle-btn active" id="beforeToggle">📊 Before</button>
+            <button class="toggle-btn active" id="afterToggle">✅ After</button>
+            <button class="toggle-btn" id="rotateToggle">🔄 Auto Rotate</button>
+            <button class="toggle-btn active" id="flowToggle">✨ Particles</button>
+        </div>
+
+        <div class="panel-title">📊 Distribution</div>
+
+        <div class="histogram-container">
+            <div class="histogram-title">Before ReLU</div>
+            <div class="histogram" id="histBefore"></div>
+        </div>
+
+        <div class="histogram-container">
+            <div class="histogram-title">After ReLU</div>
+            <div class="histogram" id="histAfter"></div>
+        </div>
+
+        <div class="info-card">
+            <h4>🔥 Why ReLU?</h4>
+            <p>ReLU introduces non-linearity while being computationally efficient. It helps avoid vanishing
+                gradients and enables learning complex patterns.</p>
+        </div>
+
+        <div class="info-card">
+            <h4>⚠️ Dead Neurons</h4>
+            <p>Neurons with consistently negative inputs may "die" and stop learning. Leaky ReLU variants address
+                this issue.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script>
+        let scene, camera, renderer, controls, clock, composer;
+        let beforeBars = [], afterBars = [];
+        let flowParticles;
+        let isPlaying = false;
+        let animSpeed = 1.0;
+        let threshold = 0;
+        let showBefore = true, showAfter = true, showFlow = true;
+        let inputData = [];
+
+        const activationFunctions = {
+            relu: x => Math.max(0, x),
+            leaky: x => x >= 0 ? x : 0.01 * x,
+            elu: x => x >= 0 ? x : 1.0 * (Math.exp(x) - 1),
+            sigmoid: x => 1 / (1 + Math.exp(-x)),
+            tanh: x => Math.tanh(x),
+            gelu: x => 0.5 * x * (1 + Math.tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * x * x * x)))
+        };
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0f);
+            scene.fog = new THREE.FogExp2(0x0a0a0f, 0.015);
+
+            camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 500);
+            camera.position.set(0, 25, 45);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            clock = new THREE.Clock();
+
+            setupLights();
+            generateData();
+            createBars();
+            createFlowParticles();
+            setupHistograms();
+            setupEventListeners();
+            updateStats();
+            setupPostProcessing();
+            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 500);
+            setupTheme();
+            animate();
+        }
+
+        function setupPostProcessing() {
+            composer = new THREE.EffectComposer(renderer);
+            composer.addPass(new THREE.RenderPass(scene, camera));
+            composer.addPass(new THREE.UnrealBloomPass(
+                new THREE.Vector2(innerWidth, innerHeight),
+                1.2, // Strength
+                0.4, // Radius
+                0.85 // Threshold
+            ));
+        }
+
+        function setupLights() {
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            const l1 = new THREE.PointLight(0x00FF88, 3, 100);
+            l1.position.set(30, 40, 30);
+            scene.add(l1);
+            const l2 = new THREE.PointLight(0xFF3C3C, 2, 100);
+            l2.position.set(-30, 30, 30);
+            scene.add(l2);
+
+            // Reflector Ground Plane
+            const groundGeo = new THREE.PlaneGeometry(1000, 1000);
+            const groundMat = new THREE.MeshStandardMaterial({
+                color: 0x020205,
+                metalness: 0.95,
+                roughness: 0.05
+            });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -2;
+            scene.add(ground);
+        }
+
+        function generateData() {
+            inputData = [];
+            for (let i = 0; i < 100; i++) {
+                inputData.push((Math.random() - 0.5) * 4);
+            }
+        }
+
+        function createBars() {
+            const spacing = 0.8;
+            const width = 0.5;
+            const startX = -40;
+
+            // Before bars (left side)
+            for (let i = 0; i < 50; i++) {
+                const value = inputData[i];
+                const height = Math.abs(value) + 0.2;
+
+                const geometry = new THREE.BoxGeometry(width, height, width);
+                const material = new THREE.MeshPhongMaterial({
+                    color: value >= 0 ? 0x00FF88 : 0xFF3C3C,
+                    emissive: value >= 0 ? 0x00FF88 : 0xFF3C3C,
+                    emissiveIntensity: 0.3,
+                    transparent: true,
+                    opacity: 0.85
+                });
+
+                const bar = new THREE.Mesh(geometry, material);
+                bar.position.set(startX + i * spacing, height / 2, -5);
+                bar.userData = { value, originalHeight: height, index: i };
+
+                scene.add(bar);
+                beforeBars.push(bar);
+            }
+
+            // After bars (right side)
+            for (let i = 0; i < 50; i++) {
+                const value = inputData[i];
+                const activated = Math.max(threshold, value);
+                const height = Math.max(0.1, Math.abs(activated) + 0.2);
+
+                const geometry = new THREE.BoxGeometry(width, height, width);
+                const material = new THREE.MeshPhongMaterial({
+                    color: activated > 0 ? 0x00FF88 : 0x333333,
+                    emissive: activated > 0 ? 0x00FF88 : 0x111111,
+                    emissiveIntensity: activated > 0 ? 0.4 : 0.1,
+                    transparent: true,
+                    opacity: activated > 0 ? 0.9 : 0.4
+                });
+
+                const bar = new THREE.Mesh(geometry, material);
+                bar.position.set(startX + i * spacing, height / 2, 5);
+                bar.userData = { value, activated, originalHeight: height, index: i };
+
+                scene.add(bar);
+                afterBars.push(bar);
+            }
+
+            // Labels
+            createLabel('Before ReLU', -20, 8, -5);
+            createLabel('After ReLU', -20, 8, 5);
+        }
+
+        function createLabel(text, x, y, z) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 64;
+            ctx.font = 'bold 32px Arial';
+            ctx.fillStyle = '#00F2FF';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, 128, 40);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.position.set(x, y, z);
+            sprite.scale.set(15, 4, 1);
+            scene.add(sprite);
+        }
+
+        function createFlowParticles() {
+            const count = 300;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = -40 + Math.random() * 40;
+                positions[i * 3 + 1] = Math.random() * 8;
+                positions[i * 3 + 2] = -5 + Math.random() * 10;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const material = new THREE.PointsMaterial({
+                color: 0x00FF88,
+                size: 0.2,
+                transparent: true,
+                opacity: 0.7,
+                blending: THREE.AdditiveBlending
+            });
+
+            flowParticles = new THREE.Points(geometry, material);
+            scene.add(flowParticles);
+        }
+
+        function setupHistograms() {
+            const bins = 20;
+            const beforeHist = document.getElementById('histBefore');
+            const afterHist = document.getElementById('histAfter');
+
+            // Calculate distributions
+            const beforeBins = new Array(bins).fill(0);
+            const afterBins = new Array(bins).fill(0);
+
+            inputData.forEach(v => {
+                const idx = Math.min(bins - 1, Math.max(0, Math.floor((v + 2) / 4 * bins)));
+                beforeBins[idx]++;
+
+                const activated = Math.max(0, v);
+                const aIdx = Math.min(bins - 1, Math.max(0, Math.floor(activated / 2 * bins)));
+                afterBins[aIdx]++;
+            });
+
+            const maxBefore = Math.max(...beforeBins) || 1;
+            const maxAfter = Math.max(...afterBins) || 1;
+
+            beforeHist.innerHTML = '';
+            afterHist.innerHTML = '';
+
+            for (let i = 0; i < bins; i++) {
+                const bar1 = document.createElement('div');
+                bar1.className = 'hist-bar';
+                bar1.style.height = (beforeBins[i] / maxBefore * 100) + '%';
+                bar1.style.background = i < bins / 2 ? '#FF3C3C' : '#00FF88';
+                beforeHist.appendChild(bar1);
+
+                const bar2 = document.createElement('div');
+                bar2.className = 'hist-bar';
+                bar2.style.height = (afterBins[i] / maxAfter * 100) + '%';
+                afterHist.appendChild(bar2);
+            }
+        }
+
+        function updateStats() {
+            let positive = 0, negative = 0, sum = 0;
+            inputData.forEach(v => {
+                const activated = Math.max(threshold, v);
+                if (activated > 0) {
+                    positive++;
+                    sum += activated;
+                } else {
+                    negative++;
+                }
+            });
+
+            document.getElementById('positiveCount').textContent = positive;
+            document.getElementById('negativeCount').textContent = negative;
+            document.getElementById('sparsity').textContent = Math.round(negative / inputData.length * 100) + '%';
+            document.getElementById('meanOutput').textContent = (sum / positive).toFixed(2);
+        }
+
+        function updateThreshold() {
+            afterBars.forEach((bar, i) => {
+                const value = inputData[i];
+                const activated = Math.max(threshold, value);
+                const height = Math.max(0.1, Math.abs(activated) + 0.2);
+
+                bar.scale.y = height / bar.userData.originalHeight;
+                bar.position.y = height / 2;
+
+                if (activated > 0) {
+                    bar.material.color.setHex(0x00FF88);
+                    bar.material.emissive.setHex(0x00FF88);
+                    bar.material.emissiveIntensity = 0.4;
+                    bar.material.opacity = 0.9;
+                } else {
+                    bar.material.color.setHex(0x333333);
+                    bar.material.emissive.setHex(0x111111);
+                    bar.material.emissiveIntensity = 0.1;
+                    bar.material.opacity = 0.4;
+                }
+            });
+
+            updateStats();
+        }
+
+        function drawComparisonGraph(type) {
+            const path = document.getElementById('comparePath');
+            const name = document.getElementById('compareName');
+
+            if (type === 'relu') {
+                path.setAttribute('d', '');
+                name.textContent = '-';
+                return;
+            }
+
+            name.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+            const fn = activationFunctions[type];
+
+            let d = '';
+            for (let i = 0; i <= 280; i += 5) {
+                const x = (i / 280) * 4 - 2; // -2 to 2
+                let y = fn(x);
+                y = Math.max(-1, Math.min(y, 1.5)); // clip
+                const py = 100 - y * 50;
+                d += (i === 0 ? 'M ' : ' L ') + i + ' ' + py;
+            }
+
+            path.setAttribute('d', d);
+        }
+
+        function setupEventListeners() {
+            window.addEventListener('resize', () => {
+                camera.aspect = innerWidth / innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(innerWidth, innerHeight);
+            });
+
+            document.getElementById('playBtn').addEventListener('click', function () {
+                isPlaying = !isPlaying;
+                this.innerHTML = isPlaying ? '⏸️ Pause' : '▶️ Play Animation';
+            });
+
+            document.getElementById('thresholdSlider').addEventListener('input', (e) => {
+                threshold = parseFloat(e.target.value);
+                document.getElementById('thresholdValue').textContent = threshold.toFixed(2);
+                updateThreshold();
+            });
+
+            document.getElementById('speedSlider').addEventListener('input', (e) => {
+                animSpeed = parseFloat(e.target.value);
+                document.getElementById('speedValue').textContent = animSpeed.toFixed(1) + 'x';
+            });
+
+            document.getElementById('beforeToggle').addEventListener('click', function () {
+                showBefore = !showBefore;
+                beforeBars.forEach(b => b.visible = showBefore);
+                this.classList.toggle('active');
+            });
+
+            document.getElementById('afterToggle').addEventListener('click', function () {
+                showAfter = !showAfter;
+                afterBars.forEach(b => b.visible = showAfter);
+                this.classList.toggle('active');
+            });
+
+            document.getElementById('rotateToggle').addEventListener('click', function () {
+                controls.autoRotate = !controls.autoRotate;
+                this.classList.toggle('active');
+            });
+
+            document.getElementById('flowToggle').addEventListener('click', function () {
+                showFlow = !showFlow;
+                flowParticles.visible = showFlow;
+                this.classList.toggle('active');
+            });
+
+            // Activation comparison buttons
+            document.querySelectorAll('.activation-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.activation-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    drawComparisonGraph(this.dataset.type);
+                });
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const elapsed = clock.getElapsedTime() * animSpeed;
+            controls.update();
+
+            // Animate bars
+            if (isPlaying) {
+                beforeBars.forEach((bar, i) => {
+                    const wave = Math.sin(elapsed * 2 + i * 0.15) * 0.15;
+                    bar.scale.y = 1 + wave;
+                });
+
+                afterBars.forEach((bar, i) => {
+                    if (bar.userData.activated > 0) {
+                        const wave = Math.sin(elapsed * 3 + i * 0.1) * 0.1;
+                        bar.scale.y = (1 + wave) * (bar.userData.originalHeight / bar.userData.originalHeight);
+                    }
+                });
+            }
+
+            // Flow particles
+            if (showFlow && flowParticles) {
+                const pos = flowParticles.geometry.attributes.position.array;
+                for (let i = 0; i < pos.length / 3; i++) {
+                    pos[i * 3 + 2] += 0.05; // move towards after
+                    pos[i * 3 + 1] += Math.sin(elapsed * 2 + i * 0.2) * 0.02;
+
+                    if (pos[i * 3 + 2] > 10) {
+                        pos[i * 3 + 2] = -5;
+                        pos[i * 3] = -40 + Math.random() * 40;
+                        pos[i * 3 + 1] = Math.random() * 8;
+                    }
+                }
+                flowParticles.geometry.attributes.position.needsUpdate = true;
+            }
+
+            if (composer) {
+                composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
+        }
+
+        init();
+        function setupTheme() {
+            // Cursor
+            const cursor = document.getElementById('cursor');
+            const cursorDot = document.getElementById('cursor-dot');
+            document.addEventListener('mousemove', e => {
+                cursor.style.left = e.clientX - 15 + 'px';
+                cursor.style.top = e.clientY - 15 + 'px';
+                cursorDot.style.left = e.clientX - 4 + 'px';
+                cursorDot.style.top = e.clientY - 4 + 'px';
+            });
+
+            // 🌟 CELESTIAL BACKGROUND SYSTEM
+            const canvas = document.getElementById('bg-canvas');
+            const bgScene = new THREE.Scene();
+            bgScene.fog = new THREE.FogExp2(0x050510, 0.0015); // Deep space fog
+
+            const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const bgRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            bgRenderer.setSize(window.innerWidth, window.innerHeight);
+            bgRenderer.setPixelRatio(window.devicePixelRatio); // Sharp rendering
+
+            // 1. Distant Starfield
+            const starGeo = new THREE.BufferGeometry();
+            const starCount = 1500;
+            const starPos = new Float32Array(starCount * 3);
+            const starSizes = new Float32Array(starCount);
+
+            for (let i = 0; i < starCount; i++) {
+                starPos[i * 3] = (Math.random() - 0.5) * 600;
+                starPos[i * 3 + 1] = (Math.random() - 0.5) * 600;
+                starPos[i * 3 + 2] = -200 - Math.random() * 400;
+                starSizes[i] = Math.random() < 0.1 ? 0.3 : 0.1;
+            }
+            starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+            starGeo.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+            const starMat = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.8, sizeAttenuation: true, transparent: true, opacity: 0.8 });
+            const starSystem = new THREE.Points(starGeo, starMat);
+            bgScene.add(starSystem);
+
+            // 2. Interactive "Asteroids" / Neural Nodes
+            const particleCount = 200;
+            const particles = new THREE.BufferGeometry();
+            const posArray = new Float32Array(particleCount * 3);
+            const particlesData = [];
+
+            for (let i = 0; i < particleCount; i++) {
+                posArray[i * 3] = (Math.random() - 0.5) * 40;
+                posArray[i * 3 + 1] = (Math.random() - 0.5) * 40;
+                posArray[i * 3 + 2] = (Math.random() - 0.5) * 40;
+                particlesData.push({
+                    velocity: new THREE.Vector3(-0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02),
+                    numConnections: 0
+                });
+            }
+            particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particleMat = new THREE.PointsMaterial({ size: 0.25, color: 0x00F2FF, transparent: true, opacity: 0.6 });
+            const particleMesh = new THREE.Points(particles, particleMat);
+            bgScene.add(particleMesh);
+
+            const lineGeo = new THREE.BufferGeometry();
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x00FF88, transparent: true, opacity: 0.15 });
+            const lines = new THREE.LineSegments(lineGeo, lineMat);
+            bgScene.add(lines);
+
+            bgCamera.position.z = 10;
+            let mouseX = 0, mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            function animateBG() {
+                requestAnimationFrame(animateBG);
+
+                // Slow rotation
+                bgScene.rotation.y += 0.0005;
+                starSystem.rotation.y -= 0.0002;
+
+                bgScene.rotation.x += (mouseY * 0.05 - bgScene.rotation.x) * 0.05;
+                bgScene.rotation.y += (mouseX * 0.05 - bgScene.rotation.y) * 0.05;
+
+                const positions = particles.attributes.position.array;
+                const linePositions = [];
+
+                for (let i = 0; i < particleCount; i++) {
+                    positions[i * 3] += particlesData[i].velocity.x;
+                    positions[i * 3 + 1] += particlesData[i].velocity.y;
+                    positions[i * 3 + 2] += particlesData[i].velocity.z;
+
+                    if (positions[i * 3] < -20) positions[i * 3] = 20;
+                    if (positions[i * 3] > 20) positions[i * 3] = -20;
+                    if (positions[i * 3 + 1] < -20) positions[i * 3 + 1] = 20;
+                    if (positions[i * 3 + 1] > 20) positions[i * 3 + 1] = -20;
+                    if (positions[i * 3 + 2] < -20) positions[i * 3 + 2] = 20;
+                    if (positions[i * 3 + 2] > 20) positions[i * 3 + 2] = -20;
+
+                    for (let j = i + 1; j < particleCount; j++) {
+                        const dx = positions[i * 3] - positions[j * 3];
+                        const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
+                        const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
+                        if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 4) {
+                            linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2], positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]);
+                        }
+                    }
+                }
+                particles.attributes.position.needsUpdate = true;
+                lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+                bgRenderer.render(bgScene, bgCamera);
+            }
+            animateBG();
+
+            // Tilt Effect
+            document.querySelectorAll('.left-panel, .right-panel').forEach(panel => {
+                panel.addEventListener('mousemove', (e) => {
+                    const rect = panel.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -2;
+                    const rotateY = ((x - centerX) / centerX) * 2;
+                    panel.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+                panel.addEventListener('mouseleave', () => {
+                    panel.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

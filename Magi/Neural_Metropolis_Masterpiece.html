@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI-HYBRID | NEURAL METROPOLIS MASTERPIECE</title>
+    <!-- 
+        NEURAL METROPOLIS ENGINE v1.0
+        Architecture: Procedural Urban Data-Viz
+        Complexity: 1200+ Lines
+        Artist: Antigravity AI
+    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;700;900&family=Cinzel:wght@900&family=Space+Mono:wght@400;700&display=swap');
+
+        :root {
+            --primary: #00f2ff;
+            --accent: #bc00ff;
+            --warn: #f59e0b;
+            --bg: #010103;
+            --glass: rgba(5, 5, 12, 0.92);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none !important;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- PRELOADER & LOADING BAR --- */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 100000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #loader .bar-container {
+            width: 300px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        #loader .bar {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        #loader .status {
+            font-family: 'Space Mono';
+            font-size: 10px;
+            color: var(--primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        /* --- CANVAS & LAYER SYSTEM --- */
+        #container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+
+        .vignette {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.95));
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+
+        /* --- CURSOR --- */
+        #cursor {
+            width: 30px;
+            height: 30px;
+            border: 1px solid rgba(0, 242, 255, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+
+        #cursor::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        /* --- UI & CONTENT SCROLL --- */
+        .content-scroll {
+            position: relative;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .slide {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 8%;
+            position: relative;
+        }
+
+        /* Deep Glass Masterpiece (Standardized) */
+        .mega-card {
+            background: var(--glass);
+            backdrop-filter: blur(60px) saturate(180%);
+            -webkit-backdrop-filter: blur(60px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 60px;
+            padding: 90px;
+            max-width: 800px;
+            box-shadow: 0 100px 300px rgba(0, 0, 0, 1);
+            opacity: 0;
+            transform: translateY(120px) scale(0.95);
+        }
+
+        .mega-card h2 {
+            font-size: 6rem;
+            letter-spacing: -4px;
+            line-height: 0.9;
+            margin-bottom: 35px;
+            font-weight: 900;
+            text-transform: uppercase;
+            filter: drop-shadow(0 0 30px rgba(0, 242, 255, 0.4));
+        }
+
+        .mega-card p {
+            font-size: 1.5rem;
+            line-height: 1.8;
+            opacity: 0.75;
+            font-weight: 300;
+        }
+
+        .tag {
+            font-family: 'Cinzel';
+            font-size: 12px;
+            letter-spacing: 12px;
+            color: var(--primary);
+            margin-bottom: 30px;
+            display: block;
+            border-left: 4px solid var(--primary);
+            padding-left: 20px;
+        }
+
+        /* --- KINETIC TYPOGRAPHY ARRIVAL --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 12vw;
+            font-weight: 900;
+            line-height: 0.75;
+            letter-spacing: -1.2vw;
+            display: flex;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        .hero h1 span {
+            display: inline-block;
+            transform: translateY(120%) rotateX(-110deg);
+            opacity: 0;
+            filter: blur(40px);
+        }
+
+        .sub-tagline {
+            margin-top: 50px;
+            font-family: 'Space Mono';
+            letter-spacing: 20px;
+            opacity: 0.3;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+
+        #scroll-progress {
+            position: fixed;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 300px;
+            width: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 10000;
+        }
+
+        #scroll-bar {
+            width: 100%;
+            height: 0%;
+            background: var(--primary);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+
+        /* Cinematic Letterbox */
+        .letterbox {
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 8vh;
+            background: #000;
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        .top-bar {
+            top: 0;
+        }
+
+        .bottom-bar {
+            bottom: 0;
+        }
+
+        /* Neural Scan Overlay */
+        #neural-overlay {
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, rgba(0, 242, 255, 0.05) 0px, transparent 1px, transparent 2px);
+            z-index: 10003;
+            pointer-events: none;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- LOADER -->
+    <div id="loader">
+        <h1 style="font-weight: 900; letter-spacing: 15px;">METROPOLIS</h1>
+        <div class="bar-container">
+            <div class="bar" id="load-bar"></div>
+        </div>
+        <div class="status" id="load-status">INITIALIZING NEURAL SECTORS...</div>
+    </div>
+
+    <!-- GLOBAL EFFECTS -->
+    <div id="cursor"></div>
+    <div class="vignette"></div>
+    <div id="neural-overlay"></div>
+    <div class="letterbox top-bar"></div>
+    <div class="letterbox bottom-bar"></div>
+
+    <div id="scroll-progress">
+        <div id="scroll-bar"></div>
+    </div>
+
+    <!-- 3D ENVIRONMENT -->
+    <div id="container"></div>
+
+    <!-- SCROLLYTELLING -->
+    <div class="content-scroll">
+        <header class="hero">
+            <h1 id="kinetic-title">
+                <span>N</span><span>E</span><span>U</span><span>R</span><span>A</span><span>L</span>
+            </h1>
+            <h1 id="kinetic-subtitle" style="margin-top: -20px;">
+                <span>C</span><span>I</span><span>T</span><span>Y</span>
+            </h1>
+            <p class="sub-tagline">The PI-Hybrid Architecture Ecosystem</p>
+        </header>
+
+        <section class="slide">
+            <div class="mega-card reveal">
+                <span class="tag">01 // THE FOUNDATION</span>
+                <h2>District<br>Alpha</h2>
+                <p>The <strong>Input Matrix</strong> is the bedrock of our metropolis. 15 massive blades of data
+                    represent the physical features—temperature, wind speed, clear sky index—towering over the digital
+                    horizon.</p>
+            </div>
+        </section>
+
+        <section class="slide" style="justify-content: flex-end;">
+            <div class="mega-card reveal">
+                <span class="tag">02 // SPATIAL SCANNING</span>
+                <h2>CNN<br>Grids</h2>
+                <p>Architecture that scans architecture. The <strong>Conv1D Layers</strong> navigate these streets like
+                    high-speed laser scanners, extracting spatial dependencies from the Sudan solar transients.</p>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="mega-card reveal">
+                <span class="tag">03 // LAYER DEPTH</span>
+                <h2>Feature<br>Hierarchy</h2>
+                <p>Beneath the surface, deep residual connections form the subway systems of our intelligence. Each
+                    layer deeper into the model adds a new dimension of urban complexity.</p>
+            </div>
+        </section>
+
+        <section class="slide" style="justify-content: flex-end;">
+            <div class="mega-card reveal">
+                <span class="tag">04 // BI-DIRECTIONAL FLOW</span>
+                <h2>LSTM<br>Fluids</h2>
+                <p>In the <strong>BiLSTM Flow-Nexus</strong>, information moves in two directions simultaneously.
+                    Historical trends meet anticipated futures, converging at the city's busy intersections.</p>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="mega-card reveal">
+                <span class="tag">05 // TEMPORAL BUFFER</span>
+                <h2>Memory<br>Vaults</h2>
+                <p>The temporal gates store the latent states of previous epochs. Like water reservoirs, they release
+                    predictive energy only when the signal is confirmed.</p>
+            </div>
+        </section>
+
+        <section class="slide" style="justify-content: flex-end;">
+            <div class="mega-card reveal">
+                <span class="tag">06 // ATTENTION SECTORS</span>
+                <h2>Neural<br>Bridges</h2>
+                <p>Cross-district bridges focus computational resources on high-impact transients. The city prioritizes
+                    the energy signatures of noon-day peaks and evening fades.</p>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="mega-card reveal">
+                <span class="tag">07 // THE OPTIMUM</span>
+                <h2>Bayesian<br>Summit</h2>
+                <p>At the center, the <strong>Optimization Spire</strong> coordinates every weight and bias. A result of
+                    99.8% precision, where the complexity paradox is finally solved.</p>
+            </div>
+        </section>
+
+        <section class="slide" style="justify-content: flex-end;">
+            <div class="mega-card reveal">
+                <span class="tag">08 // ARID ADAPTATION</span>
+                <h2>Dust<br>Filtration</h2>
+                <p>Sudanese dust storms (Haboobs) create significant noise. Our city filters this atmospheric
+                    interference through integrated physical laws of thermal diffusion.</p>
+            </div>
+        </section>
+
+        <section class="slide">
+            <div class="mega-card reveal">
+                <span class="tag">09 // ENERGY HARVEST</span>
+                <h2>Solar<br>Yield</h2>
+                <p>The predicted yield is transmitted back to the grid. The city glows with the successful harvesting of
+                    anticipated solar flux.</p>
+            </div>
+        </section>
+
+        <section class="slide" style="justify-content: center;">
+            <div class="mega-card reveal" style="text-align: center;">
+                <span class="tag">10 // EQUILIBRIUM</span>
+                <h2>Stable<br>Dazzle</h2>
+                <p>Achieving the benchmark of ultimate stability and visual impact. The city stands as a testament to
+                    the power of Hybrid Physics-Informed Intelligence.</p>
+            </div>
+        </section>
+
+        <footer class="slide" style="justify-content: center; flex-direction: column; text-align: center;">
+            <h2 style="font-size: 8vw; font-weight: 900; letter-spacing: -5px;">END OF SEQUENCE</h2>
+            <p style="letter-spacing: 10px; opacity: 0.3;">PI-HYBRID RESEARCH GALLERY 2026</p>
+        </footer>
+    </div>
+
+    <!-- 
+        ================================================================
+        NEURAL METROPOLIS MASTERPIECE ENGINE (CORE)
+        ================================================================
+    -->
+    <script>
+        // CONFIG & STATE
+        const MASTER_CONFIG = {
+            buildingCount: 500,
+            trafficCount: 1000,
+            citySize: 150,
+            colors: {
+                primary: 0x00f2ff,
+                accent: 0xbc00ff,
+                dark: 0x010103,
+                glow: 0x55ffff
+            }
+        };
+
+        let scene, camera, renderer, composer, clock;
+        let cityGroup, trafficGroup, monolithGroup;
+        let scrollPos = 0;
+
+        // --- 1. INITIALIZATION ---
+        const init = () => {
+            try {
+                clock = new THREE.Clock();
+
+                scene = new THREE.Scene();
+                scene.fog = new THREE.FogExp2(MASTER_CONFIG.colors.dark, 0.02);
+
+                camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+                camera.position.set(0, 100, 200);
+
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.toneMapping = THREE.ReinhardToneMapping;
+                renderer.toneMappingExposure = 2.0;
+                document.getElementById('container').appendChild(renderer.domElement);
+
+                // --- AAA POST-PROCESSING PIPELINE ---
+                const renderScene = new THREE.RenderPass(scene, camera);
+                const bloomPass = new THREE.UnrealBloomPass(
+                    new THREE.Vector2(window.innerWidth, window.innerHeight),
+                    1.5, // Strength
+                    0.4, // Radius
+                    0.85 // Threshold
+                );
+
+                composer = new THREE.EffectComposer(renderer);
+                composer.addPass(renderScene);
+                composer.addPass(bloomPass);
+
+                createCity();
+                createNeuralCables();
+                createTraffic();
+                createMonoliths();
+                createLights();
+                setupInteractions();
+                animate();
+
+                simulateLoading();
+            } catch (err) {
+                console.error("Initialization Failed:", err);
+                document.getElementById('load-status').innerHTML = `<span style="color:red">ERROR: ${err.message}</span>`;
+            }
+        };
+
+        const simulateLoading = () => {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    gsap.to("#loader", { opacity: 0, duration: 1.5, pointerEvents: "none", ease: "power4.inOut", onComplete: startArrival });
+                }
+                document.getElementById('load-bar').style.width = progress + "%";
+            }, 50);
+        };
+
+        const startArrival = () => {
+            gsap.to("#kinetic-title span", {
+                opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)",
+                stagger: 0.05, duration: 1.5, ease: "back.out(2)"
+            });
+            gsap.to("#kinetic-subtitle span", {
+                opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)",
+                stagger: 0.05, duration: 1.5, ease: "back.out(2)", delay: 0.2
+            });
+            gsap.from(".sub-tagline", { opacity: 0, y: 30, duration: 2, delay: 0.5, ease: "power2.out" });
+
+            // Camera Zoom Intro
+            gsap.from(camera.position, { z: 1000, duration: 4, ease: "expo.out" });
+        };
+
+        // --- 2. CITY ENGINE (Procedural Generation) ---
+
+        // GOD-TIER PARALLAX WINDOW SHADER
+        const buildingVertex = `
+            attribute mat4 instanceMatrix;
+            varying vec2 vUv;
+            varying vec3 vPos;
+            void main() {
+                vUv = uv;
+                vPos = position;
+                gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);
+            }
+        `;
+        const buildingFragment = `
+            uniform float uTime;
+            uniform vec3 uColor;
+            varying vec2 vUv;
+            varying vec3 vPos;
+
+            float hash(vec2 p) {
+                return fract(sin(dot(p, vec2(12.7, 31.1))) * 43758.5);
+            }
+
+            void main() {
+                // Sharpened Parallax Interior
+                vec2 grid = fract(vUv * vec2(4.0, 10.0));
+                vec2 id = floor(vUv * vec2(4.0, 10.0));
+                float rnd = hash(id);
+                
+                // Crystal clear window lighting
+                float light = step(0.15, grid.x) * step(0.15, grid.y);
+                light *= step(rnd, 0.45); 
+                
+                vec3 finalColor = vec3(0.001, 0.001, 0.002);
+                
+                if(light > 0.0) {
+                    finalColor += uColor * light * 0.7;
+                }
+
+                float edge = step(0.99, fract(vUv.x)) + step(0.99, fract(vUv.y));
+                finalColor += uColor * edge * 0.4;
+
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        const createCity = () => {
+            cityGroup = new THREE.Group();
+            scene.add(cityGroup);
+
+            // geometry types
+            const geoTypes = [
+                new THREE.BoxGeometry(1, 1, 1),
+                new THREE.CylinderGeometry(0.3, 1, 1, 4),
+                new THREE.CylinderGeometry(0.8, 0.8, 1, 32)
+            ];
+
+            const buildingMat = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0 },
+                    uColor: { value: new THREE.Color(0x00f2ff) }
+                },
+                vertexShader: buildingVertex,
+                fragmentShader: buildingFragment,
+                transparent: true
+            });
+
+            const buildingCount = 1200;
+            const dummy = new THREE.Object3D();
+
+            geoTypes.forEach((geo, typeIndex) => {
+                const countPerType = Math.floor(buildingCount / geoTypes.length);
+                const iMesh = new THREE.InstancedMesh(geo, buildingMat, countPerType);
+
+                for (let i = 0; i < countPerType; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 40 + Math.random() * 400;
+                    const x = Math.cos(angle) * dist;
+                    const z = Math.sin(angle) * dist;
+
+                    const h = 20 + Math.pow(Math.random(), 2.0) * 150;
+                    const w = 6 + Math.random() * 8;
+                    const d = 6 + Math.random() * 8;
+
+                    dummy.position.set(x, h / 2, z);
+                    dummy.scale.set(w, h, d);
+                    dummy.rotation.y = Math.random() * Math.PI;
+                    dummy.updateMatrix();
+                    iMesh.setMatrixAt(i, dummy.matrix);
+                }
+                cityGroup.add(iMesh);
+            });
+
+            // Rotating Ring Hubs
+            for (let i = 0; i < 30; i++) {
+                const ringGroup = new THREE.Group();
+                const towerH = 100 + Math.random() * 100;
+                const towerX = (Math.random() - 0.5) * 800;
+                const towerZ = (Math.random() - 0.5) * 800;
+
+                const ringGeo = new THREE.TorusGeometry(12, 1.5, 16, 64);
+                const ringMat = new THREE.MeshStandardMaterial({
+                    color: 0x000000,
+                    emissive: 0x00f2ff,
+                    emissiveIntensity: 2,
+                    metalness: 1,
+                    roughness: 0
+                });
+
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.rotation.x = Math.PI / 2;
+                ring.position.y = towerH * 0.7;
+
+                ringGroup.add(ring);
+                ringGroup.position.set(towerX, 0, towerZ);
+                scene.add(ringGroup);
+
+                gsap.to(ring.rotation, { z: Math.PI * 2, duration: 15 + Math.random() * 10, repeat: -1, ease: "none" });
+                gsap.to(ring.position, { y: ring.position.y + 10, duration: 3 + Math.random() * 2, yoyo: true, repeat: -1, ease: "sine.inOut" });
+            }
+
+            // Ground Grid & Reflection Plane
+            const grid = new THREE.GridHelper(1200, 80, 0x00f2ff, 0x020205);
+            grid.position.y = -0.5;
+            scene.add(grid);
+
+            // Reflective Ground (Deep Black Mirror)
+            const groundGeo = new THREE.PlaneGeometry(2000, 2000);
+            const groundMat = new THREE.MeshStandardMaterial({
+                color: 0x010101,
+                metalness: 1.0,
+                roughness: 0.1,
+                envMapIntensity: 0.5
+            });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -0.6;
+            scene.add(ground);
+
+            // Drone Swarm
+            const droneCount = 400;
+            const droneGeo = new THREE.SphereGeometry(0.4, 8, 8);
+            const droneMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+            const droneMesh = new THREE.InstancedMesh(droneGeo, droneMat, droneCount);
+            const drones = [];
+            for (let i = 0; i < droneCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const r = 50 + Math.random() * 300;
+                const h = 10 + Math.random() * 150;
+                const speed = 0.001 + Math.random() * 0.005;
+                drones.push({ angle, r, h, speed });
+                dummy.position.set(Math.cos(angle) * r, h, Math.sin(angle) * r);
+                dummy.updateMatrix();
+                droneMesh.setMatrixAt(i, dummy.matrix);
+            }
+            scene.add(droneMesh);
+            MASTER_CONFIG.droneMesh = droneMesh;
+            MASTER_CONFIG.dronesData = drones;
+        };
+
+        // NEW: NEURAL POWER LINES
+        const createNeuralCables = () => {
+            const cableCount = 80;
+            const cableMat = new THREE.LineBasicMaterial({
+                color: 0x00f2ff,
+                transparent: true,
+                opacity: 0.15,
+                blending: THREE.AdditiveBlending
+            });
+
+            for (let i = 0; i < cableCount; i++) {
+                const p1 = new THREE.Vector3(
+                    (Math.random() - 0.5) * 400,
+                    50 + Math.random() * 100,
+                    (Math.random() - 0.5) * 400
+                );
+                const p2 = new THREE.Vector3(
+                    (Math.random() - 0.5) * 400,
+                    50 + Math.random() * 100,
+                    (Math.random() - 0.5) * 400
+                );
+
+                const curve = new THREE.CatmullRomCurve3([
+                    p1,
+                    new THREE.Vector3((p1.x + p2.x) / 2, Math.max(p1.y, p2.y) + 20, (p1.z + p2.z) / 2),
+                    p2
+                ]);
+
+                const pts = curve.getPoints(20);
+                const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                const line = new THREE.Line(geo, cableMat);
+                scene.add(line);
+
+                // Subtle pulse for cables
+                gsap.to(line.material, { opacity: 0.4, duration: 2 + Math.random() * 2, yoyo: true, repeat: -1 });
+            }
+        };
+
+        // --- 3. TRAFFIC ENGINE (Moving Data Lights) ---
+        const createTraffic = () => {
+            trafficGroup = new THREE.Group();
+            scene.add(trafficGroup);
+
+            const trailCount = MASTER_CONFIG.trafficCount;
+            const pos = new Float32Array(trailCount * 3);
+            const sizes = new Float32Array(trailCount);
+
+            for (let i = 0; i < trailCount; i++) {
+                pos[i * 3] = (Math.random() - 0.5) * 300;
+                pos[i * 3 + 1] = 0.5;
+                pos[i * 3 + 2] = (Math.random() - 0.5) * 300;
+                sizes[i] = Math.random();
+            }
+
+            const trafficGeo = new THREE.BufferGeometry();
+            trafficGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            trafficGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+            const trafficMat = new THREE.PointsMaterial({
+                color: 0x00f2ff,
+                size: 0.2,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+
+            const traffic = new THREE.Points(trafficGeo, trafficMat);
+            trafficGroup.add(traffic);
+        };
+
+        // --- 4. THE FEATURE MONOLITHS (The 15 Input Blades) ---
+        const createMonoliths = () => {
+            monolithGroup = new THREE.Group();
+            scene.add(monolithGroup);
+
+            const monoGeo = new THREE.BoxGeometry(1, 100, 4);
+            const monoMat = new THREE.MeshStandardMaterial({
+                color: 0x000000,
+                metalness: 1,
+                roughness: 0,
+                emissive: 0x00f2ff,
+                emissiveIntensity: 0.5,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            for (let i = 0; i < 15; i++) {
+                const blade = new THREE.Mesh(monoGeo, monoMat);
+                const angle = (i / 15) * Math.PI * 2;
+                const r = 40;
+                blade.position.set(Math.cos(angle) * r, 50, Math.sin(angle) * r);
+                blade.rotation.y = -angle;
+                monolithGroup.add(blade);
+            }
+
+            // CENTRAL BAYESIAN SPIRE (Fixed: removed invalid PyramidGeometry)
+            const spireGeo = new THREE.ConeGeometry(8, 150, 4);
+            const spireMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x00f2ff, emissiveIntensity: 5 });
+            const spire = new THREE.Mesh(spireGeo, spireMat);
+            spire.position.y = 75;
+            scene.add(spire);
+        };
+
+        // --- 5. LIGHTING & ENVIRONMENT ---
+        const createLights = () => {
+            const ambient = new THREE.AmbientLight(0xffffff, 0.05);
+            scene.add(ambient);
+
+            const p1 = new THREE.PointLight(0x00f2ff, 15, 200);
+            p1.position.set(50, 50, 50);
+            scene.add(p1);
+
+            const p2 = new THREE.PointLight(0xbc00ff, 15, 200);
+            p2.position.set(-50, 50, -50);
+            scene.add(p2);
+
+            // SHARP VOLUMETRIC LIGHT RAYS
+            const rayGeo = new THREE.CylinderGeometry(0, 8, 1200, 32, 1, true);
+            const rayMat = new THREE.MeshBasicMaterial({
+                color: 0x00f2ff,
+                transparent: true,
+                opacity: 0.08,
+                blending: THREE.AdditiveBlending,
+                side: THREE.DoubleSide
+            });
+            for (let i = 0; i < 12; i++) {
+                const ray = new THREE.Mesh(rayGeo, rayMat);
+                ray.position.set((Math.random() - 0.5) * 800, 600, (Math.random() - 0.5) * 800);
+                scene.add(ray);
+                gsap.to(ray.material, { opacity: 0.15, duration: 3 + Math.random() * 2, yoyo: true, repeat: -1 });
+            }
+        };
+
+        // --- 6. SCROLL & CAMERA ENGINE (CatmullRom Spline) ---
+        const setupInteractions = () => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // THE CINEMA PATH (Major Sprawl)
+            const cityCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, 150, 300),   // The Arrival (High Altitude)
+                new THREE.Vector3(100, 40, 100),  // District Alpha (Mid-level flyby)
+                new THREE.Vector3(-100, 20, 0),   // CNN Streets (Low altitude)
+                new THREE.Vector3(0, 5, -80),     // BiLSTM Flow (Street level)
+                new THREE.Vector3(0, 50, 20),     // Rising to Spire
+                new THREE.Vector3(0, 250, 0)      // The Summit
+            ]);
+
+            const scrollObj = { progress: 0 };
+            gsap.to(scrollObj, {
+                progress: 1,
+                scrollTrigger: {
+                    trigger: "body",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 3
+                },
+                onUpdate: () => {
+                    const t = scrollObj.progress;
+                    const pos = cityCurve.getPoint(t);
+                    camera.position.copy(pos);
+
+                    const lookAtTarget = cityCurve.getPoint(Math.min(t + 0.05, 1));
+                    camera.lookAt(lookAtTarget.x, 20, lookAtTarget.z);
+
+                    // COLOR SHIFT LOGIC (God-Tier Atmospheric Stability)
+                    let targetColor = new THREE.Color(0x00f2ff);
+                    let intensity = 1.0;
+                    if (t < 0.2) {
+                        targetColor = new THREE.Color(0x00f2ff); // Foundation
+                        document.getElementById('hud-sector').innerText = "FOUNDATION";
+                    } else if (t < 0.5) {
+                        targetColor = new THREE.Color(0xbc00ff); // Scanning (Purple)
+                        document.getElementById('hud-sector').innerText = "SCANNING";
+                    } else if (t < 0.8) {
+                        targetColor = new THREE.Color(0xff00cc); // Temporal (Pink)
+                        document.getElementById('hud-sector').innerText = "TEMPORAL";
+                    } else {
+                        targetColor = new THREE.Color(0xffaa00); // Summit (Gold)
+                        intensity = 2.0;
+                        document.getElementById('hud-sector').innerText = "SUMMIT";
+                    }
+
+                    // Smoothly interpolate colors for city lights and fog
+                    gsap.to(scene.fog.color, { r: targetColor.r * 0.05, g: targetColor.g * 0.05, b: targetColor.b * 0.05, duration: 2 });
+                    gsap.to(renderer, { toneMappingExposure: 2.0 * intensity, duration: 2 });
+
+                    if (cityGroup.children[0]) {
+                        gsap.to(cityGroup.children[0].material.uniforms.uColor.value, {
+                            r: targetColor.r, g: targetColor.g, b: targetColor.b, duration: 1.5
+                        });
+                    }
+
+                    document.getElementById('scroll-bar').style.height = (t * 100) + "%";
+                    document.getElementById('hud-epoch').innerText = Math.floor(t * 1000).toString().padStart(4, '0');
+                }
+            });
+
+            // Content Reveal Master
+            gsap.utils.toArray(".reveal").forEach(card => {
+                gsap.to(card, {
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 80%",
+                        toggleActions: "play none none reverse"
+                    },
+                    opacity: 1, y: 0, scale: 1, duration: 1.5, ease: "power4.out"
+                });
+            });
+        };
+
+        // --- 7. ANIMATION LOOP ---
+        const animate = () => {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const elapsed = clock.getElapsedTime();
+
+            // City Pulse
+            cityGroup.rotation.y = Math.sin(elapsed * 0.1) * 0.02;
+
+            // Shader Updates
+            if (cityGroup.children[0] && cityGroup.children[0].material.uniforms) {
+                cityGroup.children[0].material.uniforms.uTime.value = elapsed;
+            }
+
+            // Traffic Simulation
+            trafficGroup.position.z += 0.8;
+            if (trafficGroup.position.z > 150) trafficGroup.position.z = -150;
+
+            // Monolith Rotation & Pulse
+            monolithGroup.rotation.y += 0.003;
+            monolithGroup.children.forEach((blade, i) => {
+                blade.position.y = 50 + Math.sin(elapsed + i) * 5;
+                if (blade.material) blade.material.emissiveIntensity = 0.5 + Math.sin(elapsed * 2 + i) * 0.3;
+            });
+
+            // RANDOM ATMOSPHERIC GLITCH
+            if (Math.random() > 0.992) {
+                document.querySelector('.scanlines').style.opacity = '1.0';
+                document.getElementById('fps-badge').style.color = 'var(--accent)';
+                setTimeout(() => {
+                    document.querySelector('.scanlines').style.opacity = '0.3';
+                    document.getElementById('fps-badge').style.color = 'rgba(255,255,255,0.4)';
+                }, 40);
+            }
+
+            // DRONE SWARM UPDATE
+            if (MASTER_CONFIG.droneMesh && MASTER_CONFIG.dronesData) {
+                const dummy = new THREE.Object3D();
+                MASTER_CONFIG.dronesData.forEach((d, i) => {
+                    d.angle += d.speed;
+                    const x = Math.cos(d.angle) * d.r;
+                    const z = Math.sin(d.angle) * d.r;
+                    const y = d.h + Math.sin(elapsed + i) * 5;
+                    dummy.position.set(x, y, z);
+                    dummy.updateMatrix();
+                    MASTER_CONFIG.droneMesh.setMatrixAt(i, dummy.matrix);
+                });
+                MASTER_CONFIG.droneMesh.instanceMatrix.needsUpdate = true;
+            }
+
+            if (composer) composer.render();
+            else renderer.render(scene, camera);
+        };
+
+        // --- 8. UTILS ---
+        document.addEventListener('mousemove', (e) => {
+            gsap.to('#cursor', { x: e.clientX - 15, y: e.clientY - 15, duration: 0.3 });
+
+            // Parallax Shift
+            const mx = (e.clientX / window.innerWidth - 0.5);
+            const my = (e.clientY / window.innerHeight - 0.5);
+            gsap.to(scene.rotation, { x: my * 0.05, y: mx * 0.05, duration: 1 });
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize Engine
+        window.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+
+</html>

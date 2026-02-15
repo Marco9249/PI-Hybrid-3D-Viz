@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI-Hybrid: Bayesian Intelligence</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@200;300;400;600;800&family=Outfit:wght@200;400;600;900&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #06B6D4;
+            --purple: #8B5CF6;
+            --gold: #F59E0B;
+            --green: #10B981;
+            --red: #EF4444;
+            --bg: #030308;
+            --card-bg: rgba(10, 10, 25, 0.6);
+            --border: rgba(255, 255, 255, 0.08)
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--purple);
+            border-radius: 3px
+        }
+
+        canvas {
+            display: block
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(circle at center, #0a0a1a 0%, #030308 100%);
+        }
+
+        /* Navigation */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(3, 3, 8, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border)
+        }
+
+        .page-footer {
+            z-index: 2;
+            position: relative
+        }
+
+        .top-nav .logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 20px;
+            background: linear-gradient(45deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(6, 182, 212, 0.5)
+        }
+
+        .back-btn {
+            color: var(--cyan);
+            text-decoration: none;
+            font-size: 13px;
+            letter-spacing: 2px;
+            font-family: 'Space Mono', monospace;
+            transition: all .3s
+        }
+
+        .back-btn:hover {
+            color: var(--gold);
+            text-shadow: 0 0 10px var(--gold)
+        }
+
+        /* Sections */
+        .section {
+            min-height: 100vh;
+            padding: 120px 60px 80px;
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2
+        }
+
+        .section-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: var(--gold);
+            margin-bottom: 15px;
+            display: block
+        }
+
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #fff, var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .section p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.05rem;
+            max-width: 700px;
+            margin-bottom: 15px
+        }
+
+        .section h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #fff
+        }
+
+        /* Glass Cards */
+        .glass {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 35px;
+            backdrop-filter: blur(30px);
+            transition: all .4s
+        }
+
+        .glass:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4)
+        }
+
+        /* Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px
+        }
+
+        /* Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all .8s cubic-bezier(0.19, 1, 0.22, 1)
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        /* GP Canvas */
+        #gp-canvas {
+            width: 100%;
+            height: 350px;
+            border-radius: 16px;
+            cursor: crosshair;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border)
+        }
+
+        /* Buttons */
+        .btn-glow {
+            padding: 14px 35px;
+            border-radius: 50px;
+            border: 1px solid var(--gold);
+            background: transparent;
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 4px;
+            cursor: pointer;
+            transition: all .4s;
+            position: relative;
+            overflow: hidden
+        }
+
+        .btn-glow:hover {
+            background: rgba(245, 158, 11, 0.15);
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+            transform: scale(1.05)
+        }
+
+        .btn-cyan {
+            border-color: var(--cyan);
+            color: var(--cyan)
+        }
+
+        .btn-cyan:hover {
+            background: rgba(6, 182, 212, 0.15);
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.3)
+        }
+
+        /* Convergence Timeline */
+        #conv-canvas {
+            width: 100%;
+            height: 300px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border)
+        }
+
+        /* Slider Styles */
+        .hp-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            margin: 10px 0
+        }
+
+        .hp-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--cyan)
+        }
+
+        /* Iteration Controls */
+        .iter-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 20px
+        }
+
+        .iter-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .3s
+        }
+
+        .iter-btn:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.3)
+        }
+
+        .iter-btn.active {
+            background: var(--cyan);
+            color: #000
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            transition: all .5s
+        }
+
+        .metric-card .value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 10px 0 5px
+        }
+
+        .metric-card .label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+            text-transform: uppercase
+        }
+
+        .metric-card .range {
+            font-size: 10px;
+            color: var(--purple);
+            margin-top: 5px;
+            font-family: 'Space Mono', monospace
+        }
+
+        .metric-card.revealed .value {
+            animation: countUp .6s ease-out
+        }
+
+        /* EI Visualization */
+        .mode-toggle {
+            display: flex;
+            border-radius: 30px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            width: fit-content;
+            margin: 20px 0
+        }
+
+        .mode-toggle button {
+            padding: 12px 30px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all .3s
+        }
+
+        .mode-toggle button.active {
+            background: var(--purple);
+            color: #fff
+        }
+
+        #ei-canvas {
+            width: 100%;
+            height: 250px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border)
+        }
+
+        /* Key Insight */
+        .insight-box {
+            padding: 25px 30px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            margin-top: 30px
+        }
+
+        .insight-box .tag {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--green);
+            margin-bottom: 8px;
+            font-weight: 700
+        }
+
+        /* Comparison visual */
+        .compare-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+            transition: all .4s
+        }
+
+        .compare-row:hover {
+            border-color: var(--cyan)
+        }
+
+        .compare-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0
+        }
+
+        /* Footer */
+        .page-footer {
+            text-align: center;
+            padding: 60px 40px;
+            border-top: 1px solid var(--border)
+        }
+
+        /* Responsive */
+        @media(max-width:900px) {
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr
+            }
+
+            .section {
+                padding: 100px 25px 60px
+            }
+
+            .section h2 {
+                font-size: 2.2rem
+            }
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px var(--gold)
+            }
+
+            50% {
+                box-shadow: 0 0 25px var(--gold)
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-10px)
+            }
+        }
+    </style>
+    <!-- Arabic Panel CSS -->
+    <link rel="stylesheet" href="ar-panel.css">
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="logo">PI-HYBRID // OPTIMIZER</div>
+        <a href="index.html" class="back-btn">← BACK TO HUB</a>
+    </nav>
+
+    <!-- ARABIC PANEL HTML -->
+    <div id="ar-panel-overlay" onclick="closeArPanel()"></div>
+    <div id="ar-panel">
+        <div class="ar-close">
+            <div style="font-family:'Courier New'; font-size:11px; letter-spacing:3px; color:var(--cyan);">الشرح
+                التفصيلي</div>
+            <div class="ar-close-btn" onclick="closeArPanel()">✕</div>
+        </div>
+        <div class="ar-panel-content" id="ar-panel-inner"></div>
+    </div>
+    <script src="ar-panel.js"></script>
+
+    <!-- =============================== -->
+    <!-- SECTION 1: Hero -->
+    <!-- =============================== -->
+    <section class="section" style="display:flex;flex-direction:column;justify-content:center;min-height:100vh">
+        <div class="reveal">
+            <span class="section-badge">CHAPTER 06 // THE OPTIMIZER</span>
+            <h2>Bayesian Intelligence</h2>
+            <p>Manual hyperparameter tuning is computationally irresponsible. We employed <strong>Bayesian
+                    Optimization</strong> — an intelligent search strategy that finds the global optimum in just
+                <strong>30 iterations</strong> instead of thousands.
+            </p>
+            <p style="color:var(--gold);font-style:italic;margin-top:20px">"Instead of blindly searching, we teach the
+                optimizer to think."</p>
+            <div style="margin-top:40px;display:flex;gap:15px;flex-wrap:wrap">
+                <div
+                    style="padding:12px 20px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);border-radius:30px;font-size:12px;letter-spacing:1px;color:var(--cyan)">
+                    EI+ ACQUISITION</div>
+                <div
+                    style="padding:12px 20px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:30px;font-size:12px;letter-spacing:1px;color:var(--purple)">
+                    GAUSSIAN SURROGATE</div>
+                <div
+                    style="padding:12px 20px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:30px;font-size:12px;letter-spacing:1px;color:var(--gold)">
+                    30 ITERATIONS</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- SECTION 2: Why Not Grid Search? -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <span class="section-badge">THE PROBLEM</span>
+            <h2>Why Not Grid Search? <span onclick="openArPanel('bo_hero')"
+                    style="font-size:0.5em; vertical-align:middle; cursor:pointer;" class="ar-mini-btn">ℹ️</span></h2>
+            <p style="margin-bottom:40px">Grid Search tests every combination blindly. With 4 hyperparameters, this
+                requires <strong style="color:var(--red)">~10,000+ evaluations</strong>. Bayesian Optimization uses a
+                probabilistic model to find the optimum in just <strong style="color:var(--green)">30 smart
+                    trials</strong>.</p>
+        </div>
+        <div class="grid-2 reveal">
+            <div class="compare-row"
+                style="flex-direction:column;align-items:flex-start;padding:30px;border-color:rgba(239,68,68,0.3)">
+                <div style="display:flex;align-items:center;gap:15px;margin-bottom:20px;cursor:pointer"
+                    onclick="openModal('grid_search')">
+                    <div class="compare-icon" style="background:rgba(239,68,68,0.15);color:var(--red)">🔍</div>
+                    <div>
+                        <div style="font-weight:700;font-size:1.1rem">Grid Search</div>
+                        <div style="font-size:12px;color:var(--red)">Brute Force</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px">
+                    <span id="grid-dots"></span>
+                </div>
+                <div style="font-family:'Space Mono',monospace;font-size:28px;color:var(--red);font-weight:700">~10,000
+                </div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.5)">evaluations required</div>
+                <div
+                    style="margin-top:15px;width:100%;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden">
+                    <div style="width:100%;height:100%;background:var(--red);border-radius:4px"></div>
+                </div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:5px">Compute Cost: ████████████ 100%
+                </div>
+            </div>
+            <div class="compare-row"
+                style="flex-direction:column;align-items:flex-start;padding:30px;border-color:rgba(16,185,129,0.3)">
+                <div style="display:flex;align-items:center;gap:15px;margin-bottom:20px;cursor:pointer"
+                    onclick="openModal('bayesian_opt')">
+                    <div class="compare-icon" style="background:rgba(16,185,129,0.15);color:var(--green)">🧠</div>
+                    <div>
+                        <div style="font-weight:700;font-size:1.1rem">Bayesian Optimization</div>
+                        <div style="font-size:12px;color:var(--green)">Intelligent Search</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px">
+                    <span id="bayes-dots"></span>
+                </div>
+                <div style="font-family:'Space Mono',monospace;font-size:28px;color:var(--green);font-weight:700">30
+                </div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.5)">evaluations required</div>
+                <div
+                    style="margin-top:15px;width:100%;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden">
+                    <div style="width:0.3%;height:100%;background:var(--green);border-radius:4px;min-width:4px"></div>
+                </div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:5px">Compute Cost: █ 0.3%</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- SECTION 3: Interactive GP Surface -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <span class="section-badge">THE CORE IDEA</span>
+            <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('bo_process')">The Surrogate Model</h2>
+            <p>Bayesian Optimization builds a <strong>Gaussian Process (GP)</strong> — a probabilistic model of the
+                objective function. The blue band shows uncertainty. <strong style="color:var(--cyan)">Click on the
+                    canvas</strong> to add observations and watch the GP update!</p>
+        </div>
+        <div class="reveal" style="margin-top:30px">
+            <canvas id="gp-canvas"></canvas>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:15px">
+                <div style="display:flex;gap:20px;font-size:12px">
+                    <span><span style="color:var(--cyan)">━━</span> GP Mean (Predicted)</span>
+                    <span><span style="color:rgba(6,182,212,0.3)">██</span> Uncertainty Band</span>
+                    <span><span style="color:var(--gold)">●</span> Observations</span>
+                    <span><span style="color:rgba(255,255,255,0.3)">╌╌</span> True Function</span>
+                </div>
+                <button class="btn-glow btn-cyan" onclick="resetGP()"
+                    style="padding:8px 20px;font-size:11px;letter-spacing:2px">RESET</button>
+            </div>
+        </div>
+        <div class="insight-box reveal" style="margin-top:25px">
+            <div class="tag">💡 HOW IT WORKS</div>
+            <p style="color:rgba(255,255,255,0.8);margin:0;font-size:14px">Each click adds an "observation." The GP
+                updates its belief about the function shape. Notice how the <strong>uncertainty band narrows</strong>
+                near observations and remains wide in unexplored regions. The optimizer samples where uncertainty is
+                high (exploration) or where the predicted value is good (exploitation).</p>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- SECTION 4: Exploration vs Exploitation -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <span class="section-badge">THE BALANCE</span>
+            <h2 style="cursor:pointer" onclick="openArPanel('bo_process')">Exploration vs Exploitation</h2>
+            <p>The <strong>EI+ (Expected Improvement Plus)</strong> acquisition function decides where to sample next by
+                balancing two strategies:</p>
+        </div>
+        <div class="grid-2 reveal" style="margin-top:30px">
+            <div>
+                <div class="mode-toggle">
+                    <button class="active" onclick="setEIMode('explore')">🔭 EXPLORE</button>
+                    <button onclick="setEIMode('exploit')">⛏️ EXPLOIT</button>
+                </div>
+                <div id="ei-explain" class="glass" style="margin-top:20px;min-height:140px">
+                    <h3 style="font-size:1.2rem;color:var(--purple);margin-bottom:10px">Exploration Mode</h3>
+                    <p style="font-size:14px;margin:0">Sample in regions of <strong>HIGH uncertainty</strong>. The
+                        algorithm ventures into unknown territory to discover potentially better configurations. This
+                        prevents getting stuck in local minima.</p>
+                </div>
+            </div>
+            <div>
+                <canvas id="ei-canvas"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- SECTION 5: 30-Iteration Journey -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <span class="section-badge">THE JOURNEY</span>
+            <h2 style="cursor:pointer" onclick="openArPanel('bo_results')">30-Iteration Convergence</h2>
+            <p>Watch the optimizer converge toward the global minimum over 30 iterations. Each point represents a
+                hyperparameter combination tested.</p>
+        </div>
+        <div class="reveal" style="margin-top:30px">
+            <canvas id="conv-canvas"></canvas>
+            <div class="iter-controls">
+                <button class="iter-btn" id="conv-play" onclick="toggleConv()">▶</button>
+                <button class="iter-btn" onclick="setConvSpeed(0.5)">½×</button>
+                <button class="iter-btn active" onclick="setConvSpeed(1)">1×</button>
+                <button class="iter-btn" onclick="setConvSpeed(2)">2×</button>
+                <div style="flex:1;margin-left:10px">
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.5)">
+                        <span>Iteration: <span id="conv-iter"
+                                style="color:var(--cyan);font-weight:bold">0</span>/30</span>
+                        <span>Best RMSE: <span id="conv-best" style="color:var(--green);font-weight:bold">—</span>
+                            W/m²</span>
+                    </div>
+                    <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;margin-top:8px">
+                        <div id="conv-progress"
+                            style="height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:2px;transition:width .3s">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="conv-params" class="glass"
+                style="margin-top:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:15px;font-size:12px;text-align:center">
+                <div>
+                    <div style="color:rgba(255,255,255,0.4);font-size:10px;letter-spacing:1px">LEARNING RATE</div>
+                    <div id="cp-lr"
+                        style="font-family:'Space Mono',monospace;font-size:18px;color:var(--cyan);margin-top:5px">—
+                    </div>
+                </div>
+                <div>
+                    <div style="color:rgba(255,255,255,0.4);font-size:10px;letter-spacing:1px">L2 REG</div>
+                    <div id="cp-l2"
+                        style="font-family:'Space Mono',monospace;font-size:18px;color:var(--purple);margin-top:5px">—
+                    </div>
+                </div>
+                <div>
+                    <div style="color:rgba(255,255,255,0.4);font-size:10px;letter-spacing:1px">BiLSTM UNITS</div>
+                    <div id="cp-units"
+                        style="font-family:'Space Mono',monospace;font-size:18px;color:var(--gold);margin-top:5px">—
+                    </div>
+                </div>
+                <div>
+                    <div style="color:rgba(255,255,255,0.4);font-size:10px;letter-spacing:1px">DROPOUT</div>
+                    <div id="cp-drop"
+                        style="font-family:'Space Mono',monospace;font-size:18px;color:var(--green);margin-top:5px">—
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- SECTION 6: Search Space Explorer -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <span class="section-badge">INTERACTIVE</span>
+            <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('bo_params')">The Search Space Explorer</h2>
+            <p>Adjust the hyperparameters yourself and see how far your choice is from the Bayesian-optimized values.
+                Can you beat the optimizer?</p>
+        </div>
+        <div class="grid-2 reveal" style="margin-top:30px">
+            <div>
+                <div class="glass" style="margin-bottom:20px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span
+                            style="font-size:13px;font-weight:600">Learning Rate</span><span id="sl-lr-val"
+                            style="font-family:'Space Mono',monospace;color:var(--cyan)">0.005</span></div>
+                    <input type="range" class="hp-slider" id="sl-lr" min="0" max="100" value="50" oninput="updateHP()">
+                    <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,0.3)">
+                        <span>10⁻⁴</span><span>10⁻²</span>
+                    </div>
+                </div>
+                <div class="glass" style="margin-bottom:20px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span
+                            style="font-size:13px;font-weight:600">L2 Regularization</span><span id="sl-l2-val"
+                            style="font-family:'Space Mono',monospace;color:var(--purple)">5×10⁻⁴</span></div>
+                    <input type="range" class="hp-slider" id="sl-l2" min="0" max="100" value="50" oninput="updateHP()">
+                    <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,0.3)">
+                        <span>10⁻⁵</span><span>10⁻³</span>
+                    </div>
+                </div>
+                <div class="glass" style="margin-bottom:20px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span
+                            style="font-size:13px;font-weight:600">BiLSTM Units</span><span id="sl-units-val"
+                            style="font-family:'Space Mono',monospace;color:var(--gold)">175</span></div>
+                    <input type="range" class="hp-slider" id="sl-units" min="100" max="250" value="175"
+                        oninput="updateHP()">
+                    <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,0.3)">
+                        <span>100</span><span>250</span>
+                    </div>
+                </div>
+                <div class="glass">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span
+                            style="font-size:13px;font-weight:600">Dropout Rate</span><span id="sl-drop-val"
+                            style="font-family:'Space Mono',monospace;color:var(--green)">30%</span></div>
+                    <input type="range" class="hp-slider" id="sl-drop" min="10" max="50" value="30"
+                        oninput="updateHP()">
+                    <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,0.3)">
+                        <span>10%</span><span>50%</span>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center">
+                <div class="glass" style="padding:40px">
+                    <div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-bottom:10px">
+                        ESTIMATED RMSE</div>
+                    <div id="hp-rmse"
+                        style="font-family:'Outfit',sans-serif;font-size:4rem;font-weight:900;color:var(--gold)">32.1
+                    </div>
+                    <div style="font-size:14px;color:rgba(255,255,255,0.5)">W/m²</div>
+                    <div id="hp-diff" style="margin-top:15px;font-size:13px;color:var(--red)">+12.57 from optimal</div>
+                    <div
+                        style="margin-top:20px;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden">
+                        <div id="hp-bar"
+                            style="height:100%;width:50%;background:var(--gold);border-radius:3px;transition:all .4s">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-glow" onclick="revealOptimal()"
+                    style="margin-top:25px;animation:pulse-glow 2s infinite">✦ REVEAL OPTIMAL ✦</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- =============================== -->
+    <!-- SECTION 7: Final Dashboard -->
+    <!-- =============================== -->
+    <section class="section">
+        <div class="reveal">
+            <span class="section-badge">THE RESULT — TABLE IV</span>
+            <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('bo_results')">Optimized Configuration</h2>
+            <p>After 30 Bayesian iterations (~5 hours of compute on Intel i5, 16GB RAM), the algorithm converged to this
+                configuration:</p>
+        </div>
+        <div class="grid-2 reveal" style="margin-top:30px;grid-template-columns:1fr 1fr">
+            <div class="grid-3" style="grid-template-columns:1fr 1fr">
+                <div class="metric-card" id="mc-lr" onclick="openModal('hyper_lr')" style="cursor:pointer">
+                    <div class="label">Learning Rate</div>
+                    <div class="value" style="color:var(--cyan)">0.00175</div>
+                    <div class="range">[10⁻⁴, 10⁻²] Log</div>
+                </div>
+                <div class="metric-card" id="mc-l2" onclick="openModal('hyper_l2')" style="cursor:pointer">
+                    <div class="label">L2 Regularization</div>
+                    <div class="value" style="color:var(--purple)">1.2×10⁻⁴</div>
+                    <div class="range">[10⁻⁵, 10⁻³] Log</div>
+                </div>
+                <div class="metric-card" id="mc-units" onclick="openModal('hyper_lstm')" style="cursor:pointer">
+                    <div class="label">BiLSTM Units</div>
+                    <div class="value" style="color:var(--gold)">210</div>
+                    <div class="range">[100, 250] Integer</div>
+                </div>
+                <div class="metric-card" id="mc-drop" onclick="openModal('hyper_dropout')" style="cursor:pointer">
+                    <div class="label">Dropout Rate</div>
+                    <div class="value" style="color:var(--green)">10.4%</div>
+                    <div class="range">[0.1, 0.5] Linear</div>
+                </div>
+            </div>
+            <div>
+                <div class="glass" style="border-color:rgba(16,185,129,0.3)">
+                    <div
+                        style="font-size:10px;letter-spacing:3px;color:var(--green);margin-bottom:15px;font-weight:700">
+                        🔑 KEY INSIGHT</div>
+                    <h3 style="font-size:1.3rem;margin-bottom:15px">High Capacity + Low Regularization</h3>
+                    <p style="font-size:14px;color:rgba(255,255,255,0.7);margin:0">The optimizer converged to
+                        <strong>210 BiLSTM units</strong> (near max) but only <strong>10.4% dropout</strong> (near
+                        minimum). This reveals that the <strong style="color:var(--green)">physics features provide such
+                            clean signal</strong> that aggressive regularization is unnecessary.
+                    </p>
+                </div>
+                <div class="glass" style="margin-top:15px;border-color:rgba(245,158,11,0.3)">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <div style="font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:5px">TOTAL
+                                PARAMETERS</div>
+                            <div style="font-family:'Outfit',sans-serif;font-size:2rem;font-weight:900">492,200</div>
+                        </div>
+                        <div style="text-align:right">
+                            <div style="font-size:10px;letter-spacing:2px;color:var(--purple);margin-bottom:5px">vs
+                                TRANSFORMER</div>
+                            <div
+                                style="font-family:'Outfit',sans-serif;font-size:2rem;font-weight:900;color:var(--red)">
+                                100M+</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:15px;font-size:12px;color:rgba(255,255,255,0.5)">The Bayesian-optimized
+                        architecture is <strong style="color:var(--gold)">200× lighter</strong> than typical
+                        Transformers while achieving superior accuracy.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="page-footer">
+        <a href="index.html" class="back-btn" style="font-size:16px">← RETURN TO MAIN PRESENTATION</a>
+    </div>
+
+    <!-- =============================== -->
+    <!-- JAVASCRIPT -->
+    <!-- =============================== -->
+    <script>
+        // ---- Reveal on scroll ----
+        gsap.registerPlugin(ScrollTrigger);
+        document.querySelectorAll('.reveal').forEach(el => {
+            ScrollTrigger.create({ trigger: el, start: 'top 85%', onEnter: () => el.classList.add('active') });
+        });
+
+        // ---- Comparison dots ----
+        (function () {
+            let gd = '', bd = '';
+            for (let i = 0; i < 60; i++) gd += '<span style="display:inline-block;width:4px;height:4px;border-radius:50%;background:rgba(239,68,68,' + (0.15 + Math.random() * 0.3) + ');margin:1px"></span>';
+            for (let i = 0; i < 30; i++) bd += '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(16,185,129,' + (0.3 + Math.random() * 0.5) + ');margin:2px"></span>';
+            document.getElementById('grid-dots').innerHTML = gd;
+            document.getElementById('bayes-dots').innerHTML = bd;
+        })();
+
+        // ---- GP Surface ----
+        const gpCanvas = document.getElementById('gp-canvas');
+        const gpCtx = gpCanvas.getContext('2d');
+        let gpObs = [];
+        function resizeGP() { gpCanvas.width = gpCanvas.offsetWidth; gpCanvas.height = gpCanvas.offsetHeight; drawGP(); }
+        window.addEventListener('resize', resizeGP);
+        setTimeout(resizeGP, 100);
+
+        // True function (hidden from user — a noisy multi-modal function)
+        function trueFunc(x) { return 0.5 * Math.sin(3 * Math.PI * x) + 0.3 * Math.cos(5 * Math.PI * x) + 0.1 * Math.sin(7 * Math.PI * x); }
+
+        // Simplified GP prediction (RBF kernel simulation)
+        function gpPredict(x) {
+            if (gpObs.length === 0) return { mean: 0, std: 0.5 };
+            let mean = 0, wSum = 0, minDist = Infinity;
+            gpObs.forEach(o => {
+                const d = Math.abs(x - o.x);
+                const w = Math.exp(-d * d * 50);
+                mean += w * o.y;
+                wSum += w;
+                if (d < minDist) minDist = d;
+            });
+            mean = wSum > 0.01 ? mean / wSum : 0;
+            const std = Math.min(0.5, 0.5 * (1 - Math.exp(-minDist * minDist * 2)));
+            // Invert std: more obs = less uncertainty
+            const uncertainty = 0.5 - std;
+            return { mean, std: Math.max(0.05, uncertainty) };
+        }
+
+        function drawGP() {
+            const W = gpCanvas.width, H = gpCanvas.height;
+            gpCtx.clearRect(0, 0, W, H);
+            const pad = 40, gW = W - 2 * pad, gH = H - 2 * pad;
+            // Grid
+            gpCtx.strokeStyle = 'rgba(255,255,255,0.04)'; gpCtx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) { gpCtx.beginPath(); gpCtx.moveTo(pad + gW * i / 10, pad); gpCtx.lineTo(pad + gW * i / 10, pad + gH); gpCtx.stroke(); }
+            for (let i = 0; i <= 6; i++) { gpCtx.beginPath(); gpCtx.moveTo(pad, pad + gH * i / 6); gpCtx.lineTo(pad + gW, pad + gH * i / 6); gpCtx.stroke(); }
+            // Axes labels
+            gpCtx.fillStyle = 'rgba(255,255,255,0.3)'; gpCtx.font = '10px Space Mono';
+            gpCtx.fillText('Hyperparameter Space', pad + gW / 2 - 60, H - 5);
+            gpCtx.save(); gpCtx.translate(10, pad + gH / 2 + 30); gpCtx.rotate(-Math.PI / 2); gpCtx.fillText('RMSE', 0, 0); gpCtx.restore();
+
+            const mapX = x => pad + x * gW, mapY = y => pad + gH / 2 - y * gH * 0.8;
+            const N = 200;
+            // True function
+            gpCtx.strokeStyle = 'rgba(255,255,255,0.15)'; gpCtx.setLineDash([4, 4]); gpCtx.lineWidth = 1; gpCtx.beginPath();
+            for (let i = 0; i <= N; i++) { const x = i / N; const px = mapX(x), py = mapY(trueFunc(x)); i === 0 ? gpCtx.moveTo(px, py) : gpCtx.lineTo(px, py); }
+            gpCtx.stroke(); gpCtx.setLineDash([]);
+            // Uncertainty band
+            const means = [], stds = [];
+            for (let i = 0; i <= N; i++) { const x = i / N; const p = gpPredict(x); means.push(p.mean); stds.push(p.std); }
+            gpCtx.fillStyle = 'rgba(6,182,212,0.12)'; gpCtx.beginPath();
+            for (let i = 0; i <= N; i++) gpCtx.lineTo(mapX(i / N), mapY(means[i] + stds[i] * 2));
+            for (let i = N; i >= 0; i--) gpCtx.lineTo(mapX(i / N), mapY(means[i] - stds[i] * 2));
+            gpCtx.closePath(); gpCtx.fill();
+            // GP mean
+            gpCtx.strokeStyle = '#06B6D4'; gpCtx.lineWidth = 2.5; gpCtx.beginPath();
+            for (let i = 0; i <= N; i++) { const px = mapX(i / N), py = mapY(means[i]); i === 0 ? gpCtx.moveTo(px, py) : gpCtx.lineTo(px, py); }
+            gpCtx.stroke();
+            // Observations
+            gpObs.forEach(o => {
+                gpCtx.beginPath(); gpCtx.arc(mapX(o.x), mapY(o.y), 6, 0, Math.PI * 2); gpCtx.fillStyle = 'var(--gold)'; gpCtx.fill();
+                gpCtx.beginPath(); gpCtx.arc(mapX(o.x), mapY(o.y), 10, 0, Math.PI * 2); gpCtx.strokeStyle = 'rgba(245,158,11,0.3)'; gpCtx.lineWidth = 2; gpCtx.stroke();
+            });
+            // Instruction
+            if (gpObs.length === 0) { gpCtx.fillStyle = 'rgba(255,255,255,0.3)'; gpCtx.font = '14px Inter'; gpCtx.fillText('Click anywhere to add observations...', W / 2 - 130, H / 2); }
+        }
+        gpCanvas.addEventListener('click', e => {
+            const rect = gpCanvas.getBoundingClientRect();
+            const W = gpCanvas.width, H = gpCanvas.height, pad = 40, gW = W - 2 * pad, gH = H - 2 * pad;
+            const px = e.clientX - rect.left, py = e.clientY - rect.top;
+            const x = (px - pad) / gW, y = trueFunc(x) + (Math.random() - 0.5) * 0.1;
+            if (x >= 0 && x <= 1) { gpObs.push({ x, y }); drawGP(); }
+        });
+        function resetGP() { gpObs = []; drawGP(); }
+
+        // ---- EI Mode ----
+        let eiMode = 'explore';
+        function setEIMode(m) {
+            eiMode = m;
+            document.querySelectorAll('.mode-toggle button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            const box = document.getElementById('ei-explain');
+            if (m === 'explore') {
+                box.innerHTML = '<h3 style="font-size:1.2rem;color:var(--purple);margin-bottom:10px">Exploration Mode</h3><p style="font-size:14px;margin:0">Sample in regions of <strong>HIGH uncertainty</strong>. The algorithm ventures into unknown territory to discover potentially better configurations. This prevents getting stuck in local minima.</p>';
+            } else {
+                box.innerHTML = '<h3 style="font-size:1.2rem;color:var(--green);margin-bottom:10px">Exploitation Mode</h3><p style="font-size:14px;margin:0">Sample near the <strong>current best</strong> observation. The algorithm refines its estimate around the most promising region. This converges faster but risks missing the global optimum.</p>';
+            }
+            drawEI();
+        }
+        const eiCanvas = document.getElementById('ei-canvas');
+        const eiCtx = eiCanvas.getContext('2d');
+        function resizeEI() { eiCanvas.width = eiCanvas.offsetWidth; eiCanvas.height = eiCanvas.offsetHeight; drawEI(); }
+        window.addEventListener('resize', resizeEI); setTimeout(resizeEI, 100);
+        function drawEI() {
+            const W = eiCanvas.width, H = eiCanvas.height; eiCtx.clearRect(0, 0, W, H);
+            const pad = 30, gW = W - 2 * pad, gH = H - 2 * pad;
+            // Draw GP-like curve
+            eiCtx.strokeStyle = 'rgba(6,182,212,0.5)'; eiCtx.lineWidth = 2; eiCtx.beginPath();
+            for (let i = 0; i <= 100; i++) { const x = i / 100; const y = 0.4 * Math.sin(2.5 * Math.PI * x) + 0.2 * Math.cos(4 * Math.PI * x); eiCtx.lineTo(pad + x * gW, pad + gH / 3 - y * gH * 0.4); }
+            eiCtx.stroke();
+            // EI curve
+            const eiColor = eiMode === 'explore' ? 'var(--purple)' : 'var(--green)';
+            eiCtx.fillStyle = eiMode === 'explore' ? 'rgba(139,92,246,0.15)' : 'rgba(16,185,129,0.15)';
+            eiCtx.strokeStyle = eiColor; eiCtx.lineWidth = 2; eiCtx.beginPath();
+            const bestX = eiMode === 'explore' ? 0.15 : 0.65;
+            for (let i = 0; i <= 100; i++) {
+                const x = i / 100;
+                let ei;
+                if (eiMode === 'explore') {
+                    ei = 0.3 * Math.exp(-(x - 0.15) * (x - 0.15) * 30) + 0.5 * Math.exp(-(x - 0.75) * (x - 0.75) * 20) + 0.2 * Math.exp(-(x - 0.45) * (x - 0.45) * 40);
+                } else {
+                    ei = 0.8 * Math.exp(-(x - 0.65) * (x - 0.65) * 60) + 0.1 * Math.exp(-(x - 0.2) * (x - 0.2) * 30);
+                }
+                eiCtx.lineTo(pad + x * gW, pad + gH - ei * gH * 0.6);
+            }
+            eiCtx.stroke();
+            // Fill area
+            eiCtx.lineTo(pad + gW, pad + gH); eiCtx.lineTo(pad, pad + gH); eiCtx.closePath(); eiCtx.fill();
+            // Labels
+            eiCtx.fillStyle = 'rgba(255,255,255,0.3)'; eiCtx.font = '10px Space Mono';
+            eiCtx.fillText('Surrogate (GP Mean)', pad, pad - 8);
+            eiCtx.fillStyle = eiColor; eiCtx.fillText('EI+ Acquisition', pad, pad + gH + 18);
+            // Arrow to next sample
+            const peakX = eiMode === 'explore' ? 0.75 : 0.65;
+            eiCtx.beginPath(); eiCtx.moveTo(pad + peakX * gW, pad + gH * 0.2); eiCtx.lineTo(pad + peakX * gW, pad + gH * 0.45);
+            eiCtx.strokeStyle = eiColor; eiCtx.lineWidth = 2; eiCtx.setLineDash([3, 3]); eiCtx.stroke(); eiCtx.setLineDash([]);
+            eiCtx.fillStyle = eiColor; eiCtx.font = 'bold 11px Inter'; eiCtx.fillText('↓ SAMPLE NEXT', pad + peakX * gW - 40, pad + gH * 0.17);
+        }
+
+        // ---- Convergence Animation ----
+        const convCanvas = document.getElementById('conv-canvas');
+        const convCtx = convCanvas.getContext('2d');
+        function resizeConv() { convCanvas.width = convCanvas.offsetWidth; convCanvas.height = convCanvas.offsetHeight; drawConv(); }
+        window.addEventListener('resize', resizeConv); setTimeout(resizeConv, 100);
+
+        // Simulated 30-iteration data
+        const convData = [];
+        (function () {
+            let best = 55;
+            const optLR = 0.00175, optL2 = 1.2e-4, optUnits = 210, optDrop = 0.104;
+            for (let i = 0; i < 30; i++) {
+                const t = i / 29;
+                const rmse = 55 - 35 * Math.pow(t, 0.6) + Math.random() * 8 * (1 - t);
+                best = Math.min(best, rmse);
+                convData.push({
+                    iter: i + 1, rmse: Math.max(19.53, rmse), best: Math.max(19.53, best),
+                    lr: (0.001 + Math.random() * 0.009 * (1 - t * 0.8)).toFixed(5),
+                    l2: (1e-4 + Math.random() * 9e-4 * (1 - t * 0.7)).toExponential(1),
+                    units: Math.round(100 + Math.random() * 150 * (0.5 + t * 0.5)),
+                    drop: (10 + Math.random() * 40 * (1 - t * 0.7)).toFixed(1)
+                });
+            }
+            // Fix last entry to optimal
+            convData[29] = { iter: 30, rmse: 19.53, best: 19.53, lr: optLR.toFixed(5), l2: optL2.toExponential(1), units: 210, drop: '10.4' };
+        })();
+
+        let convIdx = 0, convPlaying = false, convSpeed = 1, convTimer = null;
+        function drawConv() {
+            const W = convCanvas.width, H = convCanvas.height;
+            convCtx.clearRect(0, 0, W, H);
+            const pad = 50, gW = W - 2 * pad, gH = H - 2 * pad;
+            // Grid
+            convCtx.strokeStyle = 'rgba(255,255,255,0.04)'; convCtx.lineWidth = 1;
+            for (let i = 0; i <= 6; i++) {
+                const y = pad + gH * i / 6; convCtx.beginPath(); convCtx.moveTo(pad, y); convCtx.lineTo(pad + gW, y); convCtx.stroke();
+                convCtx.fillStyle = 'rgba(255,255,255,0.2)'; convCtx.font = '10px Space Mono'; convCtx.fillText((60 - i * 10).toFixed(0), pad - 30, y + 4);
+            }
+            // Labels
+            convCtx.fillStyle = 'rgba(255,255,255,0.3)'; convCtx.font = '10px Space Mono'; convCtx.fillText('RMSE (W/m²)', 5, pad - 10);
+            convCtx.fillText('Iteration', pad + gW / 2 - 20, H - 5);
+            const mapX = i => pad + (i / 30) * gW, mapY = v => pad + (60 - v) / 60 * gH;
+            // Optimal line
+            convCtx.strokeStyle = 'rgba(16,185,129,0.3)'; convCtx.setLineDash([4, 4]); convCtx.lineWidth = 1; convCtx.beginPath();
+            convCtx.moveTo(pad, mapY(19.53)); convCtx.lineTo(pad + gW, mapY(19.53)); convCtx.stroke(); convCtx.setLineDash([]);
+            convCtx.fillStyle = 'rgba(16,185,129,0.4)'; convCtx.font = '10px Space Mono'; convCtx.fillText('Optimal: 19.53', pad + gW - 80, mapY(19.53) - 8);
+            // Points & best line
+            if (convIdx > 0) {
+                // Best line
+                convCtx.strokeStyle = 'var(--green)'; convCtx.lineWidth = 2; convCtx.beginPath();
+                for (let i = 0; i < convIdx; i++) { const px = mapX(i + 1), py = mapY(convData[i].best); i === 0 ? convCtx.moveTo(px, py) : convCtx.lineTo(px, py); }
+                convCtx.stroke();
+                // Points
+                for (let i = 0; i < convIdx; i++) {
+                    const px = mapX(i + 1), py = mapY(convData[i].rmse);
+                    convCtx.beginPath(); convCtx.arc(px, py, 4, 0, Math.PI * 2);
+                    convCtx.fillStyle = convData[i].rmse <= 25 ? 'var(--green)' : convData[i].rmse <= 35 ? 'var(--gold)' : 'var(--red)';
+                    convCtx.fill();
+                    if (i === convIdx - 1) { convCtx.beginPath(); convCtx.arc(px, py, 8, 0, Math.PI * 2); convCtx.strokeStyle = 'rgba(6,182,212,0.5)'; convCtx.lineWidth = 2; convCtx.stroke(); }
+                }
+            }
+        }
+        function toggleConv() {
+            convPlaying = !convPlaying;
+            document.getElementById('conv-play').textContent = convPlaying ? '⏸' : '▶';
+            if (convPlaying) { if (convIdx >= 30) convIdx = 0; stepConv(); } else { clearTimeout(convTimer); }
+        }
+        function setConvSpeed(s) {
+            convSpeed = s;
+            document.querySelectorAll('.iter-controls .iter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        function stepConv() {
+            if (!convPlaying || convIdx >= 30) return void (convPlaying = false, document.getElementById('conv-play').textContent = '▶');
+            const d = convData[convIdx];
+            convIdx++;
+            document.getElementById('conv-iter').textContent = convIdx;
+            document.getElementById('conv-best').textContent = d.best.toFixed(2);
+            document.getElementById('conv-progress').style.width = (convIdx / 30 * 100) + '%';
+            document.getElementById('cp-lr').textContent = d.lr;
+            document.getElementById('cp-l2').textContent = d.l2;
+            document.getElementById('cp-units').textContent = d.units;
+            document.getElementById('cp-drop').textContent = d.drop + '%';
+            drawConv();
+            convTimer = setTimeout(stepConv, 600 / convSpeed);
+        }
+
+        // ---- Search Space Explorer ----
+        function updateHP() {
+            const lr = Math.pow(10, -4 + document.getElementById('sl-lr').value / 100 * 2);
+            const l2 = Math.pow(10, -5 + document.getElementById('sl-l2').value / 100 * 2);
+            const units = parseInt(document.getElementById('sl-units').value);
+            const drop = parseInt(document.getElementById('sl-drop').value) / 100;
+            document.getElementById('sl-lr-val').textContent = lr.toExponential(2);
+            document.getElementById('sl-l2-val').textContent = l2.toExponential(1);
+            document.getElementById('sl-units-val').textContent = units;
+            document.getElementById('sl-drop-val').textContent = (drop * 100).toFixed(0) + '%';
+            // Simulate RMSE
+            const dLR = Math.abs(Math.log10(lr) - Math.log10(0.00175)) * 15;
+            const dL2 = Math.abs(Math.log10(l2) - Math.log10(1.2e-4)) * 5;
+            const dU = Math.abs(units - 210) / 150 * 12;
+            const dD = Math.abs(drop - 0.104) / 0.4 * 8;
+            const rmse = 19.53 + dLR + dL2 + dU + dD;
+            document.getElementById('hp-rmse').textContent = rmse.toFixed(1);
+            const diff = rmse - 19.53;
+            const diffEl = document.getElementById('hp-diff');
+            diffEl.textContent = diff < 0.5 ? '★ Near Optimal!' : '+' + diff.toFixed(2) + ' from optimal';
+            diffEl.style.color = diff < 2 ? 'var(--green)' : diff < 10 ? 'var(--gold)' : 'var(--red)';
+            document.getElementById('hp-rmse').style.color = diff < 2 ? 'var(--green)' : diff < 10 ? 'var(--gold)' : 'var(--red)';
+            document.getElementById('hp-bar').style.width = Math.min(100, diff / 30 * 100) + '%';
+            document.getElementById('hp-bar').style.background = diff < 2 ? 'var(--green)' : diff < 10 ? 'var(--gold)' : 'var(--red)';
+        }
+        function revealOptimal() {
+            document.getElementById('sl-lr').value = Math.round((Math.log10(0.00175) + 4) / 2 * 100);
+            document.getElementById('sl-l2').value = Math.round((Math.log10(1.2e-4) + 5) / 2 * 100);
+            document.getElementById('sl-units').value = 210;
+            document.getElementById('sl-drop').value = 10.4;
+            updateHP();
+            // Animate gold flash
+            document.querySelectorAll('.hp-slider').forEach(s => { s.style.boxShadow = '0 0 15px var(--gold)'; setTimeout(() => s.style.boxShadow = 'none', 1500); });
+        }
+        updateHP();
+    </script>
+
+    <!-- Three.js Starry Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, particles;
+        function initPortal() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 2000);
+            camera.position.z = 1000;
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true, alpha: true });
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            const geo = new THREE.BufferGeometry();
+            const pos = new Float32Array(2500 * 3);
+            for (let i = 0; i < 2500 * 3; i++) pos[i] = (Math.random() - 0.5) * 2000;
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            const mat = new THREE.PointsMaterial({ color: 0x06B6D4, size: 2, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending });
+            particles = new THREE.Points(geo, mat);
+            scene.add(particles);
+            animate();
+        }
+        function animate() { requestAnimationFrame(animate); particles.rotation.y += 0.0005; particles.rotation.x += 0.0002; renderer.render(scene, camera); }
+        window.addEventListener('load', initPortal);
+        window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+        document.addEventListener('mousemove', e => { if (particles) { particles.rotation.y += (e.clientX - innerWidth / 2) * 0.000001; particles.rotation.x += (e.clientY - innerHeight / 2) * 0.000001; } });
+    </script>
+
+    <!-- ARABIC MODAL POPUP SYSTEM -->
+    <style>
+        #equation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            z-index: 2147483647;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity .3s
+        }
+
+        #equation-modal.active {
+            opacity: 1
+        }
+
+        #equation-modal .modal-card {
+            background: rgba(18, 18, 28, 0.90);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.02);
+            width: 90%;
+            max-width: 480px;
+            padding: 35px;
+            border-radius: 24px;
+            position: relative;
+            transform: scale(0.92) translateY(10px);
+            transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden
+        }
+
+        #equation-modal.active .modal-card {
+            transform: scale(1) translateY(0)
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all .2s
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transform: rotate(90deg)
+        }
+
+        #modal-title {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            opacity: 0.9
+        }
+
+        #modal-eq {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            font-size: 26px;
+            margin-bottom: 25px;
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.07));
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3)
+        }
+
+        #modal-desc {
+            font-family: 'Dubai', 'Segoe UI', Tahoma, sans-serif;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 15px;
+            line-height: 1.8;
+            text-align: right;
+            direction: rtl;
+            font-weight: 300
+        }
+
+        #modal-desc strong {
+            color: #fff;
+            font-weight: 600
+        }
+
+        .metric-card:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+            transform: translateY(-3px)
+        }
+    </style>
+
+    <div id="equation-modal">
+        <div class="modal-card">
+            <div class="modal-close-btn" onclick="closeModal()">&times;</div>
+            <div id="modal-title"></div>
+            <div id="modal-eq"></div>
+            <div id="modal-desc"></div>
+        </div>
+    </div>
+
+    <script>
+        const equations = {
+            'grid_search': { color: 'var(--red)', title: 'GRID SEARCH', eq: 'Cost ∝ N⁴', desc: '<strong>البحث الشبكي (التقليدي):</strong><br>يقوم بتجربة كل الاحتمالات الممكنة بشكل أعمى. مع 4 متغيرات، يتطلب آلاف التجارب مما يجعله غير عملي ومكلف جداً حسابياً.' },
+            'bayesian_opt': { color: 'var(--green)', title: 'BAYESIAN OPTIMIZATION', eq: 'P(score | hyperparameters)', desc: '<strong>التحسين البايزي (الذكي):</strong><br>يبني نموذجاً احتمالياً (Surrogate) لفهم العلاقة بين المتغيرات والأداء. يختار التجربة التالية بذكاء بناءً على المناطق الواعدة، مما يقلل عدد التجارب المطلوبة بنسبة 99%.' },
+            'gp_model': { color: 'var(--cyan)', title: 'GAUSSIAN PROCESS', eq: 'f(x) ~ GP(m(x), k(x,x\'))', desc: '<strong>العملية الغوسية (المحاكي):</strong><br>النموذج الاحتمالي الذي يستخدمه المُحسّن. المنطقة الزرقاء تمثل "عدم اليقين" (Uncertainty). كلما أضفنا نقطة بيانات، يقل عدم اليين في تلك المنطقة، ويبدأ النموذج في فهم شكل الدالة الحقيقية.' },
+            'ei_plus': { color: 'var(--purple)', title: 'EXPECTED IMPROVEMENT +', eq: 'EI(x) = E[max(f(x) - f*, 0)]', desc: '<strong>دالة الاستحواذ (EI+):</strong><br>هي العقل المدبر الذي يوازن بين:<br>1. <strong>الاستكشاف (Exploration):</strong> البحث في المناطق المجهولة ذات عدم اليقين العالي.<br>2. <strong>الاستغلال (Exploitation):</strong> التحسين في المناطق التي نعرف أنها جيدة.<br>هذا التوازن يضمن عدم الوقوع في وحل الحلول المحلية.' },
+            'convergence': { color: 'var(--gold)', title: 'CONVERGENCE PLOT', eq: 'RMSE → Global Min', desc: '<strong>منحنى التقارب:</strong><br>يوضح كيف يتحسن أداء النموذج مع كل تجربة. لاحظ كيف ينخفض الخطأ (RMSE) بسرعة في التجارب الأولى ثم يستقر عند الحل الأمثل (19.53 W/m²) في أقل من 30 تجربة.' },
+            'search_space': { color: '#fff', title: 'SEARCH SPACE', eq: 'Hyperparameter Bounds', desc: '<strong>فضاء البحث:</strong><br>النطاقات المحددة لكل متغير:<br>• معدل التعلم (لوغاريتمي): 10⁻⁴ إلى 10⁻²<br>• الوحدات العصبية: 100 إلى 250<br>• التسرب (Dropout): 10% إلى 50%<br>تم تحديد هذه النطاقات بناءً على أبحاث سابقة وتجارب أولية.' },
+            'dashboard': { color: 'var(--green)', title: 'OPTIMIZATION DASHBOARD', eq: 'Final Configuration', desc: '<strong>لوحة النتائج النهائية:</strong><br>أفضل تكوين تم الوصول إليه:<br>• سعة عالية (210 وحدة) لاستيعاب الفيزياء المعقدة.<br>• تنظيم منخفض (10.4% Dropout) لأن الميزات الفيزيائية نظيفة ولا تحتاج لكبح قوي.<br>• معدل تعلم دقيق لضمان استقرار التدريب.' },
+            'hyper_lr': { color: 'var(--cyan)', title: 'LEARNING RATE', eq: 'α = 0.00175', desc: '<strong>معدل التعلم:</strong><br>يتحكم في سرعة تعديل الأوزان. تم اختياره بدقة ليكون صغيراً بما يكفي لمنع التذبذب، وكبيراً بما يكفي لتسريع التقارب.' },
+            'hyper_l2': { color: 'var(--purple)', title: 'L2 REGULARIZATION', eq: 'λ = 1.2×10⁻⁴', desc: '<strong>تنظيم L2 (Weight Decay):</strong><br>يمنع الأوزان من أن تصبح كبيرة جداً، مما يقلل من تعقيد النموذج ويمنع الحفظ الصم (Overfitting).' },
+            'hyper_lstm': { color: 'var(--gold)', title: 'BiLSTM UNITS', eq: 'N = 210', desc: '<strong>عدد الخلايا العصبية:</strong><br>سعة الذاكرة الزمنية للطبقة. العدد 210 يوفر توازناً مثالياً بين القدرة على حفظ الأنماط الطويلة وسرعة المعالجة.' },
+            'hyper_dropout': { color: 'var(--green)', title: 'DROPOUT RATE', eq: 'p = 10.4%', desc: '<strong>معدل الإسقاط (Dropout):</strong><br>نسبة الخلايا التي يتم إطفاؤها عشوائياً أثناء التدريب. القيمة المنخفضة (10%) تدل على أن النموذج واثق من بياناته ولا يحتاج لتشويش كبير لتعلم التعميم.' }
+        };
+        function openModal(type) {
+            if (!equations[type]) return;
+            const d = equations[type];
+            document.getElementById('modal-title').innerHTML = d.title;
+            document.getElementById('modal-title').style.color = d.color;
+            document.getElementById('modal-eq').innerHTML = d.eq;
+            document.getElementById('modal-eq').style.color = d.color;
+            document.getElementById('modal-desc').innerHTML = d.desc;
+            const m = document.getElementById('equation-modal');
+            m.style.display = 'flex';
+            setTimeout(() => m.classList.add('active'), 10);
+        }
+        function closeModal() {
+            const m = document.getElementById('equation-modal');
+            m.classList.remove('active');
+            setTimeout(() => m.style.display = 'none', 300);
+        }
+        document.getElementById('equation-modal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
+    </script>
+</body>
+
+</html>

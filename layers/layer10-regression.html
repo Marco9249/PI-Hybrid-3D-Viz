@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer 10: Linear Regression Output | Physics Is All You Need</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --gold: #F59E0B;
+            --orange: #F97316;
+            --red: #EF4444;
+            --cyan: #06B6D4;
+            --green: #10B981;
+            --purple: #8B5CF6;
+            --bg: #020206;
+            --panel: rgba(6, 4, 16, 0.88);
+            --glass: rgba(245, 158, 11, 0.22);
+            --font: 'Outfit', sans-serif;
+            --mono: 'JetBrains Mono', monospace
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font);
+            background: var(--bg);
+            color: #fff
+        }
+
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            z-index: 1
+        }
+
+        canvas#bgStars {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: .5
+        }
+
+        #cursor {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform .06s;
+            mix-blend-mode: difference
+        }
+
+        #cursorDot {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            box-shadow: 0 0 14px var(--gold)
+        }
+
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s, visibility 1s
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            visibility: hidden
+        }
+
+        .load-ring {
+            width: 80px;
+            height: 80px;
+            border: 3px solid transparent;
+            border-top: 3px solid var(--gold);
+            border-right: 3px solid var(--orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            position: relative
+        }
+
+        .load-ring::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border: 2px solid transparent;
+            border-bottom: 2px solid var(--cyan);
+            border-left: 2px solid var(--green);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite reverse
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .load-text {
+            margin-top: 20px;
+            color: var(--gold);
+            letter-spacing: 4px;
+            font-size: 11px;
+            font-weight: 600
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 85px;
+            background: linear-gradient(180deg, rgba(2, 2, 6, .98) 0%, rgba(2, 2, 6, .5) 80%, transparent);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 32px
+        }
+
+        .layer-badge {
+            display: flex;
+            align-items: center;
+            gap: 18px
+        }
+
+        .layer-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--gold), var(--red));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 0 40px rgba(245, 158, 11, .5), 0 0 80px rgba(245, 158, 11, .2);
+            animation: iconPulse 3s ease-in-out infinite
+        }
+
+        @keyframes iconPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 40px rgba(245, 158, 11, .5), 0 0 80px rgba(245, 158, 11, .2);
+                transform: scale(1)
+            }
+
+            50% {
+                box-shadow: 0 0 60px rgba(245, 158, 11, .8), 0 0 120px rgba(249, 115, 22, .4);
+                transform: scale(1.06)
+            }
+        }
+
+        .layer-title h1 {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, var(--gold), var(--orange), var(--red));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none
+        }
+
+        .layer-title p {
+            font-size: 10px;
+            color: rgba(255, 255, 255, .4);
+            letter-spacing: 5px;
+            text-transform: uppercase
+        }
+
+        .header-metrics {
+            display: flex;
+            gap: 12px
+        }
+
+        .metric-box {
+            background: rgba(245, 158, 11, .06);
+            border: 1px solid var(--glass);
+            padding: 8px 18px;
+            border-radius: 12px;
+            text-align: center;
+            backdrop-filter: blur(12px)
+        }
+
+        .metric-label {
+            font-size: 7px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: 200;
+            color: #fff;
+            font-family: var(--mono)
+        }
+
+        .nav-group {
+            display: flex;
+            gap: 10px
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, .5);
+            border: 1px solid rgba(245, 158, 11, .25);
+            border-radius: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all .3s;
+            backdrop-filter: blur(10px)
+        }
+
+        .nav-btn:hover {
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 0 25px var(--gold)
+        }
+
+        .panel {
+            position: fixed;
+            top: 100px;
+            width: 340px;
+            max-height: calc(100vh - 115px);
+            background: var(--panel);
+            backdrop-filter: blur(35px) saturate(150%);
+            border: 1px solid rgba(245, 158, 11, .15);
+            border-radius: 24px;
+            padding: 22px;
+            z-index: 50;
+            overflow-y: auto;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .03);
+            transition: border-color .3s, box-shadow .3s
+        }
+
+        .panel:hover {
+            border-color: rgba(245, 158, 11, .4);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, .7), 0 0 30px rgba(245, 158, 11, .08)
+        }
+
+        .panel-l {
+            left: 24px
+        }
+
+        .panel-r {
+            right: 24px
+        }
+
+        .sec {
+            font-size: 9px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(245, 158, 11, .12);
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .ghi-box {
+            background: radial-gradient(ellipse at center, rgba(245, 158, 11, .08), transparent 70%);
+            border: 1px solid rgba(245, 158, 11, .3);
+            border-radius: 22px;
+            padding: 28px;
+            text-align: center;
+            margin-bottom: 18px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .ghi-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(245, 158, 11, .1), transparent);
+            animation: ghiGlow 2.5s ease-in-out infinite
+        }
+
+        @keyframes ghiGlow {
+
+            0%,
+            100% {
+                opacity: .4
+            }
+
+            50% {
+                opacity: 1
+            }
+        }
+
+        .ghi-val {
+            font-size: 64px;
+            font-weight: 200;
+            color: var(--gold);
+            text-shadow: 0 0 50px rgba(245, 158, 11, .6), 0 0 100px rgba(245, 158, 11, .2);
+            position: relative;
+            z-index: 1;
+            font-family: var(--mono)
+        }
+
+        .ghi-unit {
+            font-size: 16px;
+            color: var(--orange);
+            letter-spacing: 4px;
+            margin-top: 4px
+        }
+
+        .ghi-sub {
+            font-size: 9px;
+            color: rgba(255, 255, 255, .4);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 8px
+        }
+
+        .weight-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 3px;
+            margin-bottom: 16px
+        }
+
+        .w-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 7px;
+            transition: all .3s;
+            cursor: pointer;
+            border: 1px solid transparent
+        }
+
+        .w-cell:hover {
+            transform: scale(1.3);
+            z-index: 10;
+            border-color: var(--gold);
+            box-shadow: 0 0 15px currentColor
+        }
+
+        @keyframes weightFlashLarge {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+                background: rgba(245, 158, 11, 0.05);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+                background: rgba(245, 158, 11, 0.25);
+                border-color: var(--gold);
+                transform: scale(1.12);
+            }
+        }
+
+        @keyframes weightFlashMedium {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 rgba(249, 115, 22, 0);
+            }
+
+            50% {
+                box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
+                background: rgba(249, 115, 22, 0.18);
+                transform: scale(1.08);
+            }
+        }
+
+        @keyframes weightFlashSmall {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 rgba(6, 182, 212, 0);
+            }
+
+            50% {
+                box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+                background: rgba(6, 182, 212, 0.12);
+            }
+        }
+
+        .w-cell.flash-large {
+            animation: weightFlashLarge 0.8s ease-out;
+        }
+
+        .w-cell.flash-medium {
+            animation: weightFlashMedium 0.6s ease-out;
+        }
+
+        .w-cell.flash-small {
+            animation: weightFlashSmall 0.5s ease-out;
+        }
+
+        .cons-card {
+            background: rgba(0, 0, 0, .25);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--green)
+        }
+
+        .cons-card.warn {
+            border-left-color: var(--orange)
+        }
+
+        .cons-icon {
+            font-size: 20px
+        }
+
+        .cons-info {
+            flex: 1
+        }
+
+        .cons-name {
+            font-size: 11px;
+            font-weight: 600
+        }
+
+        .cons-val {
+            font-size: 10px;
+            color: var(--cyan);
+            font-family: var(--mono)
+        }
+
+        .cons-status {
+            font-size: 16px
+        }
+
+        .ctrl-row {
+            margin-bottom: 16px
+        }
+
+        .ctrl-head {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px
+        }
+
+        .ctrl-label {
+            font-size: 9px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px
+        }
+
+        .ctrl-val {
+            font-size: 10px;
+            color: var(--cyan);
+            font-family: var(--mono)
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, .07);
+            border-radius: 3px;
+            appearance: none;
+            -webkit-appearance: none;
+            outline: none
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, var(--gold), var(--orange));
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 16px rgba(245, 158, 11, .6)
+        }
+
+        .act-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+            margin-bottom: 14px
+        }
+
+        .act-btn {
+            padding: 11px;
+            background: rgba(255, 255, 255, .02);
+            border: 1px solid rgba(245, 158, 11, .18);
+            border-radius: 11px;
+            color: rgba(255, 255, 255, .6);
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            letter-spacing: 1px
+        }
+
+        .act-btn:hover {
+            background: rgba(245, 158, 11, .1);
+            border-color: var(--gold);
+            color: #fff
+        }
+
+        .act-btn.danger {
+            border-color: rgba(239, 68, 68, .25)
+        }
+
+        .act-btn.danger:hover {
+            border-color: var(--red);
+            color: var(--red)
+        }
+
+        .act-btn.active {
+            background: linear-gradient(135deg, rgba(245, 158, 11, .12), rgba(249, 115, 22, .12));
+            border-color: var(--gold);
+            color: #fff
+        }
+
+        .abl-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 14px;
+            font-size: 9px
+        }
+
+        .abl-table th {
+            color: var(--gold);
+            text-align: left;
+            padding: 5px 6px;
+            border-bottom: 1px solid rgba(245, 158, 11, .15);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase
+        }
+
+        .abl-table td {
+            padding: 5px 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, .03);
+            font-family: var(--mono);
+            font-size: 9px
+        }
+
+        .abl-table tr.hl {
+            background: rgba(245, 158, 11, .06)
+        }
+
+        .abl-table tr.hl td {
+            color: var(--gold);
+            font-weight: 600
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 7px;
+            font-weight: 700
+        }
+
+        .tag-g {
+            background: rgba(245, 158, 11, .12);
+            color: var(--gold);
+            border: 1px solid rgba(245, 158, 11, .25)
+        }
+
+        .tag-r {
+            background: rgba(239, 68, 68, .1);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, .25)
+        }
+
+        .tag-x {
+            background: rgba(255, 255, 255, .05);
+            color: #888;
+            border: 1px solid rgba(255, 255, 255, .08)
+        }
+
+        /* PHASE STEPPER - NEW */
+        .phase-stepper {
+            position: fixed;
+            top: 95px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 85;
+            display: flex;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(6, 4, 16, 0.92);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(245, 158, 11, .2);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .6)
+        }
+
+        .phase-step {
+            padding: 8px 18px;
+            border: 1px solid rgba(255, 255, 255, .15);
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .4);
+            transition: all .4s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: .5
+        }
+
+        .phase-step.active {
+            background: linear-gradient(135deg, rgba(245, 158, 11, .15), rgba(249, 115, 22, .1));
+            border-color: var(--gold);
+            color: var(--gold);
+            opacity: 1;
+            box-shadow: 0 0 20px rgba(245, 158, 11, .3);
+            transform: scale(1.05)
+        }
+
+        .phase-step .icon {
+            font-size: 14px
+        }
+
+        /* LIVE MATH COMPUTATION - NEW */
+        .math-window {
+            background: rgba(0, 0, 0, .4);
+            border: 1px solid rgba(245, 158, 11, .25);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 16px;
+            font-family: var(--mono);
+            font-size: 9px;
+            line-height: 1.8;
+            max-height: 280px;
+            overflow-y: auto
+        }
+
+        .math-section {
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, .06)
+        }
+
+        .math-section:last-child {
+            border-bottom: none
+        }
+
+        .math-label {
+            font-size: 8px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            font-weight: 700
+        }
+
+        .math-line {
+            color: #aaa;
+            margin: 2px 0;
+            padding-left: 8px
+        }
+
+        .math-line .hl {
+            color: var(--gold);
+            font-weight: 600
+        }
+
+        .math-line .cy {
+            color: var(--cyan)
+        }
+
+        .math-line .gr {
+            color: var(--green)
+        }
+
+        .math-line .rd {
+            color: var(--red)
+        }
+
+        #stressCanvas {
+            width: 100%;
+            height: 90px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, .25)
+        }
+
+        .eq-card {
+            background: rgba(0, 0, 0, .3);
+            border-radius: 12px;
+            padding: 14px;
+            border-left: 3px solid var(--gold);
+            margin-top: 12px
+        }
+
+        .eq-title {
+            font-size: 8px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px
+        }
+
+        .eq-code {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--cyan);
+            line-height: 1.9
+        }
+
+        .tele-box {
+            font-family: var(--mono);
+            font-size: 8px;
+            color: #666;
+            height: 80px;
+            overflow: hidden;
+            position: relative;
+            background: rgba(0, 0, 0, .25);
+            padding: 8px;
+            border-left: 2px solid var(--cyan);
+            border-radius: 0 6px 6px 0;
+            margin-top: 12px
+        }
+
+        .tele-line {
+            margin-bottom: 2px;
+            white-space: nowrap
+        }
+
+        .scan-bar {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent, rgba(6, 182, 212, .06) 50%, transparent);
+            animation: scanD 2.5s linear infinite;
+            pointer-events: none
+        }
+
+        @keyframes scanD {
+            0% {
+                top: -100%
+            }
+
+            100% {
+                top: 100%
+            }
+        }
+
+        .bottom-hud {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 80;
+            display: flex;
+            gap: 28px;
+            align-items: center;
+            padding: 10px 36px;
+            background: linear-gradient(0deg, rgba(2, 2, 6, .95) 60%, transparent);
+            min-width: 680px;
+            justify-content: center
+        }
+
+        .hud-stat {
+            text-align: center
+        }
+
+        .hud-label {
+            font-size: 7px;
+            color: rgba(255, 255, 255, .35);
+            text-transform: uppercase;
+            letter-spacing: 2px
+        }
+
+        .hud-val {
+            font-size: 20px;
+            font-weight: 200;
+            font-family: var(--mono)
+        }
+
+        .hud-val.gold {
+            color: var(--gold);
+            text-shadow: 0 0 20px rgba(245, 158, 11, .3)
+        }
+
+        .hud-val.red {
+            color: var(--red)
+        }
+
+        .hud-badge {
+            padding: 5px 18px;
+            border-radius: 18px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            animation: bPulse 2s ease-in-out infinite
+        }
+
+        .hud-badge.confirmed {
+            background: rgba(16, 185, 129, .12);
+            border: 1px solid var(--green);
+            color: var(--green)
+        }
+
+        .hud-badge.racing {
+            background: rgba(245, 158, 11, .08);
+            border: 1px solid var(--gold);
+            color: var(--gold)
+        }
+
+        @keyframes bPulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .5
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 3px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cursor"></div>
+    <div id="cursorDot"></div>
+    <canvas id="bgStars"></canvas>
+    <div class="loading" id="loading">
+        <div class="load-ring"></div>
+        <div class="load-text">INITIALIZING REGRESSION CORE...</div>
+    </div>
+
+    <header class="header">
+        <div class="layer-badge">
+            <div class="layer-icon">⚡</div>
+            <div class="layer-title">
+                <h1>Linear Regression Output</h1>
+                <p>Layer 10 · Dense(1) · Linear Activation</p>
+            </div>
+        </div>
+        <div class="nav-group"><a href="layer9-output.html" class="nav-btn">← PREV</a><a href="../index.html"
+                class="nav-btn">HOME</a></div>
+        <div class="header-metrics">
+            <div class="metric-box">
+                <div class="metric-label">Input</div>
+                <div class="metric-value">64</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Output</div>
+                <div class="metric-value">1</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Activation</div>
+                <div class="metric-value">Linear</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">RMSE</div>
+                <div class="metric-value" style="color:var(--gold)">19.53</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">R²</div>
+                <div class="metric-value">0.997</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- PHASE STEPPER - NEW -->
+    <div class="phase-stepper" id="phaseStepper">
+        <div class="phase-step active" data-phase="0">
+            <span class="icon">→</span>
+            <span>① Forward Pass</span>
+        </div>
+        <div class="phase-step" data-phase="1">
+            <span class="icon">📊</span>
+            <span>② Loss Calculation</span>
+        </div>
+        <div class="phase-step" data-phase="2">
+            <span class="icon">←</span>
+            <span>③ Backpropagation</span>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <!-- LEFT PANEL -->
+    <div class="panel panel-l">
+        <div class="sec">☀️ GHI Prediction Output</div>
+        <div class="ghi-box">
+            <div class="ghi-val" id="ghiVal">542</div>
+            <div class="ghi-unit">W/m²</div>
+            <div class="ghi-sub">Global Horizontal Irradiance</div>
+        </div>
+
+        <div class="sec">⚖️ Weight Matrix (64→1)</div>
+        <div class="weight-grid" id="weightGrid"></div>
+        <div style="font-size:8px;color:#555;margin-bottom:14px;font-family:var(--mono)">ŷ = Σ(wᵢ·xᵢ) + b = <span
+                id="sumDisplay" style="color:var(--gold)">542.3</span></div>
+
+        <!-- LIVE MATH COMPUTATION - NEW -->
+        <div class="sec">📐 Live Computation</div>
+        <div class="math-window" id="mathWindow">
+            <div class="math-section">
+                <div class="math-label">Forward Pass</div>
+                <div class="math-line">w₀·x₀ = <span class="hl" id="m0"></span></div>
+                <div class="math-line">w₁·x₁ = <span class="hl" id="m1"></span></div>
+                <div class="math-line">w₂·x₂ = <span class="hl" id="m2"></span></div>
+                <div class="math-line">... (64 total)</div>
+                <div class="math-line">──────────────</div>
+                <div class="math-line">Σ = <span class="cy" id="mSum"></span> W/m²</div>
+            </div>
+            <div class="math-section">
+                <div class="math-label">Post-Filter</div>
+                <div class="math-line">y_final = max(0, <span id="mRaw"></span>) = <span class="gr" id="mFinal"></span>
+                    W/m²</div>
+            </div>
+            <div class="math-section">
+                <div class="math-label">Loss Calculation</div>
+                <div class="math-line">MSE = (ŷ - y_true)² = <span class="rd" id="mMSE"></span></div>
+                <div class="math-line">L2 = λ·‖W‖² = <span id="mL2"></span></div>
+                <div class="math-line">Total = <span class="hl" id="mTotal"></span></div>
+            </div>
+            <div class="math-section">
+                <div class="math-label">Gradient (∂L/∂w₀)</div>
+                <div class="math-line">δ = (ŷ - y_true) = <span id="mDelta"></span></div>
+                <div class="math-line">∇w₀ = δ · x₀ = <span class="cy" id="mGrad"></span></div>
+            </div>
+        </div>
+
+        <div class="sec">🔒 Physics Constraints</div>
+        <div class="cons-card"><span class="cons-icon">📐</span>
+            <div class="cons-info">
+                <div class="cons-name">Non-Negativity Filter</div>
+                <div class="cons-val">y_final = max(0, ŷ)</div>
+            </div><span class="cons-status">✅</span>
+        </div>
+        <div class="cons-card"><span class="cons-icon">🌡️</span>
+            <div class="cons-info">
+                <div class="cons-name">Solar Constant Bound</div>
+                <div class="cons-val">GHI ≤ 1367 W/m²</div>
+            </div><span class="cons-status">✅</span>
+        </div>
+        <div class="cons-card"><span class="cons-icon">☁️</span>
+            <div class="cons-info">
+                <div class="cons-name">Clearness Index</div>
+                <div class="cons-val" id="ktVal">KT = 0.82</div>
+            </div><span class="cons-status">✅</span>
+        </div>
+        <div class="cons-card warn"><span class="cons-icon">🌅</span>
+            <div class="cons-info">
+                <div class="cons-name">Solar Zenith</div>
+                <div class="cons-val" id="zenVal">θz = 25.4°</div>
+            </div><span class="cons-status">⚡</span>
+        </div>
+
+        <div class="tele-box" id="teleBox">
+            <div class="scan-bar"></div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel panel-r">
+        <div class="sec">🔬 Bayesian Optimal Hyperparams</div>
+        <div class="ctrl-row">
+            <div class="ctrl-head"><span class="ctrl-label">Dropout α</span><span class="ctrl-val" id="vA">0.104</span>
+            </div><input type="range" id="sA" min="0.05" max="0.5" step="0.001" value="0.104">
+        </div>
+        <div class="ctrl-row">
+            <div class="ctrl-head"><span class="ctrl-label">L2 Reg λ</span><span class="ctrl-val" id="vL">1.2e-4</span>
+            </div><input type="range" id="sL" min="0.00001" max="0.001" step="0.00001" value="0.00012">
+        </div>
+        <div class="ctrl-row">
+            <div class="ctrl-head"><span class="ctrl-label">Learning Rate</span><span class="ctrl-val"
+                    id="vR">0.00175</span></div><input type="range" id="sR" min="0.0001" max="0.01" step="0.0001"
+                value="0.00175">
+        </div>
+
+        <div class="sec">⚡ Scenario Injection</div>
+        <div class="act-grid">
+            <button class="act-btn" id="btnCloud">☁️ CLOUD</button>
+            <button class="act-btn danger" id="btnDust">🌪️ DUST STORM</button>
+            <button class="act-btn" id="btnNight">🌙 NIGHT MASK</button>
+            <button class="act-btn" id="btnReset">🔄 RESET</button>
+        </div>
+
+        <div class="sec">⚔️ Complexity Paradox (Table VII)</div>
+        <table class="abl-table">
+            <thead>
+                <tr>
+                    <th>Model</th>
+                    <th>Phys</th>
+                    <th>Attn</th>
+                    <th>RMSE</th>
+                    <th>R²</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Baseline <span class="tag tag-x">12F</span></td>
+                    <td>✗</td>
+                    <td>✗</td>
+                    <td>55.32</td>
+                    <td>0.970</td>
+                </tr>
+                <tr>
+                    <td>Attn-Hybrid <span class="tag tag-r">15F</span></td>
+                    <td>✓</td>
+                    <td>✓</td>
+                    <td>30.64</td>
+                    <td>0.992</td>
+                </tr>
+                <tr class="hl">
+                    <td>PI-Hybrid <span class="tag tag-g">15F</span></td>
+                    <td>✓</td>
+                    <td>✗</td>
+                    <td>19.53</td>
+                    <td>0.997</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="sec">📈 5-Year Stress Test</div>
+        <canvas id="stressCanvas" width="300" height="90"></canvas>
+
+        <div class="eq-card">
+            <div class="eq-title">Regression Equation</div>
+            <div class="eq-code">ŷ = W·x + b (Linear)<br>y_final = max(0, ŷ)<br>KT = GHI/(GHI_cs + 1)<br>L = MSE +
+                λ·‖W‖²</div>
+        </div>
+    </div>
+
+    <!-- BOTTOM HUD -->
+    <div class="bottom-hud">
+        <div class="hud-stat">
+            <div class="hud-label">Epoch</div>
+            <div class="hud-val" id="epochVal" style="color:var(--purple)">0 / 100</div>
+        </div>
+        <div class="hud-stat">
+            <div class="hud-label">RMSE (W/m²)</div>
+            <div class="hud-val gold" id="rmseVal">25.01</div>
+        </div>
+        <div class="hud-stat">
+            <div class="hud-label">RMSE Δ</div>
+            <div class="hud-val" id="rmseDelta" style="color:var(--green)">—</div>
+        </div>
+        <div class="hud-stat">
+            <div class="hud-label">Best RMSE</div>
+            <div class="hud-val" id="rmseBest" style="color:var(--cyan)">25.01</div>
+        </div>
+        <div class="hud-stat" style="min-width:120px">
+            <div class="hud-label">Training Progress</div>
+            <div
+                style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:4px;overflow:hidden">
+                <div id="trainProgress"
+                    style="width:0%;height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:3px;transition:width 0.5s ease">
+                </div>
+            </div>
+        </div>
+        <div id="hudBadge" class="hud-badge racing">EPOCH 0 / 100</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+    <script>
+        // ═════════════════════════════════════════════════
+        // GLOBALS
+        // ═════════════════════════════════════════════════
+        let scene, camera, renderer, composer, controls;
+        let inputSpheres = [], outputSphere, weightLines = [], dataParticles = [];
+        let terrain, piDrone, atDrone, beacon, dustSys, piTrail, atTrail;
+        let time = 0, isDust = false, isCloud = false, isNight = false, cloudTimer = 0, epoch = 0, raceOver = false;
+        // === TRAINING TRACKING ===
+        let trainEpoch = 0;
+        const MAX_EPOCHS = 100;
+        let currentRMSE = 25.01;  // Start: Baseline RMSE from Table VII
+        const targetRMSE = 19.53; // End: PI-Hybrid optimal RMSE from Table VII
+        let bestRMSE = 25.01;
+        let prevRMSE = 25.01;
+        // Output sphere target Y position (moves up as RMSE improves)
+        let outputSphereTargetY = 14;
+        const weights = []; for (let i = 0; i < 64; i++)weights.push((Math.random() - .5) * 2);
+        let bias = 0.1;
+        const PI_A = { x: -32, z: -32, vx: 0, vz: 0, trail: [], dist: 50 };
+        const AT_A = { x: -32, z: -26, vx: 0, vz: 0, trail: [], dist: 50 };
+
+        // PHASE SYSTEM - NEW
+        let currentPhase = 0; // 0=Forward, 1=Loss, 2=Backprop
+        let phaseTimer = 0;
+        const PHASE_DURATION = 180; // frames per phase (~3 seconds at 60fps)
+
+        // LIVE MATH - NEW
+        const inputs = []; for (let i = 0; i < 64; i++) inputs.push(Math.random() * 1000); // Sample feature values
+        let groundTruth = 538; // Target GHI
+        let learningRate = 0.001;
+
+        // PARTICLE SYSTEMS FOR PHASES - NEW
+        let forwardParticles = null, backpropParticles = null, errorHalo = null;
+        const activeParticles = []; // {mesh, startPos, endPos, progress, speed}
+
+        function updatePhase(phase) {
+            const previousPhase = currentPhase;
+            currentPhase = phase;
+
+            // Update UI indicators
+            document.querySelectorAll('.phase-step').forEach((el, idx) => {
+                el.classList.toggle('active', idx === phase);
+            });
+            updateLiveMath();
+
+            // SPAWN PHASE-SPECIFIC VISUALS - NEW
+            cleanupParticles(); // Clear previous phase particles
+
+            if (phase === 0) {
+                // Forward Pass: spawn data flow particles
+                createForwardParticles();
+
+                // TRIGGER WEIGHT UPDATE if coming from Backprop
+                if (previousPhase === 2) {
+                    // === INCREMENT EPOCH ===
+                    if (trainEpoch < MAX_EPOCHS) {
+                        trainEpoch++;
+                        prevRMSE = currentRMSE;
+
+                        // Simulate RMSE decay: exponential curve from 25.01 → 19.53
+                        const progress = trainEpoch / MAX_EPOCHS;
+                        const decay = Math.exp(-3.5 * progress);
+                        currentRMSE = targetRMSE + (25.01 - targetRMSE) * decay;
+
+                        // Add noise from environment
+                        if (isDust) currentRMSE += Math.random() * 1.5;
+                        if (isCloud) currentRMSE += Math.random() * 0.8;
+                        currentRMSE = Math.max(targetRMSE, currentRMSE);
+
+                        if (currentRMSE < bestRMSE) bestRMSE = currentRMSE;
+
+                        // === MOVE OUTPUT SPHERE based on RMSE improvement ===
+                        // As RMSE drops from 25→19.53, sphere rises from Y=14 to Y=18
+                        const rmseProgress = 1 - (currentRMSE - targetRMSE) / (25.01 - targetRMSE);
+                        outputSphereTargetY = 14 + rmseProgress * 4;
+                    }
+
+                    setTimeout(() => {
+                        updateWeightsWithAnimation();
+                        updateWeightUI();
+                    }, 200);
+                }
+            } else if (phase === 1) {
+                // Loss Calculation: create error halo
+                createErrorHalo();
+            } else if (phase === 2) {
+                // Backpropagation: spawn gradient particles
+                createBackpropParticles();
+            }
+        }
+
+        function updateLiveMath() {
+            // FORWARD PASS  
+            let sum = bias;
+            const contributions = [];
+            for (let i = 0; i < 64; i++) {
+                const c = weights[i] * inputs[i];
+                contributions.push({ idx: i, val: c });
+                sum += c;
+            }
+            // Show top 3 contributors
+            contributions.sort((a, b) => Math.abs(b.val) - Math.abs(a.val));
+            const c0 = contributions[0], c1 = contributions[1], c2 = contributions[2];
+            document.getElementById('m0').textContent = `${weights[c0.idx].toFixed(3)} × ${inputs[c0.idx].toFixed(1)} = ${c0.val.toFixed(2)}`;
+            document.getElementById('m1').textContent = `${weights[c1.idx].toFixed(3)} × ${inputs[c1.idx].toFixed(1)} = ${c1.val.toFixed(2)}`;
+            document.getElementById('m2').textContent = `${weights[c2.idx].toFixed(3)} × ${inputs[c2.idx].toFixed(1)} = ${c2.val.toFixed(2)}`;
+            document.getElementById('mSum').textContent = sum.toFixed(2);
+
+            // POST-FILTER
+            const filtered = Math.max(0, sum);
+            document.getElementById('mRaw').textContent = sum.toFixed(2);
+            document.getElementById('mFinal').textContent = filtered.toFixed(2);
+
+            // LOSS
+            const error = filtered - groundTruth;
+            const mse = error * error;
+            const l2 = weights.reduce((acc, w) => acc + w * w, 0) * 0.0001;
+            const totalLoss = mse + l2;
+            document.getElementById('mMSE').textContent = mse.toFixed(2);
+            document.getElementById('mL2').textContent = l2.toFixed(4);
+            document.getElementById('mTotal').textContent = totalLoss.toFixed(2);
+
+            // GRADIENT
+            const delta = error;
+            const grad0 = delta * inputs[c0.idx];
+            document.getElementById('mDelta').textContent = delta.toFixed(2);
+            document.getElementById('mGrad').textContent = grad0.toFixed(1);
+        }
+
+        // ═════════════════════════════════════════════════
+        // PARTICLE SYSTEM FUNCTIONS - NEW
+        // ═════════════════════════════════════════════════
+        function createForwardParticles() {
+            // Safety check - don't spawn if scene not ready
+            if (!scene || !inputSpheres || inputSpheres.length === 0 || !outputSphere) return;
+
+            // Spawn particles from random input neurons to output
+            const numParticles = 12;
+            for (let i = 0; i < numParticles; i++) {
+                const inputIdx = Math.floor(Math.random() * inputSpheres.length);
+                const startSphere = inputSpheres[inputIdx];
+                const geo = new THREE.SphereGeometry(0.15, 8, 8);
+                const mat = new THREE.MeshBasicMaterial({
+                    color: 0xF59E0B,
+                    transparent: true,
+                    opacity: 0.9,
+                    emissive: 0xF59E0B,
+                    emissiveIntensity: 0.5
+                });
+                const particle = new THREE.Mesh(geo, mat);
+                particle.position.copy(startSphere.position);
+                scene.add(particle);
+
+                activeParticles.push({
+                    mesh: particle,
+                    startPos: startSphere.position.clone(),
+                    endPos: outputSphere.position.clone(),
+                    progress: Math.random() * 0.3, // Stagger start
+                    speed: 0.008 + Math.random() * 0.004
+                });
+            }
+        }
+
+        function createBackpropParticles() {
+            // Safety check - don't spawn if scene not ready
+            if (!scene || !inputSpheres || inputSpheres.length === 0 || !outputSphere) return;
+
+            // Spawn particles from output back to random inputs
+            const numParticles = 10;
+            for (let i = 0; i < numParticles; i++) {
+                const inputIdx = Math.floor(Math.random() * inputSpheres.length);
+                const endSphere = inputSpheres[inputIdx];
+                const geo = new THREE.SphereGeometry(0.12, 8, 8);
+                const mat = new THREE.MeshBasicMaterial({
+                    color: 0x06B6D4,
+                    transparent: true,
+                    opacity: 0.85,
+                    emissive: 0x06B6D4,
+                    emissiveIntensity: 0.4
+                });
+                const particle = new THREE.Mesh(geo, mat);
+                particle.position.copy(outputSphere.position);
+                scene.add(particle);
+
+                activeParticles.push({
+                    mesh: particle,
+                    startPos: outputSphere.position.clone(),
+                    endPos: endSphere.position.clone(),
+                    progress: Math.random() * 0.2,
+                    speed: 0.007 + Math.random() * 0.003
+                });
+            }
+        }
+
+        function createErrorHalo() {
+            // Safety check - don't create if scene not ready
+            if (!scene || !outputSphere || !camera) return;
+
+            // Create pulsing error visualization around output
+            if (errorHalo) {
+                scene.remove(errorHalo);
+                errorHalo.geometry.dispose();
+                errorHalo.material.dispose();
+            }
+            const geo = new THREE.RingGeometry(1.2, 2.5, 32);
+            const mat = new THREE.MeshBasicMaterial({
+                color: 0xEF4444,
+                transparent: true,
+                opacity: 0.4,
+                side: THREE.DoubleSide
+            });
+            errorHalo = new THREE.Mesh(geo, mat);
+            errorHalo.position.copy(outputSphere.position);
+            errorHalo.lookAt(camera.position);
+            scene.add(errorHalo);
+        }
+
+        function updateParticles() {
+            // Animate all active particles
+            for (let i = activeParticles.length - 1; i >= 0; i--) {
+                const p = activeParticles[i];
+                p.progress += p.speed;
+
+                if (p.progress >= 1) {
+                    // Remove completed particle
+                    scene.remove(p.mesh);
+                    p.mesh.geometry.dispose();
+                    p.mesh.material.dispose();
+                    activeParticles.splice(i, 1);
+                } else {
+                    // Lerp position
+                    p.mesh.position.lerpVectors(p.startPos, p.endPos, p.progress);
+                    // Gentle pulse
+                    const scale = 1 + Math.sin(p.progress * Math.PI) * 0.3;
+                    p.mesh.scale.setScalar(scale);
+                }
+            }
+
+            // Pulse error halo
+            if (errorHalo && currentPhase === 1) {
+                const pulse = Math.sin(time * 4) * 0.5 + 0.5;
+                errorHalo.material.opacity = 0.3 + pulse * 0.3;
+                errorHalo.scale.setScalar(1 + pulse * 0.2);
+                errorHalo.rotation.z += 0.01;
+                errorHalo.lookAt(camera.position);
+            } else if (errorHalo) {
+                // Fade out when not in loss phase
+                errorHalo.material.opacity *= 0.95;
+                if (errorHalo.material.opacity < 0.01) {
+                    scene.remove(errorHalo);
+                    errorHalo.geometry.dispose();
+                    errorHalo.material.dispose();
+                    errorHalo = null;
+                }
+            }
+        }
+
+        function cleanupParticles() {
+            // Safety check
+            if (!scene) return;
+
+            // Remove all active particles
+            activeParticles.forEach(p => {
+                scene.remove(p.mesh);
+                p.mesh.geometry.dispose();
+                p.mesh.material.dispose();
+            });
+            activeParticles.length = 0;
+
+            if (errorHalo) {
+                scene.remove(errorHalo);
+                errorHalo.geometry.dispose();
+                errorHalo.material.dispose();
+                errorHalo = null;
+            }
+        }
+
+        // ═════════════════════════════════════════════════
+        // BACKGROUND STARS
+        // ═════════════════════════════════════════════════
+        (function () {
+            const c = document.getElementById('bgStars'), x = c.getContext('2d');
+            c.width = innerWidth; c.height = innerHeight;
+            const s = []; for (let i = 0; i < 300; i++)s.push({ x: Math.random() * c.width, y: Math.random() * c.height, r: Math.random() * 1.8, a: Math.random(), sp: .003 + Math.random() * .005 });
+            (function d() { x.clearRect(0, 0, c.width, c.height); s.forEach(p => { p.a += p.sp * (Math.random() - .4); p.a = Math.max(.05, Math.min(1, p.a)); x.beginPath(); x.arc(p.x, p.y, p.r, 0, Math.PI * 2); x.fillStyle = `rgba(245,200,80,${p.a * .25})`; x.fill() }); requestAnimationFrame(d) })();
+            addEventListener('resize', () => { c.width = innerWidth; c.height = innerHeight })
+        })();
+
+        // CURSOR
+        document.addEventListener('mousemove', e => {
+            document.getElementById('cursor').style.left = (e.clientX - 14) + 'px';
+            document.getElementById('cursor').style.top = (e.clientY - 14) + 'px';
+            document.getElementById('cursorDot').style.left = (e.clientX - 3) + 'px';
+            document.getElementById('cursorDot').style.top = (e.clientY - 3) + 'px';
+        });
+
+        // WEIGHT GRID UI
+        (function () {
+            const g = document.getElementById('weightGrid');
+            for (let i = 0; i < 64; i++) { const d = document.createElement('div'); d.className = 'w-cell'; d.id = 'w' + i; g.appendChild(d) }
+        })();
+        function updateWeightUI() {
+            for (let i = 0; i < 64; i++) {
+                const w = weights[i], el = document.getElementById('w' + i);
+                const n = (w + 2) / 4;
+                const r = Math.floor(n * 255), g = Math.floor((1 - Math.abs(w)) * 80), b = Math.floor((1 - n) * 255);
+                el.style.background = `rgba(${r},${g},${b},0.6)`;
+                el.textContent = w.toFixed(1);
+                el.style.color = w > 0 ? '#fbbf24' : '#60a5fa';
+            }
+        }
+
+        // WEIGHT ANIMATION SYSTEM - NEW
+        function tweenValue(element, startVal, endVal, duration = 600) {
+            const startTime = Date.now();
+
+            function update() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Easing function (ease-out)
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = startVal + (endVal - startVal) * eased;
+
+                element.textContent = current.toFixed(1);
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            update();
+        }
+
+        function animateWeightUpdate(cellIdx, oldVal, newVal) {
+            const cell = document.getElementById(`w${cellIdx}`);
+            if (!cell) return;
+
+            const delta = Math.abs(newVal - oldVal);
+
+            // Remove any existing animation classes
+            cell.classList.remove('flash-large', 'flash-medium', 'flash-small');
+
+            // Trigger flash based on magnitude
+            if (delta > 0.1) {
+                cell.classList.add('flash-large');
+            } else if (delta > 0.01) {
+                cell.classList.add('flash-medium');
+            } else if (delta > 0.001) {
+                cell.classList.add('flash-small');
+            }
+
+            // Tween the displayed value
+            tweenValue(cell, oldVal, newVal, 600);
+
+            // Remove animation class after it completes
+            setTimeout(() => {
+                cell.classList.remove('flash-large', 'flash-medium', 'flash-small');
+            }, 800);
+        }
+
+        function updateWeightsWithAnimation() {
+            // Store old values
+            const oldWeights = weights.map(w => w);
+
+            // Simulate weight updates (this should be replaced with real gradient descent)
+            for (let i = 0; i < 64; i++) {
+                // Compute gradient (simplified)
+                const gradient = (Math.random() - 0.5) * 0.1;
+                weights[i] -= learningRate * gradient * 100; // Scale for visibility
+                weights[i] *= 0.998; // L2 decay
+
+                // Clamp to reasonable range
+                weights[i] = Math.max(-2, Math.min(2, weights[i]));
+
+                // Trigger animation if changed significantly
+                if (Math.abs(weights[i] - oldWeights[i]) > 0.001) {
+                    animateWeightUpdate(i, oldWeights[i], weights[i]);
+                }
+            }
+
+            // Update bias too
+            bias += (Math.random() - 0.5) * 0.02;
+        }
+
+        // STRESS CHART
+        function drawStress() {
+            const c = document.getElementById('stressCanvas'), x = c.getContext('2d'), w = c.width, h = c.height;
+            const d = [{ y: 2020, v: 25.01 }, { y: 2021, v: 22.31 }, { y: 2022, v: 19.69 }, { y: 2023, v: 19.53 }, { y: 2024, v: 22.01 }];
+            x.clearRect(0, 0, w, h);
+            x.strokeStyle = 'rgba(245,158,11,.08)'; x.lineWidth = .5;
+            for (let i = 0; i < 4; i++) { const ly = 8 + i * (h - 25) / 3; x.beginPath(); x.moveTo(35, ly); x.lineTo(w - 5, ly); x.stroke() }
+            const bw = 28, gap = (w - 60) / d.length;
+            d.forEach((p, i) => {
+                const bx = 42 + i * gap, bh = (p.v / 30) * (h - 28), by = h - 14 - bh;
+                const gr = x.createLinearGradient(bx, by, bx, h - 14);
+                gr.addColorStop(0, 'rgba(245,158,11,.85)'); gr.addColorStop(1, 'rgba(249,115,22,.2)');
+                x.fillStyle = gr; x.beginPath(); x.roundRect(bx, by, bw, bh, [3, 3, 0, 0]); x.fill();
+                x.fillStyle = 'rgba(255,255,255,.5)'; x.font = '8px JetBrains Mono'; x.textAlign = 'center';
+                x.fillText(p.y, bx + bw / 2, h - 2); x.fillStyle = 'rgba(245,158,11,.9)'; x.fillText(p.v.toFixed(1), bx + bw / 2, by - 3);
+            });
+            x.fillStyle = 'rgba(245,158,11,.4)'; x.font = '7px JetBrains Mono'; x.textAlign = 'left'; x.fillText('RMSE W/m²', 1, 9);
+        }
+
+        // ═════════════════════════════════════════════════
+        // THREE.JS INIT
+        // ═════════════════════════════════════════════════
+        function init() {
+            const box = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x020208, 0.009);
+            camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 600);
+            camera.position.set(0, 18, 38);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            box.appendChild(renderer.domElement);
+
+            const rp = new THREE.RenderPass(scene, camera);
+            const bp = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 2, .4, .85);
+            bp.threshold = .1; bp.strength = 1.6; bp.radius = .7;
+            composer = new THREE.EffectComposer(renderer);
+            composer.addPass(rp); composer.addPass(bp);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.autoRotate = true; controls.autoRotateSpeed = .35; controls.enableDamping = true; controls.dampingFactor = .06;
+            controls.maxPolarAngle = Math.PI / 2.1;
+
+            // ENHANCED LIGHTING
+            const sun = new THREE.DirectionalLight(0xffd080, 1.5); sun.position.set(40, 80, 40); scene.add(sun);
+            scene.add(new THREE.AmbientLight(0x1a1a3a, .4));
+            const pl1 = new THREE.PointLight(0xF59E0B, 2, 60); pl1.position.set(0, 12, 0); scene.add(pl1);
+            const pl2 = new THREE.PointLight(0x06B6D4, .8, 40); pl2.position.set(-15, 8, 15); scene.add(pl2);
+            const pl3 = new THREE.PointLight(0x8B5CF6, .6, 40); pl3.position.set(15, 8, -15); scene.add(pl3);
+            // Hemisphere for ambient fill
+            scene.add(new THREE.HemisphereLight(0xF59E0B, 0x0a0a20, .3));
+
+            buildNeuralViz();
+            buildLandscape();
+            buildDrones();
+            buildBeacon();
+            buildDust();
+            buildTrails();
+            setupUI();
+            drawStress();
+            updateWeightUI();
+
+            addEventListener('resize', onResize);
+            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 1400);
+            animate();
+            log('Regression Core online. 64→1 Linear.');
+            log('Weight optimization in progress...');
+        }
+
+        // ═════════════════════════════════════════════════
+        // NEURAL VISUALIZATION (64 inputs → 1 output)
+        // ═════════════════════════════════════════════════
+        function buildNeuralViz() {
+            const inputGroup = new THREE.Group();
+            // 64 input neurons arranged in a ring
+            for (let i = 0; i < 64; i++) {
+                const angle = (i / 64) * Math.PI * 2;
+                const r = 10;
+                const x = Math.cos(angle) * r;
+                const z = Math.sin(angle) * r;
+                const geo = new THREE.SphereGeometry(.18, 12, 12);
+                const hue = (i / 64);
+                const col = new THREE.Color().setHSL(hue * .15 + .08, 1, .6);
+                const mat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: .8 });
+                const sphere = new THREE.Mesh(geo, mat);
+                sphere.position.set(x, 8, z);
+                scene.add(sphere);
+                inputSpheres.push(sphere);
+                // Connection line to output
+                const pts = [new THREE.Vector3(x, 8, z), new THREE.Vector3(0, 14, 0)];
+                const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+                const lm = new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: .12 });
+                const line = new THREE.Line(lineGeo, lm);
+                scene.add(line);
+                weightLines.push(line);
+            }
+            // Output neuron (big glowing sphere)
+            const oGeo = new THREE.SphereGeometry(.8, 32, 32);
+            const oMat = new THREE.MeshBasicMaterial({ color: 0xF59E0B, transparent: true, opacity: .9 });
+            outputSphere = new THREE.Mesh(oGeo, oMat);
+            outputSphere.position.set(0, 14, 0);
+            scene.add(outputSphere);
+            // Output glow
+            const glowGeo = new THREE.SphereGeometry(1.5, 16, 16);
+            const glowMat = new THREE.MeshBasicMaterial({ color: 0xF59E0B, transparent: true, opacity: .1 });
+            const glow = new THREE.Mesh(glowGeo, glowMat);
+            glow.position.set(0, 14, 0);
+            scene.add(glow);
+            // Outer ring
+            const ringGeo = new THREE.TorusGeometry(10, .04, 8, 128);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xF59E0B, transparent: true, opacity: .2 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.y = 8; ring.rotation.x = -Math.PI / 2;
+            scene.add(ring);
+        }
+
+        function buildLandscape() {
+            const geo = new THREE.PlaneGeometry(80, 80, 80, 80);
+            geo.rotateX(-Math.PI / 2);
+            const pos = geo.attributes.position;
+            const cols = new Float32Array(pos.count * 3);
+
+            for (let i = 0; i < pos.count; i++) {
+                const x = pos.getX(i), z = pos.getZ(i);
+                const h = tY(x, z);
+                pos.setY(i, h);
+
+                // Color mapping: deep green at minimum → cyan → purple → red at peaks
+                const t = Math.min(Math.max(h / 18, 0), 1);
+                if (t < 0.15) {
+                    // Deep minimum zone: bright green
+                    cols[i * 3] = 0.05;
+                    cols[i * 3 + 1] = 0.6 - t * 2;
+                    cols[i * 3 + 2] = 0.2;
+                } else if (t < 0.4) {
+                    // Mid zone: cyan to blue
+                    cols[i * 3] = 0.05;
+                    cols[i * 3 + 1] = 0.3 - t * 0.3;
+                    cols[i * 3 + 2] = 0.5 + t * 0.3;
+                } else if (t < 0.7) {
+                    // Upper zone: purple
+                    cols[i * 3] = 0.2 + t * 0.3;
+                    cols[i * 3 + 1] = 0.05;
+                    cols[i * 3 + 2] = 0.5 - t * 0.2;
+                } else {
+                    // Peaks: red-orange
+                    cols[i * 3] = 0.5 + t * 0.3;
+                    cols[i * 3 + 1] = 0.08;
+                    cols[i * 3 + 2] = 0.1;
+                }
+            }
+
+            geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+            geo.computeVertexNormals();
+
+            // Wireframe layer
+            terrain = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+                vertexColors: true, wireframe: true, transparent: true,
+                opacity: .4, emissive: 0x010105, shininess: 30
+            }));
+            scene.add(terrain);
+
+            // Solid fill (semi-transparent)
+            scene.add(new THREE.Mesh(geo.clone(), new THREE.MeshPhongMaterial({
+                vertexColors: true, transparent: true, opacity: .15,
+                side: THREE.DoubleSide
+            })));
+
+            // === CONTOUR RINGS at different loss levels ===
+            const contourLevels = [3, 7, 12];
+            const contourColors = [0x10B981, 0x06B6D4, 0x8B5CF6];
+            contourLevels.forEach((level, idx) => {
+                const radius = Math.sqrt(level / 0.005); // Match base bowl coefficient
+                const contourGeo = new THREE.TorusGeometry(radius, .03, 8, 128);
+                const contourMat = new THREE.MeshBasicMaterial({
+                    color: contourColors[idx], transparent: true,
+                    opacity: .25 - idx * .05
+                });
+                const contour = new THREE.Mesh(contourGeo, contourMat);
+                contour.rotation.x = -Math.PI / 2;
+                contour.position.y = level + 0.1;
+                scene.add(contour);
+            });
+
+            // === OPTIMAL POINT MARKER (Global Minimum at 0,0) ===
+            const optHeight = tY(0, 0);
+            const optGeo = new THREE.SphereGeometry(.6, 24, 24);
+            const optMat = new THREE.MeshBasicMaterial({
+                color: 0x10B981, transparent: true, opacity: .7
+            });
+            const optMarker = new THREE.Mesh(optGeo, optMat);
+            optMarker.position.set(0, optHeight + 0.5, 0);
+            scene.add(optMarker);
+
+            // Glow around optimal point
+            const optGlowGeo = new THREE.SphereGeometry(2, 16, 16);
+            const optGlowMat = new THREE.MeshBasicMaterial({
+                color: 0x10B981, transparent: true, opacity: .08,
+                blending: THREE.AdditiveBlending
+            });
+            const optGlow = new THREE.Mesh(optGlowGeo, optGlowMat);
+            optGlow.position.set(0, optHeight + 0.5, 0);
+            scene.add(optGlow);
+
+            // Basin disc glow on the ground
+            const basinGeo = new THREE.CircleGeometry(8, 64);
+            const basinMat = new THREE.MeshBasicMaterial({
+                color: 0x10B981, transparent: true, opacity: .06,
+                side: THREE.DoubleSide, blending: THREE.AdditiveBlending
+            });
+            const basin = new THREE.Mesh(basinGeo, basinMat);
+            basin.rotation.x = -Math.PI / 2;
+            basin.position.y = optHeight + 0.05;
+            scene.add(basin);
+
+            // === LOCAL MINIMUM TRAP (where Attention might get stuck) ===
+            const trapHeight = tY(-15, -12);
+            const trapGeo = new THREE.SphereGeometry(.3, 16, 16);
+            const trapMat = new THREE.MeshBasicMaterial({
+                color: 0xEF4444, transparent: true, opacity: .5
+            });
+            const trap = new THREE.Mesh(trapGeo, trapMat);
+            trap.position.set(-15, trapHeight + 0.3, -12);
+            scene.add(trap);
+
+            // Trap warning ring
+            const trapRingGeo = new THREE.TorusGeometry(2, .02, 8, 32);
+            const trapRingMat = new THREE.MeshBasicMaterial({
+                color: 0xEF4444, transparent: true, opacity: .2
+            });
+            const trapRing = new THREE.Mesh(trapRingGeo, trapRingMat);
+            trapRing.rotation.x = -Math.PI / 2;
+            trapRing.position.set(-15, trapHeight + 0.2, -12);
+            scene.add(trapRing);
+        }
+
+        function tY(x, z) {
+            // ═══ REALISTIC LOSS LANDSCAPE (all heights > 0) ═══
+
+            // Base bowl: global trend toward (0,0), min ~0 at center
+            let h = (x * x + z * z) * 0.005;
+
+            // === LOCAL MINIMA (dips but not below global min) ===
+            h -= 2.5 * Math.exp(-((x + 15) * (x + 15) + (z + 12) * (z + 12)) / 30);
+            h -= 2.0 * Math.exp(-((x - 18) * (x - 18) + (z + 8) * (z + 8)) / 40);
+            h -= 1.5 * Math.exp(-((x + 8) * (x + 8) + (z - 20) * (z - 20)) / 20);
+            h -= 1.2 * Math.exp(-((x - 12) * (x - 12) + (z - 15) * (z - 15)) / 50);
+
+            // === RIDGELINES (walls between valleys) ===
+            h += 3.5 * Math.exp(-Math.pow(x * 0.6 + z * 0.6 + 6, 2) / 18);
+            h += 2.8 * Math.exp(-Math.pow(x * 0.4 - z * 0.5 - 10, 2) / 14);
+
+            // === TERRAIN TEXTURE (bumps, saddle points) ===
+            h += 1.2 * Math.sin(x * 0.18) * Math.sin(z * 0.18);
+            h += 0.7 * Math.cos(x * 0.3 + z * 0.12) * Math.sin(z * 0.22);
+            h += 0.4 * Math.sin(x * 0.5) * Math.cos(z * 0.4);
+
+            // === ENSURE GLOBAL MIN AT (0,0) stays deepest ===
+            h -= 3.5 * Math.exp(-(x * x + z * z) / 50);
+
+            // Shift up so minimum is ~0.3 (never negative)
+            h += 4;
+
+            return Math.max(0.1, h);
+        }
+
+        // DRONES
+        function mkDrone(c) {
+            const g = new THREE.Group();
+            g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.8, 1), new THREE.MeshBasicMaterial({ color: c, wireframe: true })));
+            const r1 = new THREE.Mesh(new THREE.TorusGeometry(1.4, .05, 8, 32), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: .45 }));
+            r1.rotation.x = Math.PI / 3; g.add(r1);
+            const r2 = new THREE.Mesh(new THREE.TorusGeometry(1.1, .03, 8, 32), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: .25 }));
+            r2.rotation.z = Math.PI / 4; g.add(r2);
+            g.add(new THREE.Mesh(new THREE.SphereGeometry(1.6, 12, 12), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: .06 })));
+            return g;
+        }
+        function buildDrones() { piDrone = mkDrone(0xF59E0B); scene.add(piDrone); atDrone = mkDrone(0xEF4444); scene.add(atDrone) }
+
+        function buildBeacon() {
+            const g = new THREE.Group();
+            const beam = new THREE.Mesh(new THREE.CylinderGeometry(.2, .2, 50, 6), new THREE.MeshBasicMaterial({ color: 0x06B6D4, transparent: true, opacity: .06, blending: THREE.AdditiveBlending }));
+            beam.position.set(0, 25, 0);
+            g.add(beam);
+            const base = new THREE.Mesh(new THREE.TorusGeometry(1.8, .12, 8, 32), new THREE.MeshBasicMaterial({ color: 0x06B6D4, transparent: true, opacity: .35 }));
+            base.rotation.x = -Math.PI / 2; base.position.y = .3; g.add(base);
+            const sp = new THREE.Mesh(new THREE.SphereGeometry(.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0x06B6D4, transparent: true, opacity: .5 }));
+            sp.position.y = .8; g.add(sp);
+            beacon = g; scene.add(g);
+        }
+        function buildDust() {
+            const g = new THREE.BufferGeometry(), p = [];
+            for (let i = 0; i < 4000; i++)p.push((Math.random() - .5) * 100, Math.random() * 30, (Math.random() - .5) * 100);
+            g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
+            dustSys = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffaa44, size: .2, transparent: true, opacity: 0, blending: THREE.AdditiveBlending }));
+            scene.add(dustSys);
+        }
+        function buildTrails() {
+            piTrail = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0xF59E0B, transparent: true, opacity: .5 }));
+            scene.add(piTrail);
+            atTrail = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0xEF4444, transparent: true, opacity: .5 }));
+            scene.add(atTrail);
+        }
+        function updTrail(a, line) {
+            if (a.trail.length > 500) a.trail.shift();
+            a.trail.push(new THREE.Vector3(a.x, tY(a.x, a.z) + 1.2, a.z));
+            line.geometry.dispose(); line.geometry = new THREE.BufferGeometry().setFromPoints(a.trail);
+        }
+
+        // ═════════════════════════════════════════════════
+        // PHYSICS + ANIMATION
+        // ═════════════════════════════════════════════════
+        function getGrad(x, z, t) {
+            let dx = x * .045, dz = z * .045;
+
+            // ═══ CLOUD TRANSIENT ═══
+            // PI-Hybrid (t=1): uses ClearSky index physics → faster correction, stays on course
+            // Attention (t=2): no physics → overshoot, oscillate
+            if (isCloud) {
+                if (t === 1) {
+                    // PI-Hybrid compensates using physics-based ClearSky index
+                    dx *= 1.4; dz *= 1.4; // Stronger push toward optimum
+                } else {
+                    // Attention model oscillates wildly during cloud transients
+                    const lag = Math.sin(time * 5) * 8;
+                    dx += lag; dz += lag;
+                    dx *= 0.7; dz *= 0.7; // Slowed convergence
+                }
+            }
+
+            // ═══ DUST STORM (AOD spike) ═══
+            // PI-Hybrid (t=1): uses Linke turbidity physics → smooth adaptation
+            // Attention (t=2): no aerosol model → random walk, loses gradient
+            if (isDust) {
+                if (t === 1) {
+                    // PI-Hybrid: Linke turbidity compensates, slight slowdown only
+                    dx *= 0.85; dz *= 0.85;
+                } else {
+                    // Attention: completely lost in dust, random gradient noise
+                    dx += (Math.random() - .5) * 4;
+                    dz += (Math.random() - .5) * 4;
+                    dx *= 0.5; dz *= 0.5; // Dramatically slowed
+                }
+            }
+
+            // ═══ NIGHT MODE ═══
+            // Both slow down (no GHI), but PI-Hybrid knows to clamp to 0
+            if (isNight) {
+                if (t === 1) {
+                    dx *= .3; dz *= .3; // PI knows night = 0 GHI
+                } else {
+                    dx *= .12; dz *= .12; // Attention nearly frozen
+                    dx += (Math.random() - .5) * .5; // And noisy
+                    dz += (Math.random() - .5) * .5;
+                }
+            }
+
+            return { x: dx, z: dz };
+        }
+        function updAgent(a, mesh, t) {
+            const g = getGrad(a.x, a.z, t);
+            a.vx = a.vx * .9 - g.x * (t === 1 ? .075 : .065);
+            a.vz = a.vz * .9 - g.z * (t === 1 ? .075 : .065);
+            a.x += a.vx; a.z += a.vz;
+            mesh.position.lerp(new THREE.Vector3(a.x, tY(a.x, a.z) + 2, a.z), .1);
+            mesh.rotation.x += .012; mesh.rotation.y += .035;
+            a.dist = Math.sqrt(a.x * a.x + a.z * a.z);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            time += .035; epoch++;
+
+            // ═══ ENVIRONMENTAL EFFECTS ═══
+            if (isCloud) {
+                cloudTimer--;
+                if (cloudTimer <= 0) { isCloud = false; log('☀ Cloud cleared. PI recovered instantly.'); }
+                // Visual: reduce scene brightness during cloud
+                scene.fog.density = 0.015;
+            } else {
+                scene.fog.density = Math.max(0.009, scene.fog.density - 0.0003);
+            }
+
+            if (isDust) {
+                dustSys.material.opacity = Math.min(dustSys.material.opacity + .015, .55);
+                dustSys.rotation.y += .005;
+                dustSys.material.size = .3; // Bigger particles during storm
+                // Orange tint to fog
+                scene.fog.color.setHex(0x1a0a02);
+            } else {
+                dustSys.material.opacity *= .94;
+                dustSys.material.size = .2;
+                scene.fog.color.lerp(new THREE.Color(0x020208), 0.02);
+            }
+
+            // Night: darken everything significantly
+            if (isNight) {
+                renderer.toneMappingExposure = Math.max(0.3, renderer.toneMappingExposure - 0.01);
+            } else {
+                renderer.toneMappingExposure = Math.min(1.2, renderer.toneMappingExposure + 0.01);
+            }
+
+            // ═══ NEURAL VIZ ANIMATION ═══
+            const pulse = Math.sin(time * 2) * .5 + .5;
+
+            // Output sphere pulses differently based on phase
+            if (outputSphere) {
+                // === SMOOTH MOVEMENT: sphere rises as RMSE improves ===
+                outputSphere.position.y += (outputSphereTargetY - outputSphere.position.y) * 0.03;
+
+                if (currentPhase === 0) {
+                    // Forward: growing pulse (data arriving)
+                    outputSphere.scale.setScalar(1 + pulse * .2);
+                    outputSphere.material.opacity = .7 + pulse * .3;
+                    outputSphere.material.color.setHex(0xF59E0B); // Gold
+                } else if (currentPhase === 1) {
+                    // Loss: red error pulse
+                    outputSphere.scale.setScalar(1.05 + Math.sin(time * 4) * .1);
+                    outputSphere.material.color.setHex(0xEF4444); // Red during loss
+                } else {
+                    // Backprop: shrinking pulse (sending gradients back)
+                    outputSphere.scale.setScalar(1. + pulse * .1);
+                    outputSphere.material.color.setHex(0x06B6D4); // Cyan during backprop
+                }
+
+                // Update weight line endpoints to follow the sphere
+                for (let i = 0; i < weightLines.length; i++) {
+                    const positions = weightLines[i].geometry.attributes.position;
+                    positions.setY(1, outputSphere.position.y); // endpoint Y
+                    positions.needsUpdate = true;
+                }
+            }
+
+            // Weight lines - dynamic based on phase
+            for (let i = 0; i < weightLines.length; i++) {
+                const w = Math.abs(weights[i]);
+                if (currentPhase === 0) {
+                    // Forward: bright flow toward output
+                    weightLines[i].material.opacity = .05 + w * .15 + Math.sin(time * 3 + i * .3) * .05;
+                    weightLines[i].material.color.setHSL((i / 64) * .15 + .08, 1, .6);
+                } else if (currentPhase === 2) {
+                    // Backprop: cyan gradient flow backward
+                    weightLines[i].material.opacity = .08 + w * .18 + Math.sin(time * 4 - i * .2) * .06;
+                    weightLines[i].material.color.setHex(0x06B6D4);
+                } else {
+                    // Loss: dim, focus on output
+                    weightLines[i].material.opacity = .03 + w * .06;
+                }
+            }
+
+            // Input spheres
+            for (let i = 0; i < inputSpheres.length; i++) {
+                const s = inputSpheres[i];
+                s.position.y = 8 + Math.sin(time * 2 + i * .15) * .3;
+                s.scale.setScalar(.8 + Math.abs(weights[i]) * .4);
+            }
+
+            // Beacon pulse
+            if (beacon) beacon.children[2].scale.setScalar(1 + Math.sin(time * 3) * .25);
+
+            // ═══ PHASE CYCLING ═══
+            phaseTimer++;
+            if (phaseTimer >= PHASE_DURATION) {
+                phaseTimer = 0;
+                updatePhase((currentPhase + 1) % 3);
+            }
+
+            // Update particle animations
+            updateParticles();
+
+            // ═══ AGENTS ON LOSS LANDSCAPE ═══
+            updAgent(PI_A, piDrone, 1);
+            updAgent(AT_A, atDrone, 2);
+            updTrail(PI_A, piTrail);
+            updTrail(AT_A, atTrail);
+
+            // ═══ PI-Hybrid DRONE VISUAL EFFECTS ═══
+            // PI-Hybrid: steady golden glow (physics-guided)
+            piDrone.children[0].material.color.setHex(isDust || isCloud ? 0x22CC22 : 0xF59E0B); // Green = compensating
+            // Attention: flickers red under stress
+            if (isDust || isCloud) {
+                atDrone.children[0].material.color.setHex(
+                    Math.random() > 0.3 ? 0xEF4444 : 0x880000 // Flickering = struggling
+                );
+            } else {
+                atDrone.children[0].material.color.setHex(0xEF4444);
+            }
+
+            // ═══ GHI DISPLAY ═══
+            const ghiBase = isNight ? 0 : Math.max(0, 542 + Math.sin(time * .5) * 80 - (isCloud ? 200 : 0) - (isDust ? 100 : 0));
+            document.getElementById('ghiVal').textContent = Math.round(ghiBase);
+            const kt = (ghiBase / (780 + 1)).toFixed(2);
+            document.getElementById('ktVal').textContent = 'KT = ' + kt;
+            document.getElementById('zenVal').textContent = 'θz = ' + (25 + Math.sin(time * .3) * 15).toFixed(1) + '°';
+            document.getElementById('sumDisplay').textContent = ghiBase.toFixed(1);
+
+            if (epoch % 8 === 0) updateHUD();
+            controls.update();
+            composer.render();
+        }
+
+        function updateHUD() {
+            // === TRAINING METRICS ===
+            document.getElementById('epochVal').textContent = trainEpoch + ' / ' + MAX_EPOCHS;
+            document.getElementById('rmseVal').textContent = currentRMSE.toFixed(2);
+            document.getElementById('rmseBest').textContent = bestRMSE.toFixed(2);
+
+            // RMSE delta (improvement since last epoch)
+            const delta = currentRMSE - prevRMSE;
+            const deltaEl = document.getElementById('rmseDelta');
+            if (trainEpoch > 0) {
+                deltaEl.textContent = (delta < 0 ? '' : '+') + delta.toFixed(2);
+                deltaEl.style.color = delta < 0 ? 'var(--green)' : 'var(--red)';
+            }
+
+            // Progress bar
+            const pct = Math.min(100, (trainEpoch / MAX_EPOCHS) * 100);
+            document.getElementById('trainProgress').style.width = pct + '%';
+
+            // RMSE color: gold when high, green when near target
+            const rmseEl = document.getElementById('rmseVal');
+            if (currentRMSE <= 20) {
+                rmseEl.style.color = 'var(--green)';
+            } else if (currentRMSE <= 22) {
+                rmseEl.style.color = 'var(--cyan)';
+            } else {
+                rmseEl.style.color = 'var(--gold)';
+            }
+
+            const b = document.getElementById('hudBadge');
+
+            // Completion check
+            if (trainEpoch >= MAX_EPOCHS && !raceOver) {
+                raceOver = true;
+                b.className = 'hud-badge confirmed';
+                b.textContent = '✓ TRAINING COMPLETE';
+                log('🏆 Training complete! 100/100 epochs.');
+                log(`Final RMSE: ${currentRMSE.toFixed(2)} W/m² (Best: ${bestRMSE.toFixed(2)})`);
+                log(`Improvement: ${(25.01 - bestRMSE).toFixed(2)} W/m² (↓${((1 - bestRMSE / 25.01) * 100).toFixed(1)}%)`);
+            }
+
+            // Badge text
+            if (!raceOver) {
+                if (isDust && isCloud) {
+                    b.textContent = '⚠ DUST + CLOUD STRESS';
+                } else if (isDust) {
+                    b.textContent = '🌪 DUST STORM ACTIVE';
+                } else if (isCloud) {
+                    b.textContent = '⛅ CLOUD TRANSIENT';
+                } else if (isNight) {
+                    b.textContent = '🌙 NIGHT MODE';
+                } else {
+                    b.textContent = `EPOCH ${trainEpoch} / ${MAX_EPOCHS}`;
+                }
+            }
+        }
+
+        // ═════════════════════════════════════════════════
+        // UI
+        // ═════════════════════════════════════════════════
+        function setupUI() {
+            document.getElementById('sA').oninput = e => document.getElementById('vA').textContent = parseFloat(e.target.value).toFixed(3);
+            document.getElementById('sL').oninput = e => document.getElementById('vL').textContent = parseFloat(e.target.value).toExponential(1);
+            document.getElementById('sR').oninput = e => document.getElementById('vR').textContent = parseFloat(e.target.value).toFixed(4);
+
+            // Initialize live math display
+            updateLiveMath();
+
+            // Spawn initial forward particles - NEW
+            setTimeout(() => {
+                if (inputSpheres.length > 0 && outputSphere) {
+                    createForwardParticles();
+                }
+            }, 1000); // Wait for scene to be ready
+
+            document.getElementById('btnCloud').onclick = () => {
+                isCloud = true; cloudTimer = 180;
+                log('⛅ Cloud transient! GHI dropping rapidly...');
+                log('PI-Hybrid → ClearSky index compensating ✓');
+                log('Attention → Phase lag! Oscillating ✗');
+            };
+            document.getElementById('btnDust').onclick = () => {
+                isDust = !isDust;
+                const b = document.getElementById('btnDust');
+                if (isDust) {
+                    b.classList.add('active'); b.textContent = '🌪️ STOP';
+                    log('🌪 Dust storm! AOD spike to 0.8+');
+                    log('PI-Hybrid → Linke turbidity adapts ✓');
+                    log('Attention → Gradient noise! Random walk ✗');
+                } else {
+                    b.classList.remove('active'); b.textContent = '🌪️ DUST STORM';
+                    log('✓ Aerosol normalizing. AOD → 0.15');
+                }
+            };
+            document.getElementById('btnNight').onclick = () => {
+                isNight = !isNight;
+                const b = document.getElementById('btnNight');
+                if (isNight) {
+                    b.classList.add('active');
+                    log('🌙 Night mode: GHI clamped to 0');
+                    log('PI-Hybrid → Physics: cos(90°)=0, correct ✓');
+                    log('Attention → Frozen, noisy gradients ✗');
+                } else {
+                    b.classList.remove('active');
+                    log('☀ Day restored. Solar zenith < 85°');
+                }
+            };
+            document.getElementById('btnReset').onclick = () => {
+                PI_A.x = -32; PI_A.z = -32; PI_A.vx = 0; PI_A.vz = 0; PI_A.trail = [];
+                AT_A.x = -32; AT_A.z = -26; AT_A.vx = 0; AT_A.vz = 0; AT_A.trail = [];
+                isDust = isCloud = isNight = raceOver = false;
+                // Reset training tracking
+                trainEpoch = 0; currentRMSE = 25.01; bestRMSE = 25.01; prevRMSE = 25.01;
+                outputSphereTargetY = 14;
+                document.getElementById('hudBadge').className = 'hud-badge racing';
+                document.getElementById('hudBadge').textContent = 'EPOCH 0 / 100';
+                document.getElementById('trainProgress').style.width = '0%';
+                document.getElementById('rmseVal').textContent = '25.01';
+                document.getElementById('rmseBest').textContent = '25.01';
+                document.getElementById('rmseDelta').textContent = '—';
+                document.getElementById('btnDust').classList.remove('active');
+                document.getElementById('btnDust').textContent = '🌪️ DUST STORM';
+                document.getElementById('btnNight').classList.remove('active');
+                log('🔄 Reset. Training restarted from epoch 0.');
+            };
+        }
+
+        function log(m) {
+            const b = document.getElementById('teleBox'), e = document.createElement('div');
+            e.className = 'tele-line'; e.textContent = '[' + time.toFixed(1) + '] ' + m;
+            b.insertBefore(e, b.children[1]);
+            if (b.children.length > 10) b.removeChild(b.lastChild);
+        }
+        function onResize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight) }
+        try { init(); } catch (e) { console.error(e); document.getElementById('loading').classList.add('hidden'); }
+    </script>
+</body>
+
+</html>

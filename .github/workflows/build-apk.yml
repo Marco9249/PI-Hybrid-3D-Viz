@@ -1,0 +1,116 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+<<<<<<< HEAD
+        node-version: '22'
+=======
+        node-version: '20'
+>>>>>>> 0d89db8 (Add mobile app support (PWA + Capacitor + GitHub Actions APK builder))
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+    
+    - name: Create Capacitor project
+      run: |
+        mkdir -p mobile-app/www
+<<<<<<< HEAD
+        cp *.html mobile-app/www/ 2>/dev/null || true
+        cp manifest.json mobile-app/www/ 2>/dev/null || true
+        cp sw.js mobile-app/www/ 2>/dev/null || true
+        if [ -d "assets" ]; then cp -r assets mobile-app/www/assets 2>/dev/null || true; fi
+        if [ -d "layers" ]; then mkdir -p mobile-app/www/layers && cp layers/*.html mobile-app/www/layers/ 2>/dev/null || true; fi
+        
+=======
+        
+        # Copy all web files
+        cp index.html mobile-app/www/
+        cp manifest.json mobile-app/www/
+        cp sw.js mobile-app/www/
+        cp bayesian_optimization.html mobile-app/www/ 2>/dev/null || true
+        cp data_pipeline.html mobile-app/www/ 2>/dev/null || true
+        cp data_odyssey.html mobile-app/www/ 2>/dev/null || true
+        cp Cinematic_Monolith.html mobile-app/www/ 2>/dev/null || true
+        cp Hyper_Aether_Flux.html mobile-app/www/ 2>/dev/null || true
+        cp Neural_Metropolis_Masterpiece.html mobile-app/www/ 2>/dev/null || true
+        cp Neural_Topography_Site.html mobile-app/www/ 2>/dev/null || true
+        cp Orbital_Harmony_Core.html mobile-app/www/ 2>/dev/null || true
+        cp Solar_Flare_Nebula.html mobile-app/www/ 2>/dev/null || true
+        cp Spectral_Prism_Data.html mobile-app/www/ 2>/dev/null || true
+        cp Ultimate_Solar_Quantum.html mobile-app/www/ 2>/dev/null || true
+        
+        # Copy layers
+        mkdir -p mobile-app/www/layers
+        cp layers/*.html mobile-app/www/layers/ 2>/dev/null || true
+        
+        # Copy assets
+        mkdir -p mobile-app/www/assets
+        cp -r assets/* mobile-app/www/assets/ 2>/dev/null || true
+        
+        # Setup Capacitor
+>>>>>>> 0d89db8 (Add mobile app support (PWA + Capacitor + GitHub Actions APK builder))
+        cd mobile-app
+        npm init -y
+        npm install @capacitor/core @capacitor/cli @capacitor/android
+        
+<<<<<<< HEAD
+=======
+        # Create capacitor config
+>>>>>>> 0d89db8 (Add mobile app support (PWA + Capacitor + GitHub Actions APK builder))
+        cat > capacitor.config.json << 'EOF'
+        {
+          "appId": "com.pihybrid.solar",
+          "appName": "PI-Hybrid Solar",
+          "webDir": "www",
+<<<<<<< HEAD
+          "server": { "androidScheme": "https" }
+=======
+          "server": {
+            "androidScheme": "https"
+          }
+>>>>>>> 0d89db8 (Add mobile app support (PWA + Capacitor + GitHub Actions APK builder))
+        }
+        EOF
+        
+        npx cap add android
+        npx cap sync
+    
+    - name: Build APK
+      run: |
+        cd mobile-app/android
+        chmod +x gradlew
+<<<<<<< HEAD
+        ./gradlew assembleDebug --no-daemon
+=======
+        ./gradlew assembleDebug
+>>>>>>> 0d89db8 (Add mobile app support (PWA + Capacitor + GitHub Actions APK builder))
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: PI-Hybrid-APK
+        path: mobile-app/android/app/build/outputs/apk/debug/app-debug.apk
+<<<<<<< HEAD
+=======
+        retention-days: 30
+>>>>>>> 0d89db8 (Add mobile app support (PWA + Capacitor + GitHub Actions APK builder))

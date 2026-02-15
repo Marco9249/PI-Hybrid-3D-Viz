@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI-HYBRID | ULTIMATE APEX</title>
+    <!-- Dependencies with Post-Processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@900&family=Outfit:wght@100;400;900&family=Inter:wght@200;600&display=swap');
+
+        :root {
+            --primary: #00ffff;
+            --secondary: #ff00ff;
+            --accent: #ffff00;
+            --bg: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none !important;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Cinematic Overlays */
+        #noise-overlay {
+            position: fixed;
+            inset: 0;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_p_Nois_6.png');
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: overlay;
+        }
+
+        #vignette {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, transparent 30%, rgba(0, 0, 0, 0.9));
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Custom Cursor Apex */
+        #cursor {
+            width: 50px;
+            height: 50px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #cursor-core {
+            width: 5px;
+            height: 5px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+
+        /* Typography Apex */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 12vw;
+            font-weight: 900;
+            line-height: 0.8;
+            letter-spacing: -5px;
+            text-transform: uppercase;
+            perspective: 1000px;
+        }
+
+        .hero h1 span {
+            display: block;
+            filter: blur(5px);
+            opacity: 0;
+            transform: translateY(100px) rotateX(-90deg);
+        }
+
+        /* Layout */
+        .story-section {
+            min-height: 100vh;
+            padding: 100px 10%;
+            display: flex;
+            align-items: center;
+        }
+
+        .content-card {
+            background: rgba(5, 5, 10, 0.9);
+            backdrop-filter: blur(60px) saturate(160%);
+            -webkit-backdrop-filter: blur(60px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 60px;
+            padding: 90px;
+            max-width: 800px;
+            box-shadow: 0 60px 150px rgba(0, 0, 0, 0.9);
+            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+            opacity: 0;
+            transform: translateY(100px);
+        }
+
+        .content-card:hover {
+            transform: scale(1.02) translateY(-10px);
+            border-color: var(--primary);
+        }
+
+        .content-card h2 {
+            font-family: 'Outfit';
+            font-size: 5rem;
+            color: #fff;
+            margin-bottom: 35px;
+            line-height: 0.95;
+            letter-spacing: -3px;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .content-card p {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            opacity: 0.7;
+            font-weight: 300;
+        }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loader-title {
+            font-family: 'Outfit';
+            font-size: 4vw;
+            font-weight: 100;
+            letter-spacing: 20px;
+            color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="noise-overlay"></div>
+    <div id="vignette"></div>
+    <div id="cursor">
+        <div id="cursor-core"></div>
+    </div>
+
+    <div id="loader">
+        <div class="loader-title">QUANTUM APEX</div>
+        <div style="margin-top:20px; font-size:10px; letter-spacing:5px; opacity:0.5;">NEURAL NEBULA STABILIZING...
+        </div>
+    </div>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <header class="hero">
+        <h1 id="hero-title">
+            <span>NEURAL</span>
+            <span>SOLAR</span>
+            <span>QUANTUM</span>
+        </h1>
+    </header>
+
+    <section class="story-section">
+        <div class="content-card reveal">
+            <h2>The Data Nebula</h2>
+            <p>Predicting the unpredictable. In the high-volatility desert of Omdurman, we don't just use data; we use
+                <strong>Physics-Embedded Memory</strong> to achieve 99.7% Accuracy.
+            </p>
+            <div style="margin-top:50px; display:flex; gap:30px;">
+                <div style="font-family:'Outfit'; font-size:3rem; color:var(--accent);">36% <span
+                        style="font-size:12px; opacity:0.5; display:block;">ERROR REDUCTION</span></div>
+                <div style="font-family:'Outfit'; font-size:3rem; color:var(--secondary);">492K <span
+                        style="font-size:12px; opacity:0.5; display:block;">PARAMETERS</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="story-section" style="justify-content: flex-end;">
+        <div class="content-card reveal">
+            <h2>Liquid Logic</h2>
+            <p>Our research proved that <strong>Explicit Physical Constraints</strong> outperform heavy self-attention
+                mechanisms in noisy meteorological tasks. The architecture is the formula.</p>
+        </div>
+    </section>
+
+    <section class="story-section">
+        <div class="content-card reveal">
+            <h2>The Paradox</h2>
+            <p>Our research proved that in high-noise meteorological tasks, <strong>Explicit Physical
+                    Constraints</strong> outperform heavy self-attention mechanisms.</p>
+
+            <div style="margin-top:40px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:10px;">
+                    <span>PI-HYBRID (APEX)</span><span style="color:var(--primary)">19.53 RMSE</span>
+                </div>
+                <div style="height:2px; background:rgba(255,255,255,0.1);">
+                    <div
+                        style="width:35%; height:100%; background:var(--primary); box-shadow: 0 0 20px var(--primary);">
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:30px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:10px;">
+                    <span>TRANSFORMER (OVER-COMPLEX)</span><span style="color:#ff0099">30.64 RMSE</span>
+                </div>
+                <div style="height:2px; background:rgba(255,255,255,0.1);">
+                    <div style="width:65%; height:100%; background:#ff0099;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ultimate Simulator -->
+    <section class="story-section" style="flex-direction: column;">
+        <div class="content-card reveal" style="max-width: 1000px; width:100%;">
+            <h2>Neuromorphic Simulation</h2>
+            <p style="margin-bottom:40px;">Simulate atmospheric volatility. The PI-Hybrid core reacts at the speed of
+                physics, eliminating the phase-lag found in standard black-box AI.</p>
+
+            <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:60px; align-items:center;">
+                <div
+                    style="background:rgba(0,0,0,0.4); padding:30px; border-radius:30px; border:1px solid rgba(255,255,255,0.05);">
+                    <canvas id="simCanvas" width="600" height="300" style="width:100%; height:auto;"></canvas>
+                </div>
+                <div>
+                    <div
+                        style="background:rgba(0,255,255,0.05); padding:30px; border-radius:30px; border:1px solid rgba(0,255,255,0.2);">
+                        <label
+                            style="display:block; margin-bottom:15px; font-family:'Outfit'; font-size:10px; letter-spacing:5px; color:var(--primary);">CLOUD
+                            VOLATILITY</label>
+                        <input type="range" id="cloudSlider" min="0" max="100" value="0"
+                            style="width:100%; height:2px; background:var(--primary); appearance:none; outline:none;">
+                    </div>
+                    <div style="margin-top:30px; display:flex; flex-direction:column; gap:20px;">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div
+                                style="width:10px; height:10px; background:var(--primary); border-radius:50%; box-shadow:0 0 15px var(--primary);">
+                            </div>
+                            <span style="font-size:12px; letter-spacing:2px;">PI-HYBRID: ZERO LAG</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div style="width:10px; height:10px; background:#ff00ff; border-radius:50%;"></div>
+                            <span style="font-size:12px; letter-spacing:2px; opacity:0.5;">STANDARD AI: HIGH
+                                INERTIA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Custom Shader Source -->
+    <script id="vertexShader" type="x-shader/x-vertex">
+        varying vec2 vUv;
+        varying vec3 vPosition;
+        uniform float uTime;
+        
+        // Simplex Noise
+        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+        float snoise(vec3 v) {
+            const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+            const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+            vec3 i = floor(v + dot(v, C.yyy));
+            vec3 x0 = v - i + dot(i, C.xxx);
+            vec3 g = step(x0.yzx, x0.xyz);
+            vec3 l = 1.0 - g;
+            vec3 i1 = min( g.xyz, l.zxy );
+            vec3 i2 = max( g.xyz, l.zxy );
+            vec3 x1 = x0 - i1 + C.xxx;
+            vec3 x2 = x0 - i2 + C.yyy;
+            vec3 x3 = x0 - D.yyy;
+            i = mod289(i);
+            vec4 p = permute( permute( permute( i.z + vec4(0.0, i1.z, i2.z, 1.0 )) + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+            float n_ = 0.142857142857;
+            vec3 ns = n_ * D.wyz - D.xzx;
+            vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+            vec4 x_ = floor(j * ns.z);
+            vec4 y_ = floor(j - 7.0 * x_ );
+            vec4 x = x_ *ns.x + ns.yyyy;
+            vec4 y = y_ *ns.x + ns.yyyy;
+            vec4 h = 1.0 - abs(x) - abs(y);
+            vec4 b0 = vec4( x.xy, y.xy );
+            vec4 b1 = vec4( x.zw, y.zw );
+            vec4 s0 = floor(b0)*2.0 + 1.0;
+            vec4 s1 = floor(b1)*2.0 + 1.0;
+            vec4 sh = -step(h, vec4(0.0));
+            vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+            vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+            vec3 p0 = vec3(a0.xy,h.x);
+            vec3 p1 = vec3(a0.zw,h.y);
+            vec3 p2 = vec3(a1.xy,h.z);
+            vec3 p3 = vec3(a1.zw,h.w);
+            vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+            p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+            vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+            m = m * m;
+            return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+        }
+
+        void main() {
+            vUv = uv;
+            vPosition = position;
+            float noise = snoise(vec3(position * 0.5 + uTime * 0.2));
+            vec3 newPosition = position + normal * noise * 0.5;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+    </script>
+    <script id="fragmentShader" type="x-shader/x-fragment">
+        varying vec2 vUv;
+        varying vec3 vPosition;
+        uniform float uTime;
+        uniform vec3 uColor1;
+        uniform vec3 uColor2;
+
+        void main() {
+            float pulse = sin(uTime) * 0.5 + 0.5;
+            vec3 color = mix(uColor1, uColor2, vPosition.y * 0.5 + 0.5);
+            color += vec3(pulse * 0.2);
+            gl_FragColor = vec4(color, 0.8);
+        }
+    </script>
+
+    <section class="story-section">
+        <div style="text-align:center; width:100%;" class="reveal">
+            <h2 style="font-family:'Outfit'; font-size:4vw; color:var(--primary); margin-bottom:60px;">Neural Topology
+            </h2>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:30px;">
+                <div class="content-card" style="padding:40px;">
+                    <div style="font-family:'Cinzel'; color:var(--accent); font-size:10px; margin-bottom:10px;">LAYER
+                        01: SPATIAL</div>
+                    <h3 style="font-size:2rem; margin-bottom:10px;">64 Filters</h3>
+                    <p style="font-size:0.9rem;">CNN-1D Feature Scanner extracting multiscale variations.</p>
+                </div>
+                <div class="content-card" style="padding:40px;">
+                    <div style="font-family:'Cinzel'; color:var(--secondary); font-size:10px; margin-bottom:10px;">LAYER
+                        05: TEMPORAL</div>
+                    <h3 style="font-size:2rem; margin-bottom:10px;">210 Units</h3>
+                    <p style="font-size:0.9rem;">Bi-Directional Memory capturing long-term causality.</p>
+                </div>
+                <div class="content-card" style="padding:40px;">
+                    <div style="font-family:'Cinzel'; color:var(--primary); font-size:10px; margin-bottom:10px;">
+                        OPTIMIZER</div>
+                    <h3 style="font-size:2rem; margin-bottom:10px;">Bayesian</h3>
+                    <p style="font-size:0.9rem;">Hyperparameter evolution for arid-climate adaptation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer style="padding:150px 10%; text-align:center; position:relative; overflow:hidden;">
+        <div
+            style="opacity:0.05; font-size:15vw; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-family:'Outfit'; font-weight:900; white-space:nowrap; pointer-events:none;">
+            ABSOLUTE QUANTUM</div>
+        <div class="loader-title" style="font-size:2vw; margin-bottom:30px;">PI-HYBRID RESEARCH</div>
+        <p style="font-size:12px; letter-spacing:10px; opacity:0.3;">ADVANCED NEURAL FORECASTING LABORATORY</p>
+        <div style="margin-top:60px;">
+            <a href="index.html"
+                style="color:var(--primary); text-decoration:none; font-family:'Cinzel'; letter-spacing:5px; font-size:12px;">RETURN
+                TO LAB</a>
+        </div>
+    </footer>
+
+    <script>
+        // --- APEX SIMULATION CORE ---
+        const canvas = document.getElementById('bg-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        renderer.toneMappingExposure = 2.4;
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x010103, 0.035);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 5, 25);
+
+        const clock = new THREE.Clock();
+
+        // --- POST PROCESSING APEX ---
+        const composer = new THREE.EffectComposer(renderer);
+        composer.addPass(new THREE.RenderPass(scene, camera));
+
+        const bloomPass = new THREE.UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            1.5, // Strength
+            0.4, // Radius
+            0.85 // Threshold
+        );
+        composer.addPass(bloomPass);
+
+        // 1. NEURAL CORE (Shader Mesh)
+        const coreGeo = new THREE.IcosahedronGeometry(1.5, 64);
+        const coreMat = new THREE.ShaderMaterial({
+            vertexShader: document.getElementById('vertexShader').textContent,
+            fragmentShader: document.getElementById('fragmentShader').textContent,
+            uniforms: {
+                uTime: { value: 0 },
+                uColor1: { value: new THREE.Color(0x00ffff) },
+                uColor2: { value: new THREE.Color(0xff00ff) }
+            },
+            transparent: true
+        });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        scene.add(core);
+
+        // 2. DATA NEBULA (50,000 Particles)
+        const pointsCount = 50000;
+        const positions = new Float32Array(pointsCount * 3);
+        const colors = new Float32Array(pointsCount * 3);
+        const sizes = new Float32Array(pointsCount);
+
+        for (let i = 0; i < pointsCount * 3; i += 3) {
+            positions[i] = (Math.random() - 0.5) * 15;
+            positions[i + 1] = (Math.random() - 0.5) * 15;
+            positions[i + 2] = (Math.random() - 0.5) * 15;
+
+            colors[i] = Math.random();
+            colors[i + 1] = Math.random();
+            colors[i + 2] = 1.0;
+
+            sizes[i / 3] = Math.random() * 2;
+        }
+
+        const nebulaGeo = new THREE.BufferGeometry();
+        nebulaGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        nebulaGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const nebulaMat = new THREE.PointsMaterial({
+            size: 0.015,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.4,
+            blending: THREE.AdditiveBlending
+        });
+        const nebula = new THREE.Points(nebulaGeo, nebulaMat);
+        scene.add(nebula);
+
+        // --- ANIMATION APEX ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Preloader Out
+        window.onload = () => {
+            gsap.to("#loader", {
+                opacity: 0, duration: 2, ease: "power4.inOut", onComplete: () => {
+                    document.getElementById('loader').style.display = 'none';
+                    // Kinetic Reveal
+                    gsap.to("#hero-title span", {
+                        opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)",
+                        stagger: 0.3, duration: 2, ease: "expo.out"
+                    });
+                }
+            });
+        };
+
+        // Cinematic Camera Path
+        const pathCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 5, 25),
+            new THREE.Vector3(10, -5, 10),
+            new THREE.Vector3(-15, 8, 15),
+            new THREE.Vector3(0, 0, 8),
+            new THREE.Vector3(0, 30, 0)
+        ]);
+
+        const scrollProxy = { val: 0 };
+        gsap.to(scrollProxy, {
+            val: 1,
+            scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: 3 },
+            onUpdate: () => {
+                const pt = pathCurve.getPoint(scrollProxy.val);
+                camera.position.copy(pt);
+                camera.lookAt(0, 0, 0);
+            }
+        });
+
+        gsap.to(nebula.rotation, {
+            y: Math.PI * 6,
+            scrollTrigger: { trigger: "body", scrub: 4 }
+        });
+
+        // Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+            coreMat.uniforms.uTime.value = time;
+
+            core.rotation.y = time * 0.1;
+            nebula.rotation.x = time * 0.05;
+
+            composer.render();
+        }
+        animate();
+
+        // Cursor Logic
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', e => {
+            gsap.to(cursor, { duration: 0.5, left: e.clientX - 25, top: e.clientY - 25, ease: "power3.out" });
+        });
+
+        // Custom Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- SIMULATOR PHYSICS APEX ---
+        const simCanvas = document.getElementById('simCanvas');
+        if (simCanvas) {
+            const sCtx = simCanvas.getContext('2d');
+            const slider = document.getElementById('cloudSlider');
+            const hSize = 150;
+            const hT = new Array(hSize).fill(100);
+            const hS = new Array(hSize).fill(100);
+            const hH = new Array(hSize).fill(100);
+            let sVal = 100;
+            let hVal = 100;
+
+            function runSim() {
+                const intens = parseInt(slider.value);
+                const noise = (Math.random() - 0.5) * 8;
+                const target = 100 - intens + noise;
+
+                sVal += (target - sVal) * 0.04;
+                hVal += (target - hVal) * 0.75;
+
+                hT.shift(); hT.push(target);
+                hS.shift(); hS.push(sVal);
+                hH.shift(); hH.push(hVal);
+
+                drawSimApex();
+                requestAnimationFrame(runSim);
+            }
+
+            function drawSimApex() {
+                sCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
+                const mY = (v) => simCanvas.height - (v * simCanvas.height / 140) - 20;
+
+                // Path Drawing Helper
+                const drawPath = (arr, color, width, dash = []) => {
+                    sCtx.strokeStyle = color;
+                    sCtx.lineWidth = width;
+                    sCtx.setLineDash(dash);
+                    sCtx.beginPath();
+                    for (let i = 0; i < hSize; i++) {
+                        const x = (i / hSize) * simCanvas.width;
+                        const y = mY(arr[i]);
+                        if (i === 0) sCtx.moveTo(x, y); else sCtx.lineTo(x, y);
+                    }
+                    sCtx.stroke();
+                };
+
+                drawPath(hT, 'rgba(255,255,255,0.05)', 1, [5, 5]);
+                drawPath(hS, '#ff00ff', 2);
+                drawPath(hH, '#00ffff', 4);
+
+                // Add Glow to Hybrid
+                sCtx.shadowBlur = 15;
+                sCtx.shadowColor = '#00ffff';
+                drawPath(hH, '#00ffff', 4);
+                sCtx.shadowBlur = 0;
+            }
+            runSim();
+        }
+    </script>
+</body>
+
+</html>
