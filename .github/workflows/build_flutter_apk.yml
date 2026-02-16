@@ -32,11 +32,11 @@ jobs:
 
       - name: Build APK (Debug)
         working-directory: flutter/flutter_application_1
-        run: flutter build apk --debug
+        run: flutter build apk --debug --no-android-studio-check
 
       - name: Build APK (Release)
         working-directory: flutter/flutter_application_1
-        run: flutter build apk --release
+        run: flutter build apk --release --no-android-studio-check
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4

@@ -126,3 +126,5 @@ desktop.ini
 
 # Agent specific
 .agent/
+
+!flutter/flutter_application_1/
