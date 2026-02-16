@@ -29,10 +29,11 @@ pluginManagement {
 }
 
 plugins {
-    id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    // Increase plugin version to ensure compatibility with latest Flutter SDK
+    id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false 
     id "com.android.application" version "8.1.0" apply false
-    // Updated Kotlin version to fix potential compatibility issues with recent Flutter versions
-    id "org.jetbrains.kotlin.android" version "1.9.0" apply false
+    // Update Kotlin to 1.9.22 to fix "Unresolved reference" in generated code
+    id "org.jetbrains.kotlin.android" version "1.9.22" apply false
 }
 
 include ":app"
