@@ -15,7 +15,8 @@
     <!-- KaTeX for Professional Equations -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body);"></script>
     <script type="module" src="vendor/js/spline-viewer.js"></script>
 
 
@@ -285,36 +286,34 @@
             line-height: 1;
             margin-bottom: 25px;
             letter-spacing: -4px;
-            
+
             /* Prismatic Metallic Gradient */
-            background: linear-gradient(
-                135deg, 
-                #ffffff 0%, 
-                #06b6d4 15%, 
-                #ffffff 30%, 
-                #8b5cf6 45%, 
-                #f59e0b 60%, 
-                #ffffff 75%, 
-                #10b981 90%,
-                #ffffff 100%
-            );
+            background: linear-gradient(135deg,
+                    #ffffff 0%,
+                    #06b6d4 15%,
+                    #ffffff 30%,
+                    #8b5cf6 45%,
+                    #f59e0b 60%,
+                    #ffffff 75%,
+                    #10b981 90%,
+                    #ffffff 100%);
             background-size: 400% auto;
             color: #fff;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            
+
             /* Prismatic Shadow & Holographic Depth */
-            text-shadow: 
+            text-shadow:
                 0 0 20px rgba(6, 182, 212, 0.2),
                 10px 10px 40px rgba(139, 92, 246, 0.15);
-            
+
             /* Complex Animation Layering */
-            animation: 
-                heroBreathing 10s ease-in-out infinite, 
+            animation:
+                heroBreathing 10s ease-in-out infinite,
                 liquidFlow 18s linear infinite,
                 creativeReveal 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            
+
             position: relative;
             z-index: 2;
             will-change: transform, opacity, letter-spacing;
@@ -344,7 +343,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,0.8) 50%, transparent 60%);
+            background: linear-gradient(110deg, transparent 40%, rgba(255, 255, 255, 0.8) 50%, transparent 60%);
             background-size: 200% 100%;
             -webkit-background-clip: text;
             background-clip: text;
@@ -359,12 +358,10 @@
             position: absolute;
             width: 1000px;
             height: 500px;
-            background: radial-gradient(
-                ellipse at center, 
-                rgba(6, 182, 212, 0.15) 0%, 
-                rgba(139, 92, 246, 0.1) 40%, 
-                transparent 80%
-            );
+            background: radial-gradient(ellipse at center,
+                    rgba(6, 182, 212, 0.15) 0%,
+                    rgba(139, 92, 246, 0.1) 40%,
+                    transparent 80%);
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -379,30 +376,53 @@
         }
 
         @keyframes liquidFlow {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 400% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 400% 50%;
+            }
         }
 
         @keyframes heroBreathing {
-            0%, 100% { transform: scale(1) translateY(0) rotate(0deg); opacity: 0.95; }
-            50% { transform: scale(1.03) translateY(-15px) rotate(0.5deg); opacity: 1; }
+
+            0%,
+            100% {
+                transform: scale(1) translateY(0) rotate(0deg);
+                opacity: 0.95;
+            }
+
+            50% {
+                transform: scale(1.03) translateY(-15px) rotate(0.5deg);
+                opacity: 1;
+            }
         }
 
         @keyframes flareSweep {
-            0% { background-position: -200% 0; }
-            30% { background-position: 200% 0; }
-            100% { background-position: 200% 0; }
+            0% {
+                background-position: -200% 0;
+            }
+
+            30% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
         }
 
         @keyframes creativeReveal {
-            0% { 
-                opacity: 0; 
+            0% {
+                opacity: 0;
                 transform: scale(0.8) translateY(60px) skewX(5deg);
                 letter-spacing: 20px;
                 filter: blur(30px);
             }
-            100% { 
-                opacity: 1; 
+
+            100% {
+                opacity: 1;
                 transform: scale(1) translateY(0) skewX(0deg);
                 letter-spacing: -4px;
                 filter: blur(0px);
@@ -410,24 +430,43 @@
         }
 
         @keyframes coronaAura {
-            0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.5; }
-            50% { transform: translate(-50%, -50%) scale(1.4) rotate(15deg); opacity: 0.8; }
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.4) rotate(15deg);
+                opacity: 0.8;
+            }
         }
 
         @keyframes gentlePulse {
-            0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.3)); }
-            50% { transform: scale(1.02) translateY(-10px); filter: drop-shadow(0 0 40px rgba(6, 182, 212, 0.5)); }
+
+            0%,
+            100% {
+                transform: scale(1) translateY(0);
+                filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.3));
+            }
+
+            50% {
+                transform: scale(1.02) translateY(-10px);
+                filter: drop-shadow(0 0 40px rgba(6, 182, 212, 0.5));
+            }
         }
 
         @keyframes entranceBlur {
-            0% { 
-                opacity: 0; 
+            0% {
+                opacity: 0;
                 filter: blur(20px) drop-shadow(0 0 0px transparent);
                 transform: scale(1.1) translateY(20px);
                 letter-spacing: 15px;
             }
-            100% { 
-                opacity: 1; 
+
+            100% {
+                opacity: 1;
                 filter: blur(0px) drop-shadow(0 0 10px rgba(6, 182, 212, 0.3));
                 transform: scale(1) translateY(0);
                 letter-spacing: -3px;
@@ -435,8 +474,17 @@
         }
 
         @keyframes backgroundPulse {
-            0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
+
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
         }
 
         .hero p {
@@ -1036,13 +1084,16 @@
     <nav id="nav">
         <div class="logo">PI-HYBRID</div>
         <div class="cta-group" style="gap: 12px; z-index: 100000; pointer-events: auto !important;">
-            <a href="presentation-intro.html" class="btn-ghost" style="padding: 8px 16px; font-size: 10px; border-color: rgba(6, 182, 212, 0.4); background: rgba(6, 182, 212, 0.05);">
+            <a href="presentation-intro.html" class="btn-ghost"
+                style="padding: 8px 16px; font-size: 10px; border-color: rgba(6, 182, 212, 0.4); background: rgba(6, 182, 212, 0.05);">
                 <span style="font-size:12px;">📘</span> PROLOGUE
             </a>
-            <a href="presentation-control.html" class="btn-ghost" style="padding: 8px 16px; font-size: 10px; border-color: rgba(139, 92, 246, 0.5); background: rgba(139, 92, 246, 0.05);">
+            <a href="presentation-control.html" class="btn-ghost"
+                style="padding: 8px 16px; font-size: 10px; border-color: rgba(139, 92, 246, 0.5); background: rgba(139, 92, 246, 0.05);">
                 <span style="font-size:12px;">⚙️</span> CONTROL
             </a>
-            <a href="presentation-conclusion.html" class="btn-ghost" style="padding: 8px 16px; font-size: 10px; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.05);">
+            <a href="presentation-conclusion.html" class="btn-ghost"
+                style="padding: 8px 16px; font-size: 10px; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.05);">
                 <span style="font-size:12px;">📜</span> SUMMARY
             </a>
         </div>
