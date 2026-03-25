@@ -208,11 +208,7 @@
         }
 
         /* Shared */
-        .sec {
-            padding: 140px 60px;
-            position: relative;
-            z-index: 2
-        }
+        .sec { padding: 120px 60px; position: relative; z-index: 2 }
 
         .reveal {
             opacity: 0;
@@ -227,10 +223,16 @@
         }
 
         .sh2 {
-            font-family: 'Outfit';
-            font-size: 3rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.5rem;
             font-weight: 800;
-            margin-bottom: 20px
+            background: linear-gradient(90deg, #fff, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+            letter-spacing: -1px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
         }
 
         .sp {
@@ -248,35 +250,11 @@
         }
 
         /* Glass Card — cyan glow on hover like other pages */
-        .bcard {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 35px;
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-            transition: .5s;
-            position: relative;
-            overflow: hidden
-        }
+        
 
-        .bcard:hover {
-            transform: translateY(-5px);
-            border-color: rgba(6, 182, 212, .4);
-            box-shadow: 0 5px 40px var(--glow)
-        }
+        
 
-        .bcard::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, .3), transparent);
-            opacity: 0;
-            transition: .5s
-        }
+        
 
         .bcard:hover::before {
             opacity: 1
@@ -287,16 +265,20 @@
             cursor: pointer !important;
             position: relative;
             display: inline-block;
-            transition: .3s
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            background: linear-gradient(90deg, #fff, var(--gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
+        
+        
 
-        .ititle:hover {
-            opacity: .85
-        }
+        
 
-        .ititle:hover::after {
-            opacity: 1
-        }
+        
 
         /* Hero — cyan gradient matching intro page */
         #hero {
@@ -690,38 +672,15 @@
         }
 
         /* Future card — matching hover style */
-        .fc {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 28px;
-            transition: .5s;
-            cursor: pointer !important;
-            position: relative;
-            overflow: hidden
-        }
+        
 
-        .fc::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, .3), transparent);
-            opacity: 0;
-            transition: .5s
-        }
+        
 
         .fc:hover::before {
             opacity: 1
         }
 
-        .fc:hover {
-            border-color: rgba(6, 182, 212, .4);
-            transform: translateY(-5px);
-            box-shadow: 0 5px 30px rgba(6, 182, 212, .1)
-        }
+        
 
         .fc .icon {
             font-size: 28px;
@@ -856,13 +815,20 @@
                 font-size: 2.5rem
             }
 
-            .sec {
-                padding: 80px 25px
-            }
+            .sec { padding: 120px 60px; position: relative; z-index: 2 }
 
             .sh2 {
-                font-size: 2rem
-            }
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #fff, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+            letter-spacing: -1px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        }
 
             nav {
                 padding: 16px 20px
@@ -880,7 +846,27 @@
                 width: 40px
             }
         }
-    </style>
+            .bcard, 
+        .bcard:hover, 
+        .bcard, .fc, .p-card, .s-card, .uni-glass {
+            background: rgba(10, 10, 25, 0.4);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 40px;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden !important;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.02);
+        }
+        .bcard:hover, .fc:hover, .p-card:hover, .s-card:hover, .uni-glass:hover {
+            transform: translateY(-10px) scale(1.01);
+            border-color: rgba(6, 182, 212, 0.4);
+            background: rgba(15, 15, 35, 0.8);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.7), inset 0 0 30px rgba(6,182,212,0.1);
+        }
+</style>
 </head>
 
 <body>
