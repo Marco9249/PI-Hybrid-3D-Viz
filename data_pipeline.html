@@ -78,6 +78,11 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@200;300;400;600;800&family=Outfit:wght@200;400;600;900&family=Space+Mono:wght@400;700&display=swap"
         rel="stylesheet">
+    <!-- KaTeX for professional math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body);"></script>
     <style>
         :root {
             --cyan: #06B6D4;
@@ -530,18 +535,22 @@
                     <span class="section-badge">CHAPTER 01 // THE CONTEXT</span>
                     <h2 onclick="openArPanel('ch01')">The Stochastic Challenge</h2>
                     <p><strong>Location:</strong> Omdurman, Sudan (14.7°N, 33.2°E)</p>
-                    <p>In arid regions, grid stability is constantly threatened by "Aerosol Optical Depth" (Dust Storms) and
+                    <p>In arid regions, grid stability is constantly threatened by "Aerosol Optical Depth" (Dust Storms)
+                        and
                         rapid Cloud Transients. These make solar generation wildly unpredictable.</p>
                     <p>Standard AI treats this as random noise. We treat it as <strong>Physics</strong>.</p>
                 </div>
 
-                <div class="glass reveal" style="padding:0; overflow:hidden; position:relative; min-height:400px; display:flex; align-items:center; justify-content:center; background: radial-gradient(circle at center, #0a0a1a, #000);">
+                <div class="glass reveal"
+                    style="padding:0; overflow:hidden; position:relative; min-height:400px; display:flex; align-items:center; justify-content:center; background: radial-gradient(circle at center, #0a0a1a, #000);">
                     <!-- Enhanced 3D Globe Visual -->
                     <div id="sudan-globe-container" style="width:100%; height:400px; position:relative; outline:none;">
                         <canvas id="globe-canvas" style="width:100%; height:100%; outline:none;"></canvas>
 
-                        <div style="position:absolute; top:20px; left:20px; text-align:left; font-family:'Outfit', sans-serif; font-size:12px; color:rgba(255,255,255,0.9); background:rgba(0,0,0,0.6); padding:10px 15px; border-radius:10px; border-left:2px solid var(--cyan); backdrop-filter:blur(5px); z-index:5;">
-                            <div style="font-size:10px; color:var(--cyan); letter-spacing:2px; margin-bottom:4px;">SITE COORDINATES</div>
+                        <div
+                            style="position:absolute; top:20px; left:20px; text-align:left; font-family:'Outfit', sans-serif; font-size:12px; color:rgba(255,255,255,0.9); background:rgba(0,0,0,0.6); padding:10px 15px; border-radius:10px; border-left:2px solid var(--cyan); backdrop-filter:blur(5px); z-index:5;">
+                            <div style="font-size:10px; color:var(--cyan); letter-spacing:2px; margin-bottom:4px;">SITE
+                                COORDINATES</div>
                             14.7°N, 33.2°E<br>
                             <span style="font-size:10px; opacity:0.7;">GHI: 6.2 kWh/m²/day</span><br>
                             <span style="color:var(--red); font-weight:bold; font-size:10px;">⚠ HIGH VOLATILITY</span>
@@ -551,12 +560,15 @@
             </div>
 
             <div class="reveal" style="margin-top:40px; text-align:center;">
-                <p style="margin: 0 auto; color:rgba(255,255,255,0.5); font-style: italic;">Omdurman: Precision analysis of aerosol optical depth and cloud transients in the Nile basin.</p>
+                <p style="margin: 0 auto; color:rgba(255,255,255,0.5); font-style: italic;">Omdurman: Precision analysis
+                    of aerosol optical depth and cloud transients in the Nile basin.</p>
             </div>
         </section>
 
         <!-- Divider -->
-        <div class="reveal" style="max-width: 1300px; margin: 0 auto; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent);"></div>
+        <div class="reveal"
+            style="max-width: 1300px; margin: 0 auto; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent);">
+        </div>
 
         <!-- ARABIC PANEL HTML -->
         <div id="ar-panel-overlay" onclick="closeArPanel()"></div>
@@ -698,78 +710,6 @@
         </section>
 
         <!-- =============================== -->
-        <!-- STAGE 1.5: Log Transformation   -->
-        <!-- =============================== -->
-        <section class="section">
-            <div class="reveal">
-                <div class="stage-header">
-                    <div class="stage-num"
-                        style="background:rgba(251,146,60,0.15);color:#fb923c;border:2px solid #fb923c">𝑓</div>
-                    <div><span class="section-badge">STAGE 01.5 // TRANSFORMATION</span>
-                        <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_log')">Logarithmic
-                            Transformation</h2>
-                    </div>
-                </div>
-                <p>Solar irradiance data is heavily <strong>right-skewed</strong>. A log transformation compresses the dynamic range, accelerating neural network convergence and improving Adam optimizer efficiency by making the distribution more Gaussian.</p>
-            </div>
-
-            <!-- Interactive Visualization -->
-            <div class="grid-2 reveal" style="margin-top:30px">
-                <div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                        <div style="font-size:10px;letter-spacing:2px;color:#fb923c">DISTRIBUTION VIEW</div>
-                        <button class="btn-action" id="btn-log-toggle" onclick="toggleLogTransform()" style="background:rgba(251,146,60,0.15);border-color:#fb923c;color:#fb923c">
-                            ▶ APPLY LOG₁₀(1+x)
-                        </button>
-                    </div>
-                    <canvas id="log-canvas" class="chart-canvas" style="height:280px"></canvas>
-                    <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.4);margin-top:10px">
-                        <span id="log-x-label">GHI (W/m²)</span>
-                        <span id="log-state-label" style="color:#fb923c">Original Distribution</span>
-                    </div>
-                </div>
-                <div>
-                    <div class="glass" style="text-align:center">
-                        <div style="font-size:10px;letter-spacing:2px;color:#fb923c;margin-bottom:20px">TRANSFORMATION IMPACT</div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px">
-                            <div class="live-stat">
-                                <div class="val" id="log-skew-before" style="color:var(--red)">2.34</div>
-                                <div class="lbl">Skew (Before)</div>
-                            </div>
-                            <div class="live-stat">
-                                <div class="val" id="log-skew-after" style="color:var(--green)">—</div>
-                                <div class="lbl">Skew (After)</div>
-                            </div>
-                            <div class="live-stat">
-                                <div class="val" id="log-range" style="color:#fb923c">—</div>
-                                <div class="lbl">Compression</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="margin-top:15px;padding:15px 20px;background:rgba(0,0,0,0.3);border-radius:12px;border:1px solid rgba(251,146,60,0.2);font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.6)">
-                        <div style="color:#fb923c;margin-bottom:8px">EQUATIONS & CONDITIONS:</div>
-                        <div>• Forward: x' = log₁₀(1 + x)</div>
-                        <div>• Inverse: x = 10^(x') - 1</div>
-                        <div style="margin-top:8px;color:rgba(255,255,255,0.4)">* Uses (1+x) to prevent undefined log(0) and preserve night masking zeros.</div>
-                        <div style="color:var(--cyan);margin-top:15px;margin-bottom:8px">APPLIED TO 7 VARIABLES:</div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-                            <div>- GHI</div><div>- DHI</div>
-                            <div>- Clear-sky GHI</div><div>- Amb. Temp</div>
-                            <div>- KT Satellite</div><div>- Wet Bulb Temp</div>
-                            <div>- DNI</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="reveal" style="margin-top:15px">
-                <div class="warning-badge" style="display:flex;align-items:center;font-size:11px;line-height:1.6;border-color:rgba(251,146,60,0.3);background:rgba(251,146,60,0.05)">
-                    ⚠️ PIPELINE SEQUENCE: Cleaning → Night Mask → <strong style="color:#fb923c;margin:0 4px">Log Transform</strong> → Normalization → Sliding Window
-                </div>
-            </div>
-        </section>
-
-        <!-- =============================== -->
         <!-- STAGE 2: Night Masking -->
         <!-- =============================== -->
         <section class="section">
@@ -850,22 +790,105 @@
             </div>
         </section>
 
+
         <!-- =============================== -->
-        <!-- STAGE 3: Hybrid Normalization -->
+        <!-- STAGE 3: Log Transformation     -->
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
                 <div class="stage-header">
                     <div class="stage-num"
-                        style="background:rgba(6,182,212,0.15);color:var(--cyan);border:2px solid var(--cyan)">3</div>
+                        style="background:rgba(251,146,60,0.15);color:#fb923c;border:2px solid #fb923c">3</div>
                     <div><span class="section-badge">STAGE 03</span>
+                        <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_log')">Logarithmic
+                            Transformation</h2>
+                    </div>
+                </div>
+                <p>Solar irradiance data is heavily <strong>right-skewed</strong>. A log transformation compresses the
+                    dynamic range, accelerating neural network convergence and improving Adam optimizer efficiency by
+                    making the distribution more Gaussian.</p>
+            </div>
+
+            <!-- Interactive Visualization -->
+            <div class="grid-2 reveal" style="margin-top:30px">
+                <div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                        <div style="font-size:10px;letter-spacing:2px;color:#fb923c">DISTRIBUTION VIEW</div>
+                        <button class="btn-action" id="btn-log-toggle" onclick="toggleLogTransform()"
+                            style="background:rgba(251,146,60,0.15);border-color:#fb923c;color:#fb923c">
+                            ▶ APPLY LOG₁₀(1+x)
+                        </button>
+                    </div>
+                    <canvas id="log-canvas" class="chart-canvas" style="height:280px"></canvas>
+                    <div
+                        style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.4);margin-top:10px">
+                        <span id="log-x-label">GHI (W/m²)</span>
+                        <span id="log-state-label" style="color:#fb923c">Original Distribution</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="glass" style="text-align:center">
+                        <div style="font-size:10px;letter-spacing:2px;color:#fb923c;margin-bottom:20px">TRANSFORMATION
+                            IMPACT</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px">
+                            <div class="live-stat">
+                                <div class="val" id="log-skew-before" style="color:var(--red)">2.34</div>
+                                <div class="lbl">Skew (Before)</div>
+                            </div>
+                            <div class="live-stat">
+                                <div class="val" id="log-skew-after" style="color:var(--green)">—</div>
+                                <div class="lbl">Skew (After)</div>
+                            </div>
+                            <div class="live-stat">
+                                <div class="val" id="log-range" style="color:#fb923c">—</div>
+                                <div class="lbl">Compression</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        style="margin-top:15px;padding:15px 20px;background:rgba(0,0,0,0.3);border-radius:12px;border:1px solid rgba(251,146,60,0.2);font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.6)">
+                        <div style="color:#fb923c;margin-bottom:8px">EQUATIONS & CONDITIONS:</div>
+                        <div>• Forward: x' = log₁₀(1 + x)</div>
+                        <div>• Inverse: x = 10^(x') - 1</div>
+                        <div style="margin-top:8px;color:rgba(255,255,255,0.4)">* Uses (1+x) to prevent undefined log(0)
+                            and preserve night masking zeros.</div>
+                        <div style="color:var(--cyan);margin-top:15px;margin-bottom:8px">APPLIED TO 7 VARIABLES:</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                            <div>- GHI</div>
+                            <div>- DHI</div>
+                            <div>- Clear-sky GHI</div>
+                            <div>- Amb. Temp</div>
+                            <div>- KT Satellite</div>
+                            <div>- Wet Bulb Temp</div>
+                            <div>- DNI</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reveal" style="margin-top:15px">
+                <div class="warning-badge"
+                    style="display:flex;align-items:center;font-size:11px;line-height:1.6;border-color:rgba(251,146,60,0.3);background:rgba(251,146,60,0.05)">
+                    ⚠️ PIPELINE SEQUENCE: Cleaning → Night Mask → Log Transform → <strong
+                        style="color:var(--cyan);margin:0 4px">Normalization</strong> → Sliding Window → Split
+                </div>
+            </div>
+        </section>
+
+        <!-- =============================== -->
+        <!-- STAGE 4: Hybrid Normalization   -->
+        <!-- =============================== -->
+        <section class="section">
+            <div class="reveal">
+                <div class="stage-header">
+                    <div class="stage-num"
+                        style="background:rgba(6,182,212,0.15);color:var(--cyan);border:2px solid var(--cyan)">4</div>
+                    <div><span class="section-badge">STAGE 04</span>
                         <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage3')">Hybrid
                             Normalization
                         </h2>
                     </div>
                 </div>
-                <p>Two different normalization strategies for two different roles. Click a feature to see its raw vs
-                    normalized distribution.</p>
             </div>
             <div class="grid-2 reveal" style="margin-top:30px">
                 <div class="norm-box" style="border-color:rgba(6,182,212,0.3)">
@@ -875,9 +898,11 @@
                         FEATURES →
                         Z-SCORE</div>
                     <canvas id="zscore-canvas" class="chart-canvas" style="height:200px"></canvas>
-                    <div style="margin-top:15px;font-family:'Space Mono',monospace;font-size:14px;color:var(--cyan)">z =
-                        (x
-                        − μ<sub>train</sub>) / σ<sub>train</sub></div>
+                    <div onclick="openArPanel('dp_zscore')"
+                        style="margin-top:10px;font-size:1.1rem;color:var(--cyan);text-align:center;cursor:pointer"
+                        title="Click for detailed explanation">
+                        $$z = \frac{x - \mu_{\text{train}}}{\sigma_{\text{train}}}$$
+                    </div>
                     <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:5px">Zero mean, unit variance
                     </div>
                 </div>
@@ -888,9 +913,11 @@
                         (GHI) →
                         MIN-MAX</div>
                     <canvas id="minmax-canvas" class="chart-canvas" style="height:200px"></canvas>
-                    <div style="margin-top:15px;font-family:'Space Mono',monospace;font-size:14px;color:var(--gold)">x̂
-                        = (x
-                        − min) / (max − min)</div>
+                    <div onclick="openArPanel('dp_minmax')"
+                        style="margin-top:10px;font-size:1.1rem;color:var(--gold);text-align:center;cursor:pointer"
+                        title="Click for detailed explanation">
+                        $$\hat{x} = \frac{x - x_{\text{min}}}{x_{\text{max}} - x_{\text{min}}}$$
+                    </div>
                     <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:5px">Scaled to [0, 1]</div>
                 </div>
             </div>
@@ -900,15 +927,18 @@
             </div>
         </section>
 
+
+
+
         <!-- =============================== -->
-        <!-- STAGE 4: Sliding Window  -->
+        <!-- STAGE 5: Sliding Window  -->
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
                 <div class="stage-header">
                     <div class="stage-num"
-                        style="background:rgba(245,158,11,0.15);color:var(--gold);border:2px solid var(--gold)">4</div>
-                    <div><span class="section-badge">STAGE 04</span>
+                        style="background:rgba(245,158,11,0.15);color:var(--gold);border:2px solid var(--gold)">5</div>
+                    <div><span class="section-badge">STAGE 05</span>
                         <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage4')">Sliding Window
                             Formation
                         </h2>
@@ -951,15 +981,15 @@
         </section>
 
         <!-- =============================== -->
-        <!-- STAGE 5: Chronological Split -->
+        <!-- STAGE 6: Chronological Split -->
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
                 <div class="stage-header">
                     <div class="stage-num"
-                        style="background:rgba(16,185,129,0.15);color:var(--green);border:2px solid var(--green)">5
+                        style="background:rgba(16,185,129,0.15);color:var(--green);border:2px solid var(--green)">6
                     </div>
-                    <div><span class="section-badge">STAGE 05</span>
+                    <div><span class="section-badge">STAGE 06</span>
                         <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage5')">Chronological
                             Split
                         </h2>
@@ -1252,7 +1282,7 @@
                 }
             }
 
-            window.toggleLogTransform = function() {
+            window.toggleLogTransform = function () {
                 isLogApplied = !isLogApplied;
                 const btn = document.getElementById('btn-log-toggle');
                 if (isLogApplied) {
@@ -1351,6 +1381,8 @@
                     ruleEl.innerHTML = '✗ GHI_cs < 5 W/m² → MASKED (All solar → 0)'; ruleEl.style.borderColor = 'rgba(239,68,68,0.2)'; ruleEl.style.color = 'var(--red)'; ruleEl.style.background = 'rgba(239,68,68,0.1)';
                 }
             }
+
+
 
             // ---- Normalization Canvases ----
             const zsCanvas = document.getElementById('zscore-canvas');
@@ -2012,18 +2044,18 @@
             };
 
             const sudanPath = [
-                [9.46,33.96],[9.48,33.82],[9.98,33.84],[10.32,33.72],[10.72,33.21],[11.44,33.09],[12.18,33.21],
-                [12.25,32.74],[12.02,32.67],[11.97,32.07],[11.68,32.31],[11.08,32.40],[10.53,31.85],[9.81,31.35],
-                [9.71,30.84],[10.29,30.00],[10.08,29.62],[9.79,29.52],[9.60,29.00],[9.40,28.97],[9.40,27.97],
-                [9.60,27.83],[9.64,27.11],[9.47,26.75],[9.55,26.48],[10.14,25.96],[10.41,25.79],[10.27,25.07],
-                [9.81,24.79],[8.92,24.54],[8.73,24.19],[8.62,23.89],[8.67,23.81],[8.95,23.46],[9.27,23.39],
-                [9.68,23.56],[10.09,23.55],[10.71,22.98],[11.14,22.86],[11.38,22.88],[11.68,22.51],[12.26,22.50],
-                [12.65,22.29],[12.59,21.94],[12.96,22.04],[13.37,22.30],[13.79,22.18],[14.09,22.51],[14.33,22.30],
-                [14.94,22.57],[15.68,23.02],[15.61,23.89],[19.58,23.84],[20.00,23.85],[20.00,25.00],[22.00,25.00],
-                [22.00,29.02],[22.00,32.90],[22.00,36.87],[21.02,37.19],[20.84,36.97],[19.81,37.11],[18.61,37.48],
-                [18.37,37.86],[18.00,38.41],[17.43,37.90],[17.26,37.17],[16.96,36.85],[16.29,36.75],[14.82,36.32],
-                [14.42,36.43],[13.56,36.27],[12.58,35.86],[12.08,35.26],[11.32,34.83],[10.91,34.73],[10.63,34.26],
-                [9.58,33.96],[9.46,33.96]
+                [9.46, 33.96], [9.48, 33.82], [9.98, 33.84], [10.32, 33.72], [10.72, 33.21], [11.44, 33.09], [12.18, 33.21],
+                [12.25, 32.74], [12.02, 32.67], [11.97, 32.07], [11.68, 32.31], [11.08, 32.40], [10.53, 31.85], [9.81, 31.35],
+                [9.71, 30.84], [10.29, 30.00], [10.08, 29.62], [9.79, 29.52], [9.60, 29.00], [9.40, 28.97], [9.40, 27.97],
+                [9.60, 27.83], [9.64, 27.11], [9.47, 26.75], [9.55, 26.48], [10.14, 25.96], [10.41, 25.79], [10.27, 25.07],
+                [9.81, 24.79], [8.92, 24.54], [8.73, 24.19], [8.62, 23.89], [8.67, 23.81], [8.95, 23.46], [9.27, 23.39],
+                [9.68, 23.56], [10.09, 23.55], [10.71, 22.98], [11.14, 22.86], [11.38, 22.88], [11.68, 22.51], [12.26, 22.50],
+                [12.65, 22.29], [12.59, 21.94], [12.96, 22.04], [13.37, 22.30], [13.79, 22.18], [14.09, 22.51], [14.33, 22.30],
+                [14.94, 22.57], [15.68, 23.02], [15.61, 23.89], [19.58, 23.84], [20.00, 23.85], [20.00, 25.00], [22.00, 25.00],
+                [22.00, 29.02], [22.00, 32.90], [22.00, 36.87], [21.02, 37.19], [20.84, 36.97], [19.81, 37.11], [18.61, 37.48],
+                [18.37, 37.86], [18.00, 38.41], [17.43, 37.90], [17.26, 37.17], [16.96, 36.85], [16.29, 36.75], [14.82, 36.32],
+                [14.42, 36.43], [13.56, 36.27], [12.58, 35.86], [12.08, 35.26], [11.32, 34.83], [10.91, 34.73], [10.63, 34.26],
+                [9.58, 33.96], [9.46, 33.96]
             ];
 
             const points = sudanPath.map(c => latLonToVec3(c[0], c[1], radius + 0.15));
