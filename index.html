@@ -119,6 +119,26 @@
             min-height: 100vh;
         }
 
+        /* Global Typography Standardization */
+        p {
+            font-size: 15px;
+            line-height: 1.9;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+        }
+        strong, b {
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        em, i {
+            color: var(--cyan);
+            font-style: italic;
+        }
+
+
 
         /* Hide Scrollbar */
         ::-webkit-scrollbar {
@@ -784,7 +804,7 @@
             }
 
             .story-content p {
-                font-size: 0.95rem;
+                font-size: 14px;
             }
 
             .map-section {
@@ -1000,10 +1020,11 @@
         }
 
         .story-content p {
-            font-size: 1.1rem;
-            line-height: 1.8;
+            font-size: 15px;
+            line-height: 1.9;
             color: rgba(255, 255, 255, 0.7);
             margin-bottom: 20px;
+            font-weight: 300;
         }
 
         .highlight-card {
@@ -1439,6 +1460,64 @@
 
 
 
+
+
+    <!-- Chapter: Training Protocol -->
+    <section class="story-section">
+        <div class="story-grid">
+            <div class="story-content reveal">
+                <h2 onclick="openArPanel('train_proto')" class="interactive-title" style="z-index: 500;">Training Protocol ℹ️</h2>
+                <p>A rigorous <strong>two-stage training strategy</strong> was adopted. During Bayesian search,
+                    candidates trained for <strong>50 epochs</strong>. The final model retrained for <strong>100
+                        epochs</strong>.</p>
+                <p>Remarkably, the physics-guided architecture exhibited <em>inherent numerical stability</em> —
+                    <strong>no gradient clipping was needed</strong>, a testament to the well-conditioned input space
+                    provided by engineered features.
+                </p>
+            </div>
+            <div class="highlight-card reveal" style="border-color:var(--blue);">
+                <div style="font-family:'Courier New'; color:var(--blue); font-size:11px; margin-bottom:20px;">TRAINING
+                    CONFIGURATION (TABLE V)</div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div
+                        style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; color:rgba(255,255,255,0.6);">Optimizer</span>
+                        <span style="font-family:'Courier New'; color:var(--cyan); font-weight:bold;">Adam</span>
+                    </div>
+                    <div
+                        style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; color:rgba(255,255,255,0.6);">Batch Size</span>
+                        <span style="font-family:'Courier New'; color:var(--cyan); font-weight:bold;">128</span>
+                    </div>
+                    <div
+                        style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; color:rgba(255,255,255,0.6);">Max Epochs</span>
+                        <span style="font-family:'Courier New'; color:var(--cyan); font-weight:bold;">100</span>
+                    </div>
+                    <div
+                        style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; color:rgba(255,255,255,0.6);">Early Stopping</span>
+                        <span style="font-family:'Courier New'; color:var(--gold); font-weight:bold;">Patience =
+                            20</span>
+                    </div>
+                    <div
+                        style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; color:rgba(255,255,255,0.6);">L2 Regularization</span>
+                        <span style="font-family:'Courier New'; color:var(--purple); font-weight:bold;">λ =
+                            1.2×10⁻⁴</span>
+                    </div>
+                    <div
+                        style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; color:var(--green);">Gradient Clipping</span>
+                        <span style="font-family:'Courier New'; color:var(--green); font-weight:bold;">NOT NEEDED
+                            ✓</span>
+                    </div>
+                </div>
+                <div style="margin-top:15px; font-size:10px; color:rgba(255,255,255,0.4); text-align:center;">MATLAB
+                    R2024b · Intel i5 · 16GB RAM · ~5hrs BayesOpt</div>
+            </div>
+        </div>
+    </section>
     <!-- Chapter 5: Neural Anatomy (Was Tech Specs) -->
     <section id="chapter5" class="story-section">
         <div class="story-content reveal" style="text-align:center; margin-bottom:60px;">
@@ -1450,74 +1529,58 @@
                 results with a lightweight, optimized architecture of only <strong>492K</strong> parameters.</p>
         </div>
 
-        <div class="reveal"
-            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
-
-            <!-- Spec Card 1: Input -->
-            <div class="highlight-card"
-                style="text-align:center; position:relative; overflow:hidden; border-color:var(--cyan);">
-                <div style="font-family:'Courier New'; color:var(--cyan); font-size:12px; margin-bottom:10px;">LAYER 01
+        <div class="glass-card reveal" style="padding: 45px 30px; margin: 0 auto; max-width: 1100px; position:relative; overflow: hidden;">
+            <!-- Subtle animated background glow -->
+            <div style="position:absolute; top:50%; left:50%; width:80%; height:80%; background:radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 60%); transform:translate(-50%, -50%); pointer-events:none; z-index:0;"></div>
+            
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: stretch; gap: 20px; position: relative; z-index: 1; margin-bottom: 35px;">
+                <!-- Step 1 -->
+                <div style="flex: 1; min-width: 200px; text-align:center; border-right: 1px solid rgba(255,255,255,0.05); padding-right: 15px;">
+                    <div style="font-family:'Courier New'; color:var(--cyan); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">01. INPUT DATA</div>
+                    <h4 style="font-size:2.2rem; font-weight:900; margin-bottom:10px; color:#fff;">24h × 15</h4>
+                    <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">Physics Vector +<br>Cyclic Time Encoding</p>
                 </div>
-                <h4 style="font-size:2rem; margin-bottom:5px;">24h x 15</h4>
-                <p style="font-size:0.9rem; color:rgba(255,255,255,0.5);">Input Tensor</p>
-                <div style="margin-top:20px; font-size:11px; color:var(--purple);">
-                    <div>+ Physics Vector</div>
-                    <div>+ Cyclic Time Encoding</div>
+                <!-- Step 2 -->
+                <div style="flex: 1; min-width: 200px; text-align:center; border-right: 1px solid rgba(255,255,255,0.05); padding: 0 15px;">
+                    <div style="font-family:'Courier New'; color:var(--purple); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">02. SPATIAL CORE</div>
+                    <h4 style="font-size:2.2rem; font-weight:900; margin-bottom:10px; color:#fff;">64 Filters</h4>
+                    <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">1D-CNN Extractor<br>(Kernel: 3, Same)</p>
                 </div>
-            </div>
-
-            <!-- Spec Card 2: CNN -->
-            <div class="highlight-card" style="text-align:center; border-color:var(--purple);">
-                <div style="font-family:'Courier New'; color:var(--purple); font-size:12px; margin-bottom:10px;">SPATIAL
-                    CORE</div>
-                <h4 style="font-size:2rem; margin-bottom:5px;">64 Filters</h4>
-                <p style="font-size:0.9rem; color:rgba(255,255,255,0.5);">1D-CNN Feature Extractor</p>
-                <div
-                    style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; font-size:11px;">
-                    Kernel Size: 3 <br>
-                    Padding: 'Same'
+                <!-- Step 3 -->
+                <div style="flex: 1; min-width: 200px; text-align:center; border-right: 1px solid rgba(255,255,255,0.05); padding: 0 15px;">
+                    <div style="font-family:'Courier New'; color:var(--gold); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">03. TEMPORAL CORE</div>
+                    <h4 style="font-size:2.2rem; font-weight:900; margin-bottom:10px; color:#fff;">210 Units</h4>
+                    <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">Bi-Directional LSTM<br>Forward/Backward causality</p>
                 </div>
-            </div>
-
-            <!-- Spec Card 3: BiLSTM -->
-            <div class="highlight-card" style="text-align:center; border-color:var(--gold);">
-                <div style="font-family:'Courier New'; color:var(--gold); font-size:12px; margin-bottom:10px;">TEMPORAL
-                    CORE</div>
-                <h4 style="font-size:2rem; margin-bottom:5px;">210 Units</h4>
-                <p style="font-size:0.9rem; color:rgba(255,255,255,0.5);">Bi-Directional LSTM</p>
-                <div style="margin-top:15px; font-size:11px; opacity:0.8;">
-                    Look-back: 24 Steps<br>
-                    Look-ahead: Awareness
+                <!-- Step 4 -->
+                <div style="flex: 1; min-width: 200px; text-align:center; padding-left: 15px; position:relative;">
+                    <div style="font-family:'Courier New'; color:var(--green); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">04. OPTIMIZATION</div>
+                    <h4 style="font-size:2.2rem; font-weight:900; margin-bottom:10px; color:#fff;">Bayesian</h4>
+                    <a href="bayesian_optimization.html" style="display:inline-block; padding:8px 22px; background:rgba(16, 185, 129, 0.1); border:1px solid var(--green); color:var(--green); text-decoration:none; border-radius:30px; font-size:11px; font-weight:bold; letter-spacing:1px; transition:all 0.3s; margin-top:5px;" onmouseover="this.style.background='var(--green)'; this.style.color='#000'; this.style.boxShadow='0 0 15px rgba(16,185,129,0.4)';" onmouseout="this.style.background='rgba(16, 185, 129, 0.1)'; this.style.color='var(--green)'; this.style.boxShadow='none';">LAUNCH BRAIN ↗</a>
                 </div>
             </div>
 
-            <!-- Spec Card 4: Optimization -->
-            <div class="highlight-card"
-                style="text-align:center; border-color:var(--green); position:relative; overflow:hidden;">
-                <div style="font-family:'Courier New'; color:var(--green); font-size:12px; margin-bottom:10px;">
-                    OPTIMIZER</div>
-                <h4 style="font-size:2rem; margin-bottom:5px;">Bayesian</h4>
-                <p style="font-size:0.9rem; color:rgba(255,255,255,0.5);">Hyperparameter Tuning</p>
-                <div style="margin-top:15px; margin-bottom:15px; font-size:30px;">
-                    🛠️
+            <!-- Total Params Badge -->
+            <div style="text-align:center; position: relative; z-index: 1;">
+                <div style="display:inline-flex; align-items:center; padding:12px 30px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:50px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
+                    <span style="font-family:'Outfit'; color:rgba(255,255,255,0.6); margin-right:15px; font-size:11px; letter-spacing:1px;">TOTAL PARAMETERS</span>
+                    <span style="font-family:'Courier New'; font-weight:bold; font-size:1.6rem; color:#fff; text-shadow: 0 0 10px rgba(255,255,255,0.2);">492,200</span>
+                    <span style="color:var(--green); margin-left:15px; font-size:10px; padding:4px 12px; background:rgba(16,185,129,0.1); border-radius:20px; font-weight:bold; letter-spacing:1px;">LIGHTWEIGHT</span>
                 </div>
-                <a href="bayesian_optimization.html"
-                    style="display:inline-block; padding:8px 20px; background:rgba(0, 255, 136, 0.1); border:1px solid var(--green); color:var(--green); text-decoration:none; border-radius:30px; font-size:10px; font-weight:bold; letter-spacing:1px; transition:all 0.3s;">
-                    LAUNCH BRAIN
-                </a>
             </div>
-
-        </div>
-
-        <!-- Total Params Badge -->
-        <div class="reveal" style="text-align:center; margin-top:50px;">
-            <div
-                style="display:inline-block; padding:15px 40px; background:rgba(3,3,8,0.8); border:1px solid rgba(255,255,255,0.2); border-radius:50px; backdrop-filter:blur(10px);">
-                <span style="font-family:'Outfit'; color:rgba(255,255,255,0.6); margin-right:15px;">TOTAL
-                    PARAMETERS</span>
-                <span style="font-family:'Courier New'; font-weight:bold; font-size:1.5rem; color:#fff;">492,200</span>
-                <span style="color:var(--green); margin-left:15px; font-size:12px;">(LIGHTWEIGHT)</span>
-            </div>
+            
+            <style>
+            @media(max-width: 800px) {
+                #chapter5 .glass-card > div > div {
+                    border-right: none !important;
+                    border-bottom: 1px solid rgba(255,255,255,0.05);
+                    padding: 20px 0 !important;
+                }
+                #chapter5 .glass-card > div > div:last-child {
+                    border-bottom: none;
+                }
+            }
+            </style>
         </div>
     </section>
 
@@ -1994,11 +2057,9 @@
 
     <!-- Chapter: 5-Year Stress Test -->
     <section id="chapter9" class="story-section">
-        <div class="story-content reveal">
-            <div style="color:var(--cyan); font-family:'Courier New'; font-size:12px; margin-bottom:10px;">CHAPTER
-                09</div>
-            <h3>The Proof</h3>
-            <h2 onclick="openArPanel('ch_proof')" class="interactive-title">5-Year Robustness ℹ️</h2>
+        <div class="story-grid">
+            <div class="story-content reveal">
+                <h2 onclick="openArPanel('ch_proof')" class="interactive-title">5-Year Robustness ℹ️</h2>
             <p>To ensure operational validity in a changing climate, a <strong>long-term Stress Test</strong> was
                 conducted on an independent dataset spanning <strong>2020–2024</strong>.</p>
             <div style="font-size:11px; color:var(--cyan); margin-bottom:15px; cursor:pointer;"
@@ -2073,195 +2134,320 @@
                 </div>
             </div>
         </div>
-        </div>
     </section>
 
 
 
-    <section class="map-section" id="explore">
-        <div class="section-header reveal">
-            <h2 style="font-family: 'Outfit'; font-size: 3rem; margin-bottom: 20px;">Architecture Exploration</h2>
-            <p style="color: rgba(255,255,255,0.4);">Click on each module to enter the high-detail simulation
-                environment.</p>
+    <section class="map-section" id="explore" style="padding-top: 100px;">
+        <div class="section-header reveal" style="text-align: center; margin-bottom: 80px;">
+            <div style="color:var(--purple); font-family:'Courier New'; font-size:12px; margin-bottom:15px; letter-spacing: 4px; display:inline-block; border:1px solid rgba(139,92,246,0.3); padding:5px 15px; border-radius:30px; background:rgba(139,92,246,0.1);">THE 11 LAYERS</div>
+            <h2 style="font-family: 'Outfit'; font-size: 4.5rem; font-weight: 900; margin-bottom: 20px; background: linear-gradient(90deg, #fff, var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 10px 30px rgba(139,92,246,0.4)); line-height:1.1;">Architecture Exploration</h2>
+            <p style="color: rgba(255,255,255,0.6); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Click on any computational graph module to enter the high-detail deep learning simulation environment.</p>
         </div>
 
         <div class="grid">
-            <div onclick="openModal('layer0', 'layers/layer0-input.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer0')">?</div>
-                <div class="card-num">00</div>
-                <div class="card-icon">📊</div>
-                <h3>Sequence Input</h3>
-                <p>24-hour historical window of 15 physics-informed solar features. The bedrock of our prediction.</p>
-                <div class="badge">Input Node</div>
-            </div>
-
-            <div onclick="openModal('layer1', 'layers/layer1-conv1d.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer1')">?</div>
-                <div class="card-num">01</div>
-                <div class="card-icon">🔍</div>
-                <h3>1D-Convolution</h3>
-                <p>Advanced CNN-1D filters extracting local temporal gradients from complex atmospheric noise.</p>
-                <div class="badge">Spatial-Temp</div>
-            </div>
-
-            <div onclick="openModal('layer2', 'layers/layer2-batchnorm.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer2')">?</div>
-                <div class="card-num">02</div>
-                <div class="card-icon">🌀</div>
-                <h3>Batch Normalization</h3>
-                <p>Feature standardization ensuring stable gradient flow across the entire network depth.</p>
-                <div class="badge">Stabilization</div>
-            </div>
-
-            <div onclick="openModal('layer3', 'layers/layer3-relu.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer3')">?</div>
-                <div class="card-num">03</div>
-                <div class="card-icon">⚡</div>
-                <h3>ReLU Activation</h3>
-                <p>Non-linear ReLU rectification to spark neural connectivity and discard negative noise.</p>
-                <div class="badge">Processing</div>
-            </div>
-
-            <div onclick="openModal('layer4', 'layers/layer4-dropout1.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer4')">?</div>
-                <div class="card-num">04</div>
-                <div class="card-icon">🛡️</div>
-                <h3>Dropout (1)</h3>
-                <p>Sparse Dropout deactivation at tuned rate to enforce robustness and prevent overfitting.</p>
-                <div class="badge">Regularizer</div>
-            </div>
-
-            <div onclick="openModal('layer5', 'layers/layer5-bilstm.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer5')">?</div>
-                <div class="card-num">05</div>
-                <div class="card-icon">🧬</div>
-                <h3>BiLSTM Memory</h3>
-                <p>Double-helix BiLSTM capturing forward and backward temporal causality perfectly.</p>
-                <div class="badge" style="color: var(--purple);">Bidirectional</div>
-            </div>
-
-            <div onclick="openModal('layer6', 'layers/layer6-dropout2.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer6')">?</div>
-                <div class="card-num">06</div>
-                <div class="card-icon">💀</div>
-                <h3>Dropout (2)</h3>
-                <p>Post-memory regularization preventing co-adaptation of temporal features from BiLSTM.</p>
-                <div class="badge" style="color: #E040FB;">Post-Memory</div>
-            </div>
-
-            <div onclick="openModal('layer7', 'layers/layer7-dense.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer7')">?</div>
-                <div class="card-num">07</div>
-                <div class="card-icon">🎯</div>
-                <h3>Fully Connected</h3>
-                <p>Dense neural compression translating complex temporal memory into a solar estimate.</p>
-                <div class="badge" style="color: var(--green);">Compression</div>
-            </div>
-
-            <div onclick="openModal('layer8', 'layers/layer8-relu2.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer8')">?</div>
-                <div class="card-num">08</div>
-                <div class="card-icon">🔥</div>
-                <h3>ReLU Activation (2)</h3>
-                <p>Dense layer activation adding non-linearity before final output projection to GHI.</p>
-                <div class="badge" style="color: #F59E0B;">Activation</div>
-            </div>
-
-            <div onclick="openModal('layer9', 'layers/layer9-output.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer9')">?</div>
-                <div class="card-num">09</div>
-                <div class="card-icon">☀️</div>
-                <h3>Output (Dense)</h3>
-                <p>Physics-constrained output layer generating the final Global Horizontal Irradiance.</p>
-                <div class="badge" style="color: var(--gold);">Prediction</div>
-            </div>
-
-            <div onclick="openModal('layer10', 'layers/layer10-regression.html')" class="card reveal"
-                style="cursor:pointer; position:relative;">
-                <div class="ar-icon" onclick="event.stopPropagation(); openArPanel('layer10')">?</div>
-                <div class="card-num">10</div>
-                <div class="card-icon">📉</div>
-                <h3>Regression Output</h3>
-                <p>Loss computation and gradient backpropagation. RMSE convergence driving model optimization.</p>
-                <div class="badge" style="color: #EF4444;">Loss Engine</div>
-            </div>
+        <style>
+        .layer-compact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px 60px;
+        }
+        .compact-card {
+            background: rgba(10, 10, 25, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.02);
+            text-decoration: none;
+        }
+        .compact-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(6, 182, 212, 0.4);
+            background: rgba(15, 15, 35, 0.8);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 15px rgba(6, 182, 212, 0.1);
+        }
+        .compact-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .compact-icon {
+            font-size: 28px;
+            background: rgba(255, 255, 255, 0.03);
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.02);
+        }
+        .compact-ar-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .compact-ar-btn:hover {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--gold);
+            border-color: rgba(245, 158, 11, 0.4);
+            transform: scale(1.1);
+        }
+        .compact-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 19px;
+            color: #fff;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+        .compact-desc {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            flex: 1;
+        }
+        .compact-badge {
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
+            align-self: flex-start;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .compact-enter {
+            margin-top: auto;
+            font-family: 'Courier New';
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--cyan);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .compact-card:hover .compact-enter {
+            color: #fff;
+        }
+        </style>
+        
+        <!-- Replaced with layer-compact-grid -->
         </div>
-    </section>
+        <div class="layer-compact-grid">
 
-    <!-- Chapter: Training Protocol -->
-    <section class="story-section">
-        <div class="story-grid">
-            <div class="story-content reveal">
-                <div style="color:var(--cyan); font-family:'Courier New'; font-size:12px; margin-bottom:10px;">CHAPTER
-                    09</div>
-                <h3>The Proof</h3>
-                <h2 onclick="openArPanel('ch_proof')" class="interactive-title" style="z-index: 500;">5-Year Robustness
-                    ℹ️</h2>
-                <p>We tested the model on <strong>5 full years (2020-2024)</strong> of unseen data. It achieved an R² >
-                    0.99 consistently, proving it learned physical laws, not just weather patterns.</p>
-                <h3 style="margin-top:20px; font-size:1.2rem; color:var(--purple)">Training Protocol</h3>
-                <p>A rigorous <strong>two-stage training strategy</strong> was adopted. During Bayesian search,
-                    candidates trained for <strong>50 epochs</strong>. The final model retrained for <strong>100
-                        epochs</strong>.</p>
-                <p>Remarkably, the physics-guided architecture exhibited <em>inherent numerical stability</em> —
-                    <strong>no gradient clipping was needed</strong>, a testament to the well-conditioned input space
-                    provided by engineered features.
-                </p>
-            </div>
-            <div class="highlight-card reveal" style="border-color:var(--blue);">
-                <div style="font-family:'Courier New'; color:var(--blue); font-size:11px; margin-bottom:20px;">TRAINING
-                    CONFIGURATION (TABLE V)</div>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div
-                        style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11px; color:rgba(255,255,255,0.6);">Optimizer</span>
-                        <span style="font-family:'Courier New'; color:var(--cyan); font-weight:bold;">Adam</span>
-                    </div>
-                    <div
-                        style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11px; color:rgba(255,255,255,0.6);">Batch Size</span>
-                        <span style="font-family:'Courier New'; color:var(--cyan); font-weight:bold;">128</span>
-                    </div>
-                    <div
-                        style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11px; color:rgba(255,255,255,0.6);">Max Epochs</span>
-                        <span style="font-family:'Courier New'; color:var(--cyan); font-weight:bold;">100</span>
-                    </div>
-                    <div
-                        style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11px; color:rgba(255,255,255,0.6);">Early Stopping</span>
-                        <span style="font-family:'Courier New'; color:var(--gold); font-weight:bold;">Patience =
-                            20</span>
-                    </div>
-                    <div
-                        style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11px; color:rgba(255,255,255,0.6);">L2 Regularization</span>
-                        <span style="font-family:'Courier New'; color:var(--purple); font-weight:bold;">λ =
-                            1.2×10⁻⁴</span>
-                    </div>
-                    <div
-                        style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11px; color:var(--green);">Gradient Clipping</span>
-                        <span style="font-family:'Courier New'; color:var(--green); font-weight:bold;">NOT NEEDED
-                            ✓</span>
+            <div onclick="window.location.href='layers/layer0-input.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:var(--cyan); border-color:var(--cyan)40;">📊</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">00</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer0')" title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
-                <div style="margin-top:15px; font-size:10px; color:rgba(255,255,255,0.4); text-align:center;">MATLAB
-                    R2024b · Intel i5 · 16GB RAM · ~5hrs BayesOpt</div>
+                <div class="compact-title">Sequence Input</div>
+                <div class="compact-desc">24-hour historical window of 15 physics-informed solar features. The bedrock of our prediction.</div>
+                <div class="compact-badge" style="color:var(--cyan); border-color:var(--cyan)60;">Input Node</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
             </div>
-        </div>
-    </section>
 
+            <div onclick="window.location.href='layers/layer1-conv1d.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:var(--purple); border-color:var(--purple)40;">🔍</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">01</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer1')" title="الشرح بالعربية">ℹ️</div>
+                    </div>
+                </div>
+                <div class="compact-title">1D-Convolution</div>
+                <div class="compact-desc">Advanced CNN-1D filters extracting local temporal gradients from complex atmospheric noise.</div>
+                <div class="compact-badge" style="color:var(--purple); border-color:var(--purple)60;">Spatial-Temp</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='layers/layer2-batchnorm.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:var(--gold); border-color:var(--gold)40;">🌀</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">02</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer2')" title="الشرح بالعربية">ℹ️</div>
+                    </div>
+                </div>
+                <div class="compact-title">Batch Normalization</div>
+                <div class="compact-desc">Feature standardization ensuring stable gradient flow across the entire network depth.</div>
+                <div class="compact-badge" style="color:var(--gold); border-color:var(--gold)60;">Stabilization</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='layers/layer3-relu.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:#E040FB; border-color:#E040FB40;">⚡</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">03</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer3')" title="الشرح بالعربية">ℹ️</div>
+                    </div>
+                </div>
+                <div class="compact-title">ReLU Activation</div>
+                <div class="compact-desc">Non-linear ReLU rectification to spark neural connectivity and discard negative noise.</div>
+                <div class="compact-badge" style="color:#E040FB; border-color:#E040FB60;">Processing</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='layers/layer4-dropout1.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:#EF4444; border-color:#EF444440;">🛡️</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">04</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer4')" title="الشرح بالعربية">ℹ️</div>
+                    </div>
+                </div>
+                <div class="compact-title">Dropout (1)</div>
+                <div class="compact-desc">Sparse Dropout deactivation at tuned rate to enforce robustness and prevent overfitting.</div>
+                <div class="compact-badge" style="color:#EF4444; border-color:#EF444460;">Regularizer</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='layers/layer5-bilstm.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:var(--green); border-color:var(--green)40;">🧬</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">05</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer5')" title="الشرح بالعربية">ℹ️</div>
+                    </div>
+                </div>
+                <div class="compact-title">BiLSTM Memory</div>
+                <div class="compact-desc">Double-helix BiLSTM capturing forward and backward temporal causality perfectly.</div>
+                <div class="compact-badge" style="color:var(--green); border-color:var(--green)60;">Bidirectional</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='layers/layer6-dropout2.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:#F59E0B; border-color:#F59E0B40;">💀</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">06</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer6')" title="الشرح بالعربية">ℹ️</div>
+                    </div>
+                </div>
+                <div class="compact-title">Dropout (2)</div>
+                <div class="compact-desc">Post-memory regularization preventing co-adaptation of temporal features from BiLSTM.</div>
+                <div class="compact-badge" style="color:#F59E0B; border-color:#F59E0B60;">Post-Memory</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='layers/layer7-dense.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:var(--cyan); border-color:var(--cyan)40;">🎯</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">07</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer7')" title="الشرح بالعربية">ℹ️</div>
+                    </div>
+                </div>
+                <div class="compact-title">Fully Connected</div>
+                <div class="compact-desc">Dense neural compression translating complex temporal memory into a solar estimate.</div>
+                <div class="compact-badge" style="color:var(--cyan); border-color:var(--cyan)60;">Compression</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='layers/layer8-relu2.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:var(--purple); border-color:var(--purple)40;">🔥</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">08</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer8')" title="الشرح بالعربية">ℹ️</div>
+                    </div>
+                </div>
+                <div class="compact-title">ReLU Activation (2)</div>
+                <div class="compact-desc">Dense layer activation adding non-linearity before final output projection to GHI.</div>
+                <div class="compact-badge" style="color:var(--purple); border-color:var(--purple)60;">Activation</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='layers/layer9-output.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:var(--gold); border-color:var(--gold)40;">☀️</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">09</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer9')" title="الشرح بالعربية">ℹ️</div>
+                    </div>
+                </div>
+                <div class="compact-title">Output (Dense)</div>
+                <div class="compact-desc">Physics-constrained output layer generating the final Global Horizontal Irradiance.</div>
+                <div class="compact-badge" style="color:var(--gold); border-color:var(--gold)60;">Prediction</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='layers/layer10-regression.html'" class="compact-card reveal">
+                <div class="compact-card-header">
+                    <div class="compact-icon" style="color:#E040FB; border-color:#E040FB40;">📉</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">10</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer10')" title="الشرح بالعربية">ℹ️</div>
+                    </div>
+                </div>
+                <div class="compact-title">Regression Output</div>
+                <div class="compact-desc">Loss computation and gradient backpropagation. RMSE convergence driving model optimization.</div>
+                <div class="compact-badge" style="color:#E040FB; border-color:#E040FB60;">Loss Engine</div>
+                <div class="compact-enter">
+                    <span>ENTER LAYER</span>
+                    <span>↗</span>
+                </div>
+            </div>
+</div>
+    </section>
     <!-- Chapter: Conclusion & Future Directions -->
     <section class="story-section">
         <div class="story-content reveal" style="text-align:center; margin-bottom:60px;">
@@ -2647,16 +2833,27 @@
 
         .interactive-title {
             cursor: pointer;
-            transition: opacity 0.3s;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
             display: inline-block;
             position: relative;
-            /* Ensure z-index works */
             z-index: 10;
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #fff, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
         }
 
         .interactive-title:hover {
-            opacity: 0.8;
-            /* No glow, no transform, simple feedback */
+            transform: translateX(10px) scale(1.02);
+            background: linear-gradient(90deg, #fff, var(--gold), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.4));
         }
     </style>
 

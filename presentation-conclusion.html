@@ -53,6 +53,26 @@
             overflow-x: hidden
         }
 
+        /* Global Typography Standardization */
+        p {
+            font-size: 15px;
+            line-height: 1.9;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+        }
+        strong, b {
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        em, i {
+            color: var(--cyan);
+            font-style: italic;
+        }
+
+
         /* BG Canvas */
         #bg-canvas {
             position: fixed;
@@ -889,7 +909,6 @@
 
     <!-- ═══ HERO ═══ -->
     <section id="hero">
-        <div class="stag" style="color:var(--purple);position:relative;z-index:2">CHAPTER 05 — THE FINAL VERDICT</div>
         <h1>Conclusions<br>& Vision</h1>
         <p class="hero-sub">From chaos to control — proving that physics-guided AI outperforms brute-force complexity in
             harsh climatic environments.</p>
@@ -901,7 +920,6 @@
     <!-- ═══ SIMULATION RESULTS ═══ -->
     <section class="sec">
         <div class="reveal" style="text-align:center;margin-bottom:40px">
-            <div class="stag" style="color:var(--green)">72-HOUR MARATHON — FINAL RESULTS</div>
             <h2 class="sh2 ititle" onclick="openArPanel('conc_sim_results')">Simulation Performance</h2>
             <p class="sp" style="max-width:650px;margin:0 auto">Three consecutive days, three weather scenarios — a real
                 stress test for the integrated system.</p>
@@ -1005,7 +1023,6 @@
     <!-- ═══ SCIENTIFIC CONTRIBUTIONS ═══ -->
     <section class="sec">
         <div class="reveal" style="text-align:center;margin-bottom:50px">
-            <div class="stag" style="color:var(--cyan)">RESEARCH IMPACT</div>
             <h2 class="sh2 ititle" onclick="openArPanel('conc_contributions')">Scientific Contributions ℹ️</h2>
             <p class="sp" style="max-width:600px;margin:0 auto">The fundamental novelties that set this research apart
                 from standard solar forecasting implementations.</p>
@@ -1056,7 +1073,6 @@
     <!-- ═══ KEY CONCLUSIONS ═══ -->
     <section class="sec">
         <div class="reveal" style="text-align:center;margin-bottom:40px">
-            <div class="stag" style="color:var(--purple)">RESEARCH CONCLUSIONS</div>
             <h2 class="sh2 ititle" onclick="openArPanel('conc_conclusions')">Five Key Findings</h2>
         </div>
         <div style="max-width:850px;margin:0 auto" class="reveal">
@@ -1141,7 +1157,6 @@
     <section class="sec">
         <div class="grid2">
             <div class="reveal">
-                <div class="stag" style="color:var(--red)">RESEARCH BOUNDARIES</div>
                 <h2 class="sh2 ititle" onclick="openArPanel('conc_limitations')">Limitations</h2>
                 <p class="sp">Every rigorous study acknowledges its boundaries. These limitations define the conditions
                     of validity and the path forward.</p>
@@ -1183,7 +1198,6 @@
     <!-- ═══ RECOMMENDATIONS ═══ -->
     <section class="sec">
         <div class="reveal" style="text-align:center;margin-bottom:40px">
-            <div class="stag" style="color:var(--green)">PRACTICAL RECOMMENDATIONS</div>
             <h2 class="sh2 ititle" onclick="openArPanel('conc_recommendations')">From Lab to Field</h2>
         </div>
         <div class="grid2 reveal">
@@ -1243,7 +1257,6 @@
     <!-- ═══ FUTURE WORK ═══ -->
     <section class="sec">
         <div class="reveal" style="text-align:center;margin-bottom:40px">
-            <div class="stag" style="color:var(--cyan)">FUTURE HORIZONS</div>
             <h2 class="sh2 ititle" onclick="openArPanel('conc_future')">What Comes Next</h2>
             <p class="sp" style="max-width:600px;margin:0 auto">Research directions that extend this foundation into
                 real-world deployment and next-generation control.</p>

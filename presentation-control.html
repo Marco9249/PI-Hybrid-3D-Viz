@@ -53,6 +53,26 @@
             overflow-x: hidden
         }
 
+        /* Global Typography Standardization */
+        p {
+            font-size: 15px;
+            line-height: 1.9;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+        }
+        strong, b {
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        em, i {
+            color: var(--cyan);
+            font-style: italic;
+        }
+
+
         /* BG Canvas */
         #bg-canvas {
             position: fixed;
@@ -256,23 +276,29 @@
         }
 
         @keyframes premiumShine {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         #hero h1 {
             font-family: 'Cinzel', serif;
             font-size: 5.5rem;
             font-weight: 900;
-            background: linear-gradient(
-                to right,
-                #ffffff 0%,
-                #10b981 25%,
-                #ffffff 50%,
-                #3b82f6 75%,
-                #ffffff 100%
-            );
+            background: linear-gradient(to right,
+                    #ffffff 0%,
+                    #10b981 25%,
+                    #ffffff 50%,
+                    #3b82f6 75%,
+                    #ffffff 100%);
             background-size: 200% auto;
             color: #fff;
             background-clip: text;
@@ -743,8 +769,6 @@
 
     <!-- ═══ HERO ═══ -->
     <section id="hero">
-        <div class="stag" style="color:var(--gold);margin-bottom:20px;position:relative;z-index:2">THE COMPLETE
-            SIMULATION WALKTHROUGH</div>
         <h1>The Control<br>System Journey</h1>
         <p class="hero-sub">A sequential engineering tour inside the MATLAB/Simulink simulation — from raw weather data
             to the last drop of water.</p>
@@ -756,7 +780,6 @@
     <!-- ═══ SIGNAL FLOW MAP ═══ -->
     <div class="sec" style="padding-top:60px;padding-bottom:20px">
         <div class="reveal" style="text-align:center;margin-bottom:20px">
-            <div class="stag" style="color:var(--cyan)">SIGNAL PATH — CLICK TO NAVIGATE</div>
         </div>
         <div class="flow-bar reveal" id="flowBar">
             <div class="flow-node active" onclick="scrollToSec('sec1')">📡 DATA</div>
@@ -779,7 +802,6 @@
     <section class="sec" id="sec1">
         <div class="grid2">
             <div class="reveal">
-                <div class="stag" style="color:var(--green)">PART 01 — DATA PREPARATION</div>
                 <h2 class="sh2 ititle" onclick="openArPanel('ctrl_scenarios')">Climate Scenarios</h2>
                 <p class="sp">72 continuous hours (3 days) per scenario. The <strong style="color:#fff">Multiport
                         Switch</strong> mechanism allows instant scenario switching.</p>
@@ -791,7 +813,8 @@
                 </div>
                 <div class="ibox c" style="font-size:12px;cursor:pointer" onclick="openArPanel('ctrl_multiport')">
                     <strong>Clearness Index (KT)</strong> — distinguishes natural sunset from passing clouds. 7 of 15
-                    features are zero-cost physics. ℹ️</div>
+                    features are zero-cost physics. ℹ️
+                </div>
             </div>
             <div class="bcard reveal">
                 <div
@@ -842,7 +865,6 @@
                     style="width:100%;height:120px;display:block;border-radius:12px;margin-top:12px;cursor:pointer"></canvas>
             </div>
             <div class="reveal">
-                <div class="stag" style="color:var(--cyan)">PART 02 — PV PHYSICS MODEL</div>
                 <h2 class="sh2 ititle" onclick="openArPanel('ctrl_pv')">The Physical Heart</h2>
                 <p class="sp">Complete mathematical physics model built from scratch. MPPT embedded as dynamic equations
                     — instantaneous maximum power tracking.</p>
@@ -855,7 +877,6 @@
     <!-- ═══ PART 3: AI BRAIN ═══ -->
     <section class="sec" id="sec3">
         <div class="reveal" style="text-align:center;margin-bottom:40px">
-            <div class="stag" style="color:var(--purple)">PART 03 — THE AI BRAIN</div>
             <h2 class="sh2 ititle" onclick="openArPanel('ctrl_ai')">Hybrid Intelligence</h2>
             <p class="sp" style="max-width:650px;margin:0 auto">CNN-BiLSTM compressed via <strong
                     style="color:var(--purple)">Knowledge Distillation</strong> + <strong
@@ -910,7 +931,6 @@
     <section class="sec" id="sec4">
         <div class="grid2">
             <div class="reveal">
-                <div class="stag" style="color:var(--gold)">PART 04 — HIERARCHICAL CONTROL</div>
                 <h2 class="sh2 ititle" onclick="openArPanel('ctrl_mpc')">MPC Manager + Controller</h2>
                 <p class="sp"><strong style="color:var(--gold)">Manager</strong> decides WHEN & HOW MUCH. <strong
                         style="color:var(--cyan)">Controller</strong> finds the SMOOTHEST PATH.</p>
@@ -987,10 +1007,10 @@
                         ℹ️</div>
                 </div>
                 <div class="reveal">
-                    <div class="stag" style="color:var(--red)">PART 05 — DYNAMIC CONTROLLER</div>
                     <h2 class="sh2 ititle" onclick="openArPanel('ctrl_fopid')">FOPID: Shock Absorber</h2>
                     <p class="sp">Fractional-Order PID with 2 extra degrees of freedom (λ, μ). Parameters optimized via
-                        <strong style="color:#fff">Finite Difference</strong> gradient search.</p>
+                        <strong style="color:#fff">Finite Difference</strong> gradient search.
+                    </p>
                     <p class="sp">Output: a single, <strong style="color:var(--green)">silky-smooth control
                             signal</strong> (P_control) sent to VFD — ensuring soft starts and no inrush currents.</p>
                 </div>
@@ -1000,7 +1020,6 @@
     <!-- ═══ PARTS 6-8: VFD + PUMP + TANK ═══ -->
     <section class="sec" id="sec6">
         <div class="reveal" style="text-align:center;margin-bottom:40px">
-            <div class="stag" style="color:var(--cyan)">PARTS 06–08 — EXECUTION & STORAGE</div>
             <h2 class="sh2 ititle" onclick="openArPanel('ctrl_vfd')">VFD → Pump → Tank</h2>
         </div>
         <div class="grid2 reveal" id="sec7">
@@ -1012,7 +1031,8 @@
                     <div class="acc-b">
                         <div class="acc-in"><strong>Soft Start:</strong> Calculated burst for stiction then smooth ramp.
                             <strong>Hydraulic Saturation:</strong> Clips excess commands. <strong>Dead Zone:</strong>
-                            Below 690 RPM → full cutoff.</div>
+                            Below 690 RPM → full cutoff.
+                        </div>
                     </div>
                 </div>
                 <div class="acc">
@@ -1046,9 +1066,11 @@
                     </div>
                     <div style="text-align:left;flex:1;max-width:220px">
                         <div style="font-size:11px;margin-bottom:8px"><span style="color:var(--green)">▲ PUMP:</span>
-                            <span id="pIn">0.8</span> L/s</div>
+                            <span id="pIn">0.8</span> L/s
+                        </div>
                         <div style="font-size:11px;margin-bottom:8px"><span style="color:var(--red)">▼ DEMAND:</span>
-                            <span id="pOut">0.3</span> L/s</div>
+                            <span id="pOut">0.3</span> L/s
+                        </div>
                         <div style="font-size:11px;margin-bottom:12px"><span style="color:var(--cyan)">NET:</span> <span
                                 id="pNet">+0.5</span> L/s</div>
                         <div style="font-size:9px;color:var(--gold)">⟳ FEEDBACK → MPC MANAGER</div>

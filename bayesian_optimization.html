@@ -103,6 +103,26 @@
             line-height: 1.6
         }
 
+        /* Global Typography Standardization */
+        p {
+            font-size: 15px;
+            line-height: 1.9;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+        }
+        strong, b {
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        em, i {
+            color: var(--cyan);
+            font-style: italic;
+        }
+
+
         ::-webkit-scrollbar {
             width: 6px
         }
@@ -175,7 +195,7 @@
         /* Sections */
         .section {
             min-height: 100vh;
-            padding: 120px 60px 80px;
+            padding: 140px 60px;
             max-width: 1300px;
             margin: 0 auto;
             position: relative;
@@ -193,7 +213,7 @@
 
         .section h2 {
             font-family: 'Outfit', sans-serif;
-            font-size: 3.2rem;
+            font-size: 3rem;
             font-weight: 800;
             margin-bottom: 20px;
             background: linear-gradient(90deg, #fff, var(--cyan));
@@ -203,8 +223,9 @@
         }
 
         .section p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 15px;
+            line-height: 1.9;
             max-width: 700px;
             margin-bottom: 15px
         }
@@ -602,7 +623,6 @@
         <!-- =============================== -->
         <section class="section" style="display:flex;flex-direction:column;justify-content:center;min-height:100vh">
             <div class="reveal">
-                <span class="section-badge">CHAPTER 06 // THE OPTIMIZER</span>
                 <h2 style="cursor:pointer" onclick="openArPanel('bayesian_intelligence')">Bayesian Intelligence</h2>
 
                 <p>Manual hyperparameter tuning is computationally irresponsible. We employed <strong>Bayesian
@@ -633,7 +653,6 @@
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
-                <span class="section-badge">THE PROBLEM</span>
                 <h2>Why Not Grid Search? <span onclick="openArPanel('bo_hero')"
                         style="font-size:0.5em; vertical-align:middle; cursor:pointer;" class="ar-mini-btn">ℹ️</span>
                 </h2>
@@ -700,7 +719,6 @@
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
-                <span class="section-badge">THE CORE IDEA</span>
                 <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('bo_process')">The Surrogate Model</h2>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <p style="margin:0"><strong>Objective:</strong> Clear the "Knowledge Fog" to find the global optimum
@@ -752,7 +770,6 @@
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
-                <span class="section-badge">THE BALANCE</span>
                 <h2 style="cursor:pointer" onclick="openArPanel('bo_tradeoff')">Exploration vs Exploitation</h2>
                 <p>The <strong>EI+ (Expected Improvement Plus)</strong> acquisition function decides where to sample
                     next by
@@ -763,7 +780,8 @@
                     <div class="mode-toggle">
                         <button class="active" id="btn-explore" onclick="setEIMode('explore')">🔭 EXPLORE</button>
                         <button id="btn-exploit" onclick="setEIMode('exploit')">⛏️ EXPLOIT</button>
-                        <button class="btn-gold" id="ei-auto-btn" onclick="toggleEIAuto()" style="margin-left:10px; padding:0 15px; font-size:10px">✦ START AUTO-CYCLE</button>
+                        <button class="btn-gold" id="ei-auto-btn" onclick="toggleEIAuto()"
+                            style="margin-left:10px; padding:0 15px; font-size:10px">✦ START AUTO-CYCLE</button>
                     </div>
                     <div id="ei-explain" class="glass" style="margin-top:20px;min-height:140px">
                         <h3 style="font-size:1.2rem;color:var(--purple);margin-bottom:10px">Exploration Mode</h3>
@@ -784,7 +802,6 @@
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
-                <span class="section-badge">THE JOURNEY</span>
                 <h2 style="cursor:pointer" onclick="openArPanel('bo_results')">30-Iteration Convergence</h2>
                 <p>Watch the optimizer converge toward the global minimum over 30 iterations. Each point represents a
                     hyperparameter combination tested.</p>
@@ -848,7 +865,6 @@
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
-                <span class="section-badge">INTERACTIVE</span>
                 <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('bo_params')">The Search Space Explorer
                 </h2>
                 <p>Adjust the hyperparameters yourself and see how far your choice is from the Bayesian-optimized
@@ -935,7 +951,6 @@
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
-                <span class="section-badge">THE RESULT — TABLE IV</span>
                 <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('bo_results')">Optimized Configuration
                 </h2>
                 <p>After 30 Bayesian iterations (~5 hours of compute on Intel i5, 16GB RAM), the algorithm converged to
@@ -1231,9 +1246,9 @@
             function setEIMode(m) {
                 eiMode = m;
                 document.querySelectorAll('.mode-toggle button:not(#ei-auto-btn)').forEach(b => b.classList.remove('active'));
-                if(m === 'explore') document.getElementById('btn-explore').classList.add('active');
+                if (m === 'explore') document.getElementById('btn-explore').classList.add('active');
                 else document.getElementById('btn-exploit').classList.add('active');
-                
+
                 const box = document.getElementById('ei-explain');
                 if (m === 'explore') {
                     box.innerHTML = '<h3 style="font-size:1.2rem;color:var(--purple);margin-bottom:10px">Exploration Mode</h3><p style="font-size:14px;margin:0">Sample in regions of <strong>HIGH uncertainty</strong>. The algorithm ventures into unknown territory to discover potentially better configurations. This prevents getting stuck in local minima.</p>';
@@ -1274,13 +1289,13 @@
             function drawEI() {
                 const W = eiCanvas.width, H = eiCanvas.height; eiCtx.clearRect(0, 0, W, H);
                 const pad = 30, gW = W - 2 * pad, gH = H - 2 * pad;
-                
+
                 // Draw GP-like curve
                 eiCtx.strokeStyle = 'rgba(6,182,212,0.3)'; eiCtx.lineWidth = 1; eiCtx.beginPath();
                 const trueY = x => 0.4 * Math.sin(2.5 * Math.PI * x) + 0.2 * Math.cos(4 * Math.PI * x);
-                for (let i = 0; i <= 100; i++) { 
-                    const x = i / 100; 
-                    eiCtx.lineTo(pad + x * gW, pad + gH / 3 - trueY(x) * gH * 0.4); 
+                for (let i = 0; i <= 100; i++) {
+                    const x = i / 100;
+                    eiCtx.lineTo(pad + x * gW, pad + gH / 3 - trueY(x) * gH * 0.4);
                 }
                 eiCtx.stroke();
 
@@ -1288,7 +1303,7 @@
                 const eiColor = eiMode === 'explore' ? 'var(--purple)' : 'var(--green)';
                 eiCtx.fillStyle = eiMode === 'explore' ? 'rgba(139,92,246,0.15)' : 'rgba(16,185,129,0.15)';
                 eiCtx.strokeStyle = eiColor; eiCtx.lineWidth = 2.5; eiCtx.beginPath();
-                
+
                 let maxEI = -1, bestEI_X = 0;
                 const getEI = (x) => {
                     if (eiMode === 'explore') {
@@ -1312,9 +1327,9 @@
                 eiCtx.setLineDash([4, 4]); eiCtx.strokeStyle = eiColor;
                 eiCtx.beginPath(); eiCtx.moveTo(bx, pad); eiCtx.lineTo(bx, pad + gH); eiCtx.stroke();
                 eiCtx.setLineDash([]);
-                
+
                 // Peak marker
-                eiCtx.beginPath(); eiCtx.arc(bx, pad + gH - maxEI * gH * 0.7, 5, 0, Math.PI*2);
+                eiCtx.beginPath(); eiCtx.arc(bx, pad + gH - maxEI * gH * 0.7, 5, 0, Math.PI * 2);
                 eiCtx.fillStyle = eiColor; eiCtx.fill();
                 eiCtx.shadowBlur = 15; eiCtx.shadowColor = eiColor; eiCtx.stroke(); eiCtx.shadowBlur = 0;
 
@@ -1330,9 +1345,9 @@
                     const hv = getEI(hx);
                     eiCtx.strokeStyle = 'rgba(255,255,255,0.2)';
                     eiCtx.beginPath(); eiCtx.moveTo(eiHoverX, pad); eiCtx.lineTo(eiHoverX, pad + gH); eiCtx.stroke();
-                    
+
                     eiCtx.fillStyle = '#fff'; eiCtx.font = '10px Inter';
-                    const txt = `${(hv*100).toFixed(1)}% Potential`;
+                    const txt = `${(hv * 100).toFixed(1)}% Potential`;
                     eiCtx.fillText(txt, eiHoverX + 5, pad + gH - hv * gH * 0.7 - 10);
                 }
 

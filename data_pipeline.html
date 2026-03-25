@@ -110,6 +110,26 @@
             line-height: 1.6
         }
 
+        /* Global Typography Standardization */
+        p {
+            font-size: 15px;
+            line-height: 1.9;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+        }
+        strong, b {
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        em, i {
+            color: var(--cyan);
+            font-style: italic;
+        }
+
+
         ::-webkit-scrollbar {
             width: 6px
         }
@@ -170,8 +190,7 @@
         }
 
         .section {
-            min-height: 100vh;
-            padding: 120px 60px 80px;
+            padding: 80px 40px;
             max-width: 1300px;
             margin: 0 auto;
             position: relative;
@@ -189,7 +208,7 @@
 
         .section h2 {
             font-family: 'Outfit', sans-serif;
-            font-size: 3.2rem;
+            font-size: 3rem;
             font-weight: 800;
             margin-bottom: 20px;
             background: linear-gradient(90deg, #fff, var(--cyan));
@@ -200,9 +219,11 @@
 
         .section p {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 1.05rem;
-            max-width: 700px;
-            margin-bottom: 15px
+            font-size: 16px;
+            line-height: 1.9;
+            max-width: 750px;
+            margin-bottom: 25px;
+            font-weight: 300;
         }
 
         .section h3 {
@@ -532,7 +553,6 @@
         <section id="chapter1" class="section" style="min-height:auto; padding-top:150px; padding-bottom:50px;">
             <div class="grid-2 reveal">
                 <div class="story-content">
-                    <span class="section-badge">CHAPTER 01 // THE CONTEXT</span>
                     <h2 onclick="openArPanel('ch01')">The Stochastic Challenge</h2>
                     <p><strong>Location:</strong> Omdurman, Sudan (14.7°N, 33.2°E)</p>
                     <p>In arid regions, grid stability is constantly threatened by "Aerosol Optical Depth" (Dust Storms)
@@ -587,7 +607,6 @@
         <!-- =============================== -->
         <section class="section" style="display:flex;flex-direction:column;justify-content:center">
             <div class="reveal">
-                <span class="section-badge">CHAPTER 05 // THE PIPELINE</span>
                 <h2>The Data Odyssey <span onclick="openArPanel('dp_hero')"
                         style="font-size:0.5em; vertical-align:middle; cursor:pointer;" class="ar-mini-btn">ℹ️</span>
                 </h2>
@@ -654,7 +673,7 @@
                 <div class="stage-header">
                     <div class="stage-num"
                         style="background:rgba(239,68,68,0.15);color:var(--red);border:2px solid var(--red)">1</div>
-                    <div><span class="section-badge">STAGE 01</span>
+                    <div>
                         <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage1')">Statistical
                             Cleaning
                         </h2>
@@ -718,7 +737,7 @@
                     <div class="stage-num"
                         style="background:rgba(139,92,246,0.15);color:var(--purple);border:2px solid var(--purple)">2
                     </div>
-                    <div><span class="section-badge">STAGE 02</span>
+                    <div>
                         <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage2')">Physics-Guided
                             Night
                             Masking</h2>
@@ -799,7 +818,7 @@
                 <div class="stage-header">
                     <div class="stage-num"
                         style="background:rgba(251,146,60,0.15);color:#fb923c;border:2px solid #fb923c">3</div>
-                    <div><span class="section-badge">STAGE 03</span>
+                    <div>
                         <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_log')">Logarithmic
                             Transformation</h2>
                     </div>
@@ -883,7 +902,7 @@
                 <div class="stage-header">
                     <div class="stage-num"
                         style="background:rgba(6,182,212,0.15);color:var(--cyan);border:2px solid var(--cyan)">4</div>
-                    <div><span class="section-badge">STAGE 04</span>
+                    <div>
                         <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage3')">Hybrid
                             Normalization
                         </h2>
@@ -938,7 +957,7 @@
                 <div class="stage-header">
                     <div class="stage-num"
                         style="background:rgba(245,158,11,0.15);color:var(--gold);border:2px solid var(--gold)">5</div>
-                    <div><span class="section-badge">STAGE 05</span>
+                    <div>
                         <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage4')">Sliding Window
                             Formation
                         </h2>
@@ -989,7 +1008,7 @@
                     <div class="stage-num"
                         style="background:rgba(16,185,129,0.15);color:var(--green);border:2px solid var(--green)">6
                     </div>
-                    <div><span class="section-badge">STAGE 06</span>
+                    <div>
                         <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage5')">Chronological
                             Split
                         </h2>
