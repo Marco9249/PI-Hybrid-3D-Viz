@@ -14,7 +14,9 @@ const chapterData = {
             <p>تعمل طبقة الـ CNN كفلتر ذكي يمر فوق نافذة الـ 24 ساعة لاكتشاف "الميزات المحلية" مثل الارتفاع المفاجئ في الحرارة أو الهبوط الحاد في الضغط الجوي.</p>
             <div class="ar-info-box info">
                 <strong>المعادلة الالتفافية:</strong><br>
-                $$y(t) = (x * k)(t) = \\sum_{a=0}^{L-1} x(t-a) \\cdot k(a)$$
+                <div style="font-size:1.6rem; color:var(--cyan); text-align:center; margin:15px 0;">
+                    $$y(t) = (x * k)(t) = \\sum_{a=0}^{L-1} x(t-a) \\cdot k(a)$$
+                </div>
             </div>
             <p>حيث $x$ هو المدخل، و $k$ هو الفلتر (Kernel) الذي يتعلم الأنماط الفيزيائية تلقائياً.</p>
         `
@@ -29,8 +31,10 @@ const chapterData = {
             <p>على عكس الطبقات العادية، تحتفظ الـ LSTM بـ "حالة الخلية" (Cell State) التي تحمل المعلومات الهامة عبر الزمن وتنسى الضجيج.</p>
             <div class="ar-info-box purple">
                 <strong>آلية العمل:</strong><br>
-                $$f_t = \\sigma(W_f \\cdot [h_{t-1}, x_t] + b_f)$$
-                $$i_t = \\sigma(W_i \\cdot [h_{t-1}, x_t] + b_i)$$
+                <div style="font-size:1.5rem; color:var(--purple); text-align:center; margin:15px 0; line-height:2;">
+                    $$f_t = \\sigma(W_f \\cdot [h_{t-1}, x_t] + b_f)$$<br>
+                    $$i_t = \\sigma(W_i \\cdot [h_{t-1}, x_t] + b_i)$$
+                </div>
             </div>
             <p>النسخة الثنائية (Bi-Directional) تنظر للماضي والمستقبل (داخل النافذة) لضمان أعلى دقة لربط الأحداث.</p>
         `
@@ -2243,6 +2247,29 @@ const chapterData = {
     //  DATA PIPELINE — Detailed Explanations
     // ═══════════════════════════════════════
 
+    'dp_stage_time': {
+        tag: 'المرحلة الثانية',
+        title: 'الترميز الزمني الدوري (Cyclical Encoding)',
+        color: '#EF4444',
+        body: `
+            <strong>التوجيه الفيزيائي — استمرارية الزمن</strong>
+            <p>الزمن في الحالة الطبيعية هو نظام دائري، لكن الأجهزة الرقمية والذكاء الاصطناعي يتعاملون معه كخط مستقيم (0 إلى 23:59).</p>
+            <div class="ar-info-box warn">
+                <strong>مشكلة الانقطاع الرقمي:</strong><br>
+                بالنسبة للنموذج الرياضي، قيمة "23" وقيمة "0" هما طرفا نقيض. هذا يعني أن النموذج سيرى "قفزة" مفاجئة عند منتصف الليل، مما يشوه فهمه للعلاقة بين الساعات المتجاورة.
+            </div>
+            <div class="ar-info-box success">
+                <strong>الحل الجيبي (Trigonometric Fix):</strong><br>
+                نحول الساعة الواحدة إلى إحداثيين (Sin & Cos). هكذا تصبح الساعة 23:59 قريبة جداً من 00:00 هندسياً، تماماً كما هي في الواقع.
+            </div>
+            <div class="ar-info-box gold">
+                <strong>المعادلة المتبعة:</strong><br>
+                $$\mathbf{x}_t = \begin{bmatrix} \sin(\frac{2\pi t}{24}) \\ \cos(\frac{2\pi t}{24}) \end{bmatrix}$$
+            </div>
+            <p>هذا التحويل يسمح لشبكة CNN-BiLSTM بالتعلم عبر الأيام بشكل سلس دون القلق من "ثقب أسود" رقمي عند الساعة 12 ليلاً.</p>
+        `
+    },
+
     'dp_nasa_power': {
         tag: 'مصادر البيانات',
         title: 'قاعدة بيانات NASA POWER',
@@ -2294,7 +2321,7 @@ const chapterData = {
     },
 
     'dp_stage2': {
-        tag: 'المرحلة الثانية',
+        tag: 'المرحلة الثالثة',
         title: 'القناع الليلي (Night Masking)',
         color: '#3B82F6',
         body: `
@@ -2365,7 +2392,9 @@ const chapterData = {
             <p>الذكاء الاصطناعي لا يتنبأ بناءً على الساعة الحالية فقط، بل يحتاج "سياقاً زمنياً".</p>
             <div class="ar-info-box info">
                 <strong>أبعاد الموتّر (Tensor Shape):</strong><br>
-                <div style="font-size:1.5rem">$$X \in \mathbb{R}^{24 \times 15}$$</div>
+                <div style="font-size:1.6rem; color:var(--gold); text-align:center; margin:15px 0;">
+                    $$X \\in \\mathbb{R}^{24 \\times 15}$$
+                </div>
                 • 24: تمثل الـ 24 ساعة الماضية (دورة يومية كاملة).<br>
                 • 15: تمثل الخصائص الفيزيائية المهندسة.
             </div>
@@ -2424,14 +2453,16 @@ const chapterData = {
     },
 
     'dp_stage2': {
-        tag: 'المرحلة الثانية',
+        tag: 'المرحلة الثالثة',
         title: 'القناع الليلي (Night Masking)',
         color: '#3B82F6',
         body: `
             <strong>التوجيه الفيزيائي — التخلص من العمى الليلي</strong>
             <div class="ar-info-box success">
                 <strong>المعادلة الفيزيائية:</strong><br>
-                $$GHI_{clear\_sky} < 5 \, W/m^2 \implies \text{All Solar Stats} = 0$$
+                <div style="font-size:1.6rem; color:var(--blue); text-align:center; margin:15px 0;">
+                    $$GHI_{\\text{clear\\_sky}} < 5 \\, W/m^2 \\implies \\text{All Solar Stats} = 0$$
+                </div>
             </div>
             <p>لماذا نفعل ذلك؟ الأقمار الصناعية قد تسجل ضجيجاً طفيفاً (Noise) خلال الليل. الشبكات العصبية تحاول جاهدة "تعلم" هذا الضجيج العشوائي، مما يشتت ذكاءها.</p>
             <div class="ar-info-box gold">
@@ -2443,27 +2474,38 @@ const chapterData = {
     },
 
     'dp_stage3': {
-        tag: 'المرحلة الثالثة',
+        tag: 'المرحلة الرابعة',
         title: 'التحويل اللوغاريتمي (Logarithmic Scaling)',
-        color: '#A855F7',
+        color: '#fb923c',
         body: `
-            <strong>ترويض القيم المتطرفة ($\ln(1 + x)$)</strong>
-            <p>تتميز بيانات الإشعاع الشمسي والحرارة بنطاق واسع جداً. هذا التوزيع "الملتوي" يجعل تدريب الشبكات العصبية غير مستقر.</p>
+            <strong>ترويض القيم المتطرفة ($log_{10}(1 + x)$)</strong>
+            <p>بيانات الإشعاع الشمسي تعاني من <strong>التواء شديد نحو اليمين (Right-Skewed)</strong> — حيث تتركز أغلب القيم حول الصفر (ساعات الليل)، مع قمم متطرفة أثناء الذروة النهارية قد تصل إلى 1000+ واط/م².</p>
+            <div class="ar-info-box gold">
+                <strong>المتغيرات المحولة لوغاريتمياً (من الورقة العلمية):</strong><br>
+                ① <strong>Log-GHI</strong> — الإشعاع الأفقي الكلي<br>
+                ② <strong>Log-GHI_cs</strong> — الإشعاع النظري للسماء الصافية<br>
+                ③ <strong>Log-KT_sat</strong> — معامل الصفاء القمر الصناعي<br>
+                ④ <strong>Log-DNI</strong> — الإشعاع المباشر العمودي<br>
+                ⑤ <strong>Log-DHI</strong> — الإشعاع المنتشر<br>
+                ⑥ <strong>Log-T_amb</strong> — درجة الحرارة المحيطة<br>
+                ⑦ <strong>Log-T_wet</strong> — درجة حرارة البصيلة المبللة
+            </div>
             <div class="ar-info-box info">
                 <strong>المعادلة الرياضية:</strong><br>
-                <div style="font-size:1.5rem">$$X_{log} = \ln(1 + X_{raw})$$</div>
+                <div style="font-size:1.6rem; color:#fb923c; text-align:center; margin:15px 0;">
+                    $$X_{\\text{log}} = \\log_{10}(1 + X_{\\text{raw}})$$
+                </div>
             </div>
-            <div class="ar-info-box success">
-                <strong>لماذا الـ Log؟</strong><br>
-                • <strong>التحويل الغاوسي:</strong> يحول توزيع البيانات ليقترب من التوزيع الطبيعي.<br>
-                • <strong>تقليص الفوارق:</strong> بدلاً من التعامل مع فوارق بآلاف الواطات، يتعامل النموذج مع فوارق لوغاريتمية صغيرة.<br>
-                • <strong>تحسين الحساسية:</strong> يزيد من حساسية النموذج للتغيرات في القيم المنخفضة (مثل الفجر أو الأيام الغائمة).
+            <div class="ar-info-box warn">
+                <strong>لماذا log(1+x) وليس log(x)؟</strong><br>
+                لأن $log(0) = -\infty$ وهذا غير معرّف رياضياً! إضافة الواحد تضمن أن:<br>
+                • $log(1 + 0) = 0$ — يحافظ على "القناع الليلي" حيث تظل قيم الليل صفرية حتى بعد التحويل.
             </div>
         `
     },
 
     'dp_stage4': {
-        tag: 'المرحلة الرابعة',
+        tag: 'المرحلة الخامسة',
         title: 'التطبيع الهجين (Hybrid Normalization)',
         color: '#A855F7',
         body: `
@@ -2471,45 +2513,47 @@ const chapterData = {
                 <span style="font-size: 0.9rem; color: rgba(255,255,255,0.6); letter-spacing: 1px;">STRATEGY: DUAL-MANIFOLD SCALING</span>
             </div>
             <div class="ar-info-box" style="border-left-color: var(--cyan); background: rgba(6,182,212,0.05)">
-                <strong style="color: var(--cyan)">١. تقييس المدخلات (Standardization):</strong>
-                <div style="margin: 15px 0; font-size: 1.4rem; color: #fff">
-                    $$z = \frac{x - \mu}{\sigma}$$
-                </div>
-                تستخدم لجميع الخصائص الفيزيائية الـ 15 لجعل التوزيع بمتوسط 0 وانحراف 1.
+                <strong style="color: var(--cyan)">١. تقييس المدخلات (Z-Score Standardization):</strong>
+                <p>تستخدم لجميع الخصائص الفيزيائية الـ 15. تهدف إلى تحويل توزيع البيانات ليصبح بمتوسط ($\mu = 0$) وانحراف معياري ($\sigma = 1$).</p>
+                <strong>الفائدة:</strong> منع تلاشي التدرج (Gradient Vanishing) في طبقات الـ CNN وضمان أن جميع الميزات (مثل درجة الحرارة والضغط) لها نفس الوزن الرياضي.
             </div>
             <div class="ar-info-box" style="border-left-color: var(--gold); background: rgba(245,158,11,0.05)">
-                <strong style="color: var(--gold)">٢. تحجيم المخرجات (Normalization):</strong>
-                <div style="margin: 15px 0; font-size: 1.4rem; color: #fff">
-                    $$\hat{y} = \frac{y - y_{min}}{y_{max} - y_{min}}$$
-                </div>
-                تستخدم لهدف التنبؤ (GHI) لحصره في النطاق $[0, 1]$ لتسريع تقارب دالة الخسارة.
+                <strong style="color: var(--gold)">٢. تحجيم المخرجات (Min-Max Normalization):</strong>
+                <p>تستخدم حصرياً لمتغير التنبؤ (GHI). تقوم بحصر القيم في النطاق الصارم $[0, 1]$.</p>
+                <strong>الفائدة:</strong> التوافق مع دالة التنشيط النهائية ومنع التنبؤ بقيم فيزيائية مستحيلة (أقل من الصفر) وتحسين استقرار دالة الخسارة (MSE).
             </div>
             <div class="ar-info-box warn">
-                <strong>🛡️ حماية البيانات:</strong><br>
-                يتم حساب $\mu$ و $\sigma$ من <strong>بيانات التدريب فقط</strong> لتجنب تسريب المعلومات.
+                <strong>🛡️ منع تسريب البيانات (Leakage Prevention):</strong><br>
+                يتم حساب المعاملات ($\mu, \sigma, min, max$) من <strong>مجموعة التدريب فقط</strong>، ثم تطبيقها على بيانات التحقق والاختبار. أي استخدام لبيانات الاختبار في هذه المرحلة يعتبر "غشاً إحصائياً".
             </div>
         `
     },
 
     'dp_stage5': {
-        tag: 'المرحلة الخامسة',
-        title: 'النافذة المنزلقة (Sliding Window)',
+        tag: 'المرحلة السادسة',
+        title: 'النافذة المنزلقة (Sliding Window Formation)',
         color: '#F59E0B',
         body: `
-            <strong>تكوين الذاكرة (Sequence Formation)</strong>
-            <p>الذكاء الاصطناعي لا يتنبأ بناءً على الساعة الحالية فقط، بل يحتاج "سياقاً زمنياً".</p>
+            <strong>هيكلة الموتّرات (Tensor Construction)</strong>
+            <p>الشبكة العصبية الهجينة لا تنظر إلى لحظة زمنية منفردة، بل تحلل "سياق" الأحداث الماضية للتنبؤ بالمستقبل.</p>
             <div class="ar-info-box info">
-                <strong>أبعاد الموتّر (Tensor Shape):</strong><br>
-                <div style="font-size:1.5rem">$$X \in \mathbb{R}^{24 \times 15}$$</div>
-                • 24: تمثل الـ 24 ساعة الماضية (دورة يومية كاملة).<br>
-                • 15: تمثل الخصائص الفيزيائية المهندسة.
+                <strong>أبعاد الموتّر (Input Tensor Shape):</strong><br>
+                <div style="font-size:1.6rem; color:var(--gold); text-align:center; margin: 15px 0;">
+                    $$X \\in \\mathbb{R}^{B \\times 24 \\times 15}$$
+                </div>
+                • <strong>24 (Lookback):</strong> تمثل الـ 24 ساعة الماضية كنافذة زمنية.<br>
+                • <strong>15 (Features):</strong> تمثل عدد المتغيرات الفيزيائية في كل ساعة.
             </div>
-            <p>تنزلق هذه النافذة ساعة بساعة عبر السنوات العشرين، منتجة آلاف العينات التدريبية.</p>
+            <div class="ar-info-box success">
+                <strong>استراتيجية التنبؤ (Many-to-One):</strong><br>
+                يتم إدخال نافذة من 24 سجل زمني للتنبؤ بقيمة <strong>واحدة</strong> فقط وهي شدة الإشعاع للساعة القادمة ($t+1$).
+            </div>
+            <p>تتحرك النافذة خطوة بخطوة (Step=1) عبر الزمن، مما يسمح للنموذج بالتقاط العلاقات الديناميكية بين حركة الغيوم وتغير درجات الحرارة عبر دورة يومية كاملة.</p>
         `
     },
 
     'dp_stage6': {
-        tag: 'المرحلة السادسة',
+        tag: 'المرحلة السابعة',
         title: 'التقسيم الزمني الصارم (Chronological Split)',
         color: '#10B981',
         body: `
@@ -2530,9 +2574,9 @@ const chapterData = {
         title: 'Z-Score Normalization',
         color: '#06B6D4',
         body: `
-            <div style="text-align:center; padding: 25px; background: rgba(6,182,212,0.05); border-radius: 12px; border: 1px solid rgba(6,182,212,0.1); margin-bottom: 20px;">
-                <div style="font-size:2.2rem; color:#fff; text-shadow: 0 0 15px rgba(6,182,212,0.4)">
-                    $$z = \frac{x - \mu}{\sigma}$$
+            <div style="text-align:center; margin-bottom: 20px;">
+                <div style="font-size:2rem; color:var(--cyan);">
+                    $$z = \\frac{x - \\mu}{\\sigma}$$
                 </div>
             </div>
             <div class="ar-info-box info">
@@ -2551,8 +2595,10 @@ const chapterData = {
         title: 'Min-Max Scaling',
         color: '#F59E0B',
         body: `
-            <div style="text-align:center; padding: 10px;">
-                <div style="font-size:1.8rem; color:var(--gold)">$$x_{norm} = \frac{x - x_{min}}{x_{max} - x_{min}}$$</div>
+            <div style="text-align:center; margin: 15px 0;">
+                <div style="font-size:2rem; color:var(--gold)">
+                    $$x_{\\text{norm}} = \\frac{x - x_{\\text{min}}}{x_{\\text{max}} - x_{\\text{min}}}$$
+                </div>
             </div>
             <p>يستخدم هذا القانون لحصر البيانات في نطاق ثابت ومحدد، عادة ما يكون بين [0] و [1].</p>
             <div class="ar-info-box success">

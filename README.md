@@ -14,7 +14,7 @@
 
 <br>
 
-<a href="https://www.techrxiv.org//1376729">
+<a href="https://doi.org/10.36227/techrxiv.176827103.31624241/v1">
   <img src="https://img.shields.io/badge/SCIENTIFIC_PAPER-READ_ON_TECHRXIV-0056D2?style=for-the-badge&logo=googlescholar&logoColor=white" height="40">
 </a>
 &nbsp; &nbsp;

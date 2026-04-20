@@ -128,3 +128,8 @@ desktop.ini
 .agent/
 
 !flutter/flutter_application_1/
+
+# Scripts and Python tools
+*.py
+*.bat
+*.ps1

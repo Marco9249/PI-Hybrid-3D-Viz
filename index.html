@@ -5,23 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- GSAP & Plugins -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="assets/lib/gsap.min.js"></script>
+    <script src="assets/lib/ScrollTrigger.min.js"></script>
     <script src="install_pwa.js" defer></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#06B6D4">
     <link rel="apple-touch-icon" href="assets/app_icon.png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="assets/lib/three.min.js"></script>
     <!-- KaTeX for Professional Equations -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
-        onload="renderMathInElement(document.body);"></script>
+    <link rel="stylesheet" href="assets/lib/katex.min.css">
+    <script defer src="assets/lib/katex.min.js"></script>
+    <script defer src="assets/lib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
     <script type="module" src="vendor/js/spline-viewer.js"></script>
 
-
     <!-- React & Tailwind Setup for Interactive Mode -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/lib/tailwind.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -128,12 +126,16 @@
             margin-bottom: 20px;
             letter-spacing: 0.3px;
         }
-        strong, b {
+
+        strong,
+        b {
             color: rgba(255, 255, 255, 0.95);
             font-weight: 600;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
-        em, i {
+
+        em,
+        i {
             color: var(--cyan);
             font-style: italic;
         }
@@ -1105,6 +1107,10 @@
     <nav id="nav">
         <div class="logo">PI-HYBRID</div>
         <div class="cta-group" style="gap: 12px; z-index: 100000; pointer-events: auto !important;">
+            <a href="https://doi.org/10.36227/techrxiv.176827103.31624241/v1" target="_blank" class="btn-ghost"
+                style="padding: 8px 16px; font-size: 10px; border-color: rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.05); color: var(--gold);">
+                <span style="font-size:12px;">📄</span> PAPER
+            </a>
             <a href="presentation-intro.html" class="btn-ghost"
                 style="padding: 8px 16px; font-size: 10px; border-color: rgba(6, 182, 212, 0.4); background: rgba(6, 182, 212, 0.05);">
                 <span style="font-size:12px;">📘</span> PROLOGUE
@@ -1466,7 +1472,8 @@
     <section class="story-section">
         <div class="story-grid">
             <div class="story-content reveal">
-                <h2 onclick="openArPanel('train_proto')" class="interactive-title" style="z-index: 500;">Training Protocol ℹ️</h2>
+                <h2 onclick="openArPanel('train_proto')" class="interactive-title" style="z-index: 500;">Training
+                    Protocol ℹ️</h2>
                 <p>A rigorous <strong>two-stage training strategy</strong> was adopted. During Bayesian search,
                     candidates trained for <strong>50 epochs</strong>. The final model retrained for <strong>100
                         epochs</strong>.</p>
@@ -1529,103 +1536,90 @@
                 results with a lightweight, optimized architecture of only <strong>492K</strong> parameters.</p>
         </div>
 
-        <div class="glass-card reveal" style="padding: 45px 30px; margin: 0 auto; max-width: 1100px; position:relative; overflow: hidden;">
+        <div class="glass-card reveal"
+            style="padding: 45px 30px; margin: 0 auto; max-width: 1100px; position:relative; overflow: hidden;">
             <!-- Subtle animated background glow -->
-            <div style="position:absolute; top:50%; left:50%; width:80%; height:80%; background:radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 60%); transform:translate(-50%, -50%); pointer-events:none; z-index:0;"></div>
-            
-            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: stretch; gap: 20px; position: relative; z-index: 1; margin-bottom: 35px;">
+            <div
+                style="position:absolute; top:50%; left:50%; width:80%; height:80%; background:radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 60%); transform:translate(-50%, -50%); pointer-events:none; z-index:0;">
+            </div>
+
+            <div
+                style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: stretch; gap: 20px; position: relative; z-index: 1; margin-bottom: 35px;">
                 <!-- Step 1 -->
-                <div style="flex: 1; min-width: 200px; text-align:center; border-right: 1px solid rgba(255,255,255,0.05); padding-right: 15px;">
-                    <div style="font-family:'Courier New'; color:var(--cyan); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">01. INPUT DATA</div>
+                <div
+                    style="flex: 1; min-width: 200px; text-align:center; border-right: 1px solid rgba(255,255,255,0.05); padding-right: 15px;">
+                    <div
+                        style="font-family:'Courier New'; color:var(--cyan); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">
+                        01. INPUT DATA</div>
                     <h4 style="font-size:2.2rem; font-weight:900; margin-bottom:10px; color:#fff;">24h × 15</h4>
-                    <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">Physics Vector +<br>Cyclic Time Encoding</p>
+                    <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">Physics Vector +<br>Cyclic
+                        Time Encoding</p>
                 </div>
                 <!-- Step 2 -->
-                <div style="flex: 1; min-width: 200px; text-align:center; border-right: 1px solid rgba(255,255,255,0.05); padding: 0 15px;">
-                    <div style="font-family:'Courier New'; color:var(--purple); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">02. SPATIAL CORE</div>
+                <div
+                    style="flex: 1; min-width: 200px; text-align:center; border-right: 1px solid rgba(255,255,255,0.05); padding: 0 15px;">
+                    <div
+                        style="font-family:'Courier New'; color:var(--purple); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">
+                        02. SPATIAL CORE</div>
                     <h4 style="font-size:2.2rem; font-weight:900; margin-bottom:10px; color:#fff;">64 Filters</h4>
-                    <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">1D-CNN Extractor<br>(Kernel: 3, Same)</p>
+                    <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">1D-CNN
+                        Extractor<br>(Kernel: 3, Same)</p>
                 </div>
                 <!-- Step 3 -->
-                <div style="flex: 1; min-width: 200px; text-align:center; border-right: 1px solid rgba(255,255,255,0.05); padding: 0 15px;">
-                    <div style="font-family:'Courier New'; color:var(--gold); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">03. TEMPORAL CORE</div>
+                <div
+                    style="flex: 1; min-width: 200px; text-align:center; border-right: 1px solid rgba(255,255,255,0.05); padding: 0 15px;">
+                    <div
+                        style="font-family:'Courier New'; color:var(--gold); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">
+                        03. TEMPORAL CORE</div>
                     <h4 style="font-size:2.2rem; font-weight:900; margin-bottom:10px; color:#fff;">210 Units</h4>
-                    <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">Bi-Directional LSTM<br>Forward/Backward causality</p>
+                    <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">Bi-Directional
+                        LSTM<br>Forward/Backward causality</p>
                 </div>
                 <!-- Step 4 -->
                 <div style="flex: 1; min-width: 200px; text-align:center; padding-left: 15px; position:relative;">
-                    <div style="font-family:'Courier New'; color:var(--green); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">04. OPTIMIZATION</div>
+                    <div
+                        style="font-family:'Courier New'; color:var(--green); font-size:11px; margin-bottom:15px; letter-spacing: 2px;">
+                        04. OPTIMIZATION</div>
                     <h4 style="font-size:2.2rem; font-weight:900; margin-bottom:10px; color:#fff;">Bayesian</h4>
-                    <a href="bayesian_optimization.html" style="display:inline-block; padding:8px 22px; background:rgba(16, 185, 129, 0.1); border:1px solid var(--green); color:var(--green); text-decoration:none; border-radius:30px; font-size:11px; font-weight:bold; letter-spacing:1px; transition:all 0.3s; margin-top:5px;" onmouseover="this.style.background='var(--green)'; this.style.color='#000'; this.style.boxShadow='0 0 15px rgba(16,185,129,0.4)';" onmouseout="this.style.background='rgba(16, 185, 129, 0.1)'; this.style.color='var(--green)'; this.style.boxShadow='none';">LAUNCH BRAIN ↗</a>
+                    <a href="bayesian_optimization.html"
+                        style="display:inline-block; padding:8px 22px; background:rgba(16, 185, 129, 0.1); border:1px solid var(--green); color:var(--green); text-decoration:none; border-radius:30px; font-size:11px; font-weight:bold; letter-spacing:1px; transition:all 0.3s; margin-top:5px;"
+                        onmouseover="this.style.background='var(--green)'; this.style.color='#000'; this.style.boxShadow='0 0 15px rgba(16,185,129,0.4)';"
+                        onmouseout="this.style.background='rgba(16, 185, 129, 0.1)'; this.style.color='var(--green)'; this.style.boxShadow='none';">LAUNCH
+                        BRAIN ↗</a>
                 </div>
             </div>
 
             <!-- Total Params Badge -->
             <div style="text-align:center; position: relative; z-index: 1;">
-                <div style="display:inline-flex; align-items:center; padding:12px 30px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:50px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
-                    <span style="font-family:'Outfit'; color:rgba(255,255,255,0.6); margin-right:15px; font-size:11px; letter-spacing:1px;">TOTAL PARAMETERS</span>
-                    <span style="font-family:'Courier New'; font-weight:bold; font-size:1.6rem; color:#fff; text-shadow: 0 0 10px rgba(255,255,255,0.2);">492,200</span>
-                    <span style="color:var(--green); margin-left:15px; font-size:10px; padding:4px 12px; background:rgba(16,185,129,0.1); border-radius:20px; font-weight:bold; letter-spacing:1px;">LIGHTWEIGHT</span>
+                <div
+                    style="display:inline-flex; align-items:center; padding:12px 30px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:50px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
+                    <span
+                        style="font-family:'Outfit'; color:rgba(255,255,255,0.6); margin-right:15px; font-size:11px; letter-spacing:1px;">TOTAL
+                        PARAMETERS</span>
+                    <span
+                        style="font-family:'Courier New'; font-weight:bold; font-size:1.6rem; color:#fff; text-shadow: 0 0 10px rgba(255,255,255,0.2);">492,200</span>
+                    <span
+                        style="color:var(--green); margin-left:15px; font-size:10px; padding:4px 12px; background:rgba(16,185,129,0.1); border-radius:20px; font-weight:bold; letter-spacing:1px;">LIGHTWEIGHT</span>
                 </div>
             </div>
-            
+
             <style>
-            @media(max-width: 800px) {
-                #chapter5 .glass-card > div > div {
-                    border-right: none !important;
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
-                    padding: 20px 0 !important;
+                @media(max-width: 800px) {
+                    #chapter5 .glass-card>div>div {
+                        border-right: none !important;
+                        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                        padding: 20px 0 !important;
+                    }
+
+                    #chapter5 .glass-card>div>div:last-child {
+                        border-bottom: none;
+                    }
                 }
-                #chapter5 .glass-card > div > div:last-child {
-                    border-bottom: none;
-                }
-            }
             </style>
         </div>
     </section>
 
-    <!-- Chapter 06: Bayesian Intelligence -->
-    <section id="chapter6" class="story-section">
-        <div class="story-grid">
-            <div class="story-content reveal">
-                <div style="color:var(--cyan); font-family:'Courier New'; font-size:12px; margin-bottom:10px;">CHAPTER
-                    06</div>
-                <h3>The Optimizer</h3>
-                <h2 onclick="openArPanel('ch06')">Bayesian Intelligence</h2>
-                <p>Manual hyperparameter tuning is computationally irresponsible. We employed <strong>Bayesian
-                        Optimization</strong> with the <em>Expected Improvement Plus (EI+)</em> acquisition function.
-                </p>
-                <p>The algorithm iteratively updates a probabilistic surrogate model, balancing
-                    <strong>exploration</strong> (uncertain regions) and <strong>exploitation</strong> (promising
-                    regions) across 30 iterations.
-                </p>
-                <div
-                    style="margin-top:20px; padding:15px 20px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:15px;">
-                    <div style="font-size:10px; color:var(--green); letter-spacing:2px; margin-bottom:5px;">🔑 KEY
-                        INSIGHT</div>
-                    <p style="font-size:13px; color:rgba(255,255,255,0.8); margin:0;">Converged to <strong>high
-                            capacity</strong> (210 units) + <strong>low regularization</strong> (10.4% dropout). Physics
-                        features provide such a clean signal that aggressive regularization is unnecessary.</p>
-                </div>
-            </div>
-            <div class="highlight-card reveal"
-                style="border-color:var(--green); cursor:pointer; text-align:center; padding:50px 30px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:all 0.3s;"
-                onclick="window.location.href='bayesian_optimization.html'"
-                onmouseover="this.style.background='rgba(16,185,129,0.1)'; this.style.transform='scale(1.02)'"
-                onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.transform='scale(1)'">
-                <div style="font-size:50px; margin-bottom:20px; filter:drop-shadow(0 0 15px var(--green));">🧠</div>
-                <h3
-                    style="color:var(--green); margin-bottom:10px; font-family:'Outfit', sans-serif; letter-spacing:2px;">
-                    BAYESIAN ENGINE</h3>
-                <p style="font-size:13px; color:rgba(255,255,255,0.6); max-width:80%; line-height:1.6;">Enter the
-                    optimization lab to watch the Gaussian Process converge on the perfect architecture in real-time.
-                </p>
-                <div
-                    style="margin-top:20px; font-size:11px; color:var(--green); letter-spacing:2px; border:1px solid var(--green); padding:8px 20px; border-radius:30px;">
-                    LAUNCH ENGINE ↗</div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- 3. The Paradox (Results) -->
     <section id="chapter7" class="story-section">
@@ -2060,203 +2054,219 @@
         <div class="story-grid">
             <div class="story-content reveal">
                 <h2 onclick="openArPanel('ch_proof')" class="interactive-title">5-Year Robustness ℹ️</h2>
-            <p>To ensure operational validity in a changing climate, a <strong>long-term Stress Test</strong> was
-                conducted on an independent dataset spanning <strong>2020–2024</strong>.</p>
-            <div style="font-size:11px; color:var(--cyan); margin-bottom:15px; cursor:pointer;"
-                onclick="openArPanel('ch_proof')">CLICK FOR DETAILS ↗</div>
-            <p>The R² remained consistently above <strong style="color:var(--green);">0.995</strong> throughout the
-                entire five-year horizon — proving the model learned <em>true physical laws</em>, not temporary
-                weather patterns.</p>
-            <div style="display:flex; gap:15px; margin-top:25px; flex-wrap:wrap;">
-                <span class="feature-tag" style="border-color:var(--green); color:var(--green);">R² > 0.995</span>
-                <span class="feature-tag">5 Independent Years</span>
-                <span class="feature-tag">NASA POWER Data</span>
-            </div>
-        </div>
-        <div class="highlight-card reveal" style="border-color:var(--gold);">
-            <div style="font-family:'Courier New'; color:var(--gold); font-size:11px; margin-bottom:20px;">ANNUAL
-                METRICS (TABLE VIII)</div>
-            <div style="margin-bottom:15px;">
-                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-                    <span style="color:rgba(255,255,255,0.7);">2020</span>
-                    <span style="font-family:'Courier New';">RMSE: <span style="color:var(--gold);">25.01</span> ·
-                        R²: <span style="color:var(--green);">0.9950</span></span>
-                </div>
-                <div class="comparison-bar" style="height:12px; margin-bottom:0;">
-                    <div class="bar-fill" data-width="45%"
-                        style="width:0%; background:linear-gradient(90deg, var(--gold), var(--green));"></div>
+                <p>To ensure operational validity in a changing climate, a <strong>long-term Stress Test</strong> was
+                    conducted on an independent dataset spanning <strong>2020–2024</strong>.</p>
+                <div style="font-size:11px; color:var(--cyan); margin-bottom:15px; cursor:pointer;"
+                    onclick="openArPanel('ch_proof')">CLICK FOR DETAILS ↗</div>
+                <p>The R² remained consistently above <strong style="color:var(--green);">0.995</strong> throughout the
+                    entire five-year horizon — proving the model learned <em>true physical laws</em>, not temporary
+                    weather patterns.</p>
+                <div style="display:flex; gap:15px; margin-top:25px; flex-wrap:wrap;">
+                    <span class="feature-tag" style="border-color:var(--green); color:var(--green);">R² > 0.995</span>
+                    <span class="feature-tag">5 Independent Years</span>
+                    <span class="feature-tag">NASA POWER Data</span>
                 </div>
             </div>
-            <div style="margin-bottom:15px;">
-                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-                    <span style="color:rgba(255,255,255,0.7);">2021</span>
-                    <span style="font-family:'Courier New';">RMSE: <span style="color:var(--gold);">22.31</span> ·
-                        R²: <span style="color:var(--green);">0.9960</span></span>
+            <div class="highlight-card reveal" style="border-color:var(--gold);">
+                <div style="font-family:'Courier New'; color:var(--gold); font-size:11px; margin-bottom:20px;">ANNUAL
+                    METRICS (TABLE VIII)</div>
+                <div style="margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                        <span style="color:rgba(255,255,255,0.7);">2020</span>
+                        <span style="font-family:'Courier New';">RMSE: <span style="color:var(--gold);">25.01</span> ·
+                            R²: <span style="color:var(--green);">0.9950</span></span>
+                    </div>
+                    <div class="comparison-bar" style="height:12px; margin-bottom:0;">
+                        <div class="bar-fill" data-width="45%"
+                            style="width:0%; background:linear-gradient(90deg, var(--gold), var(--green));"></div>
+                    </div>
                 </div>
-                <div class="comparison-bar" style="height:12px; margin-bottom:0;">
-                    <div class="bar-fill" data-width="55%"
-                        style="width:0%; background:linear-gradient(90deg, var(--gold), var(--green));"></div>
+                <div style="margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                        <span style="color:rgba(255,255,255,0.7);">2021</span>
+                        <span style="font-family:'Courier New';">RMSE: <span style="color:var(--gold);">22.31</span> ·
+                            R²: <span style="color:var(--green);">0.9960</span></span>
+                    </div>
+                    <div class="comparison-bar" style="height:12px; margin-bottom:0;">
+                        <div class="bar-fill" data-width="55%"
+                            style="width:0%; background:linear-gradient(90deg, var(--gold), var(--green));"></div>
+                    </div>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                        <span style="color:rgba(255,255,255,0.7);">2022</span>
+                        <span style="font-family:'Courier New';">RMSE: <span style="color:var(--cyan);">19.69</span> ·
+                            R²: <span style="color:var(--green);">0.9968</span></span>
+                    </div>
+                    <div class="comparison-bar" style="height:12px; margin-bottom:0;">
+                        <div class="bar-fill" data-width="75%"
+                            style="width:0%; background:linear-gradient(90deg, var(--cyan), var(--green));"></div>
+                    </div>
+                </div>
+                <div
+                    style="margin-bottom:15px; background:rgba(6,182,212,0.05); border-radius:10px; padding:10px; border:1px solid rgba(6,182,212,0.2);">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                        <span style="color:#fff; font-weight:bold;">2023 ★ PEAK</span>
+                        <span style="font-family:'Courier New';">RMSE: <span
+                                style="color:var(--cyan); font-weight:bold;">19.53</span> · R²: <span
+                                style="color:var(--green); font-weight:bold;">0.9969</span></span>
+                    </div>
+                    <div class="comparison-bar" style="height:12px; margin-bottom:0;">
+                        <div class="bar-fill" data-width="85%"
+                            style="width:0%; background:linear-gradient(90deg, var(--cyan), var(--green));"></div>
+                    </div>
+                </div>
+                <div>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                        <span style="color:rgba(255,255,255,0.7);">2024</span>
+                        <span style="font-family:'Courier New';">RMSE: <span style="color:var(--gold);">22.01</span> ·
+                            R²: <span style="color:var(--green);">0.9960</span></span>
+                    </div>
+                    <div class="comparison-bar" style="height:12px; margin-bottom:0;">
+                        <div class="bar-fill" data-width="60%"
+                            style="width:0%; background:linear-gradient(90deg, var(--gold), var(--green));"></div>
+                    </div>
                 </div>
             </div>
-            <div style="margin-bottom:15px;">
-                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-                    <span style="color:rgba(255,255,255,0.7);">2022</span>
-                    <span style="font-family:'Courier New';">RMSE: <span style="color:var(--cyan);">19.69</span> ·
-                        R²: <span style="color:var(--green);">0.9968</span></span>
-                </div>
-                <div class="comparison-bar" style="height:12px; margin-bottom:0;">
-                    <div class="bar-fill" data-width="75%"
-                        style="width:0%; background:linear-gradient(90deg, var(--cyan), var(--green));"></div>
-                </div>
-            </div>
-            <div
-                style="margin-bottom:15px; background:rgba(6,182,212,0.05); border-radius:10px; padding:10px; border:1px solid rgba(6,182,212,0.2);">
-                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-                    <span style="color:#fff; font-weight:bold;">2023 ★ PEAK</span>
-                    <span style="font-family:'Courier New';">RMSE: <span
-                            style="color:var(--cyan); font-weight:bold;">19.53</span> · R²: <span
-                            style="color:var(--green); font-weight:bold;">0.9969</span></span>
-                </div>
-                <div class="comparison-bar" style="height:12px; margin-bottom:0;">
-                    <div class="bar-fill" data-width="85%"
-                        style="width:0%; background:linear-gradient(90deg, var(--cyan), var(--green));"></div>
-                </div>
-            </div>
-            <div>
-                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-                    <span style="color:rgba(255,255,255,0.7);">2024</span>
-                    <span style="font-family:'Courier New';">RMSE: <span style="color:var(--gold);">22.01</span> ·
-                        R²: <span style="color:var(--green);">0.9960</span></span>
-                </div>
-                <div class="comparison-bar" style="height:12px; margin-bottom:0;">
-                    <div class="bar-fill" data-width="60%"
-                        style="width:0%; background:linear-gradient(90deg, var(--gold), var(--green));"></div>
-                </div>
-            </div>
-        </div>
     </section>
 
 
 
     <section class="map-section" id="explore" style="padding-top: 100px;">
         <div class="section-header reveal" style="text-align: center; margin-bottom: 80px;">
-            <div style="color:var(--purple); font-family:'Courier New'; font-size:12px; margin-bottom:15px; letter-spacing: 4px; display:inline-block; border:1px solid rgba(139,92,246,0.3); padding:5px 15px; border-radius:30px; background:rgba(139,92,246,0.1);">THE 11 LAYERS</div>
-            <h2 style="font-family: 'Outfit'; font-size: 4.5rem; font-weight: 900; margin-bottom: 20px; background: linear-gradient(90deg, #fff, var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 10px 30px rgba(139,92,246,0.4)); line-height:1.1;">Architecture Exploration</h2>
-            <p style="color: rgba(255,255,255,0.6); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Click on any computational graph module to enter the high-detail deep learning simulation environment.</p>
+            <div
+                style="color:var(--purple); font-family:'Courier New'; font-size:12px; margin-bottom:15px; letter-spacing: 4px; display:inline-block; border:1px solid rgba(139,92,246,0.3); padding:5px 15px; border-radius:30px; background:rgba(139,92,246,0.1);">
+                THE 11 LAYERS</div>
+            <h2
+                style="font-family: 'Outfit'; font-size: 4.5rem; font-weight: 900; margin-bottom: 20px; background: linear-gradient(90deg, #fff, var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 10px 30px rgba(139,92,246,0.4)); line-height:1.1;">
+                Architecture Exploration</h2>
+            <p style="color: rgba(255,255,255,0.6); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Click on any
+                computational graph module to enter the high-detail deep learning simulation environment.</p>
         </div>
 
         <div class="grid">
-        <style>
-        .layer-compact-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 40px 60px;
-        }
-        .compact-card {
-            background: rgba(10, 10, 25, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 25px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: inset 0 0 10px rgba(255,255,255,0.02);
-            text-decoration: none;
-        }
-        .compact-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(6, 182, 212, 0.4);
-            background: rgba(15, 15, 35, 0.8);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 15px rgba(6, 182, 212, 0.1);
-        }
-        .compact-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-        .compact-icon {
-            font-size: 28px;
-            background: rgba(255, 255, 255, 0.03);
-            width: 55px;
-            height: 55px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: inset 0 0 10px rgba(255,255,255,0.02);
-        }
-        .compact-ar-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.05);
-            color: rgba(255,255,255,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            transition: all 0.3s;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .compact-ar-btn:hover {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--gold);
-            border-color: rgba(245, 158, 11, 0.4);
-            transform: scale(1.1);
-        }
-        .compact-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 19px;
-            color: #fff;
-            margin-bottom: 10px;
-            line-height: 1.3;
-        }
-        .compact-desc {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 13px;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            flex: 1;
-        }
-        .compact-badge {
-            font-size: 10px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            padding: 4px 12px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.03);
-            align-self: flex-start;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .compact-enter {
-            margin-top: auto;
-            font-family: 'Courier New';
-            font-size: 11px;
-            letter-spacing: 2px;
-            color: var(--cyan);
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
-        .compact-card:hover .compact-enter {
-            color: #fff;
-        }
-        </style>
-        
-        <!-- Replaced with layer-compact-grid -->
+            <style>
+                .layer-compact-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                    gap: 20px;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 0 40px 60px;
+                }
+
+                .compact-card {
+                    background: rgba(10, 10, 25, 0.4);
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                    border-radius: 20px;
+                    padding: 25px;
+                    cursor: pointer;
+                    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+                    backdrop-filter: blur(25px);
+                    -webkit-backdrop-filter: blur(25px);
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
+                    text-decoration: none;
+                }
+
+                .compact-card:hover {
+                    transform: translateY(-10px);
+                    border-color: rgba(6, 182, 212, 0.4);
+                    background: rgba(15, 15, 35, 0.8);
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(6, 182, 212, 0.1);
+                }
+
+                .compact-card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 20px;
+                }
+
+                .compact-icon {
+                    font-size: 28px;
+                    background: rgba(255, 255, 255, 0.03);
+                    width: 55px;
+                    height: 55px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 14px;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
+                }
+
+                .compact-ar-btn {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.05);
+                    color: rgba(255, 255, 255, 0.6);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 15px;
+                    transition: all 0.3s;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                }
+
+                .compact-ar-btn:hover {
+                    background: rgba(245, 158, 11, 0.1);
+                    color: var(--gold);
+                    border-color: rgba(245, 158, 11, 0.4);
+                    transform: scale(1.1);
+                }
+
+                .compact-title {
+                    font-family: 'Outfit', sans-serif;
+                    font-size: 19px;
+                    color: #fff;
+                    margin-bottom: 10px;
+                    line-height: 1.3;
+                }
+
+                .compact-desc {
+                    color: rgba(255, 255, 255, 0.5);
+                    font-size: 13px;
+                    line-height: 1.6;
+                    margin-bottom: 25px;
+                    flex: 1;
+                }
+
+                .compact-badge {
+                    font-size: 10px;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    background: rgba(255, 255, 255, 0.03);
+                    align-self: flex-start;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }
+
+                .compact-enter {
+                    margin-top: auto;
+                    font-family: 'Courier New';
+                    font-size: 11px;
+                    letter-spacing: 2px;
+                    color: var(--cyan);
+                    border-top: 1px solid rgba(255, 255, 255, 0.05);
+                    padding-top: 15px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    transition: all 0.3s;
+                }
+
+                .compact-card:hover .compact-enter {
+                    color: #fff;
+                }
+            </style>
+
+            <!-- Replaced with layer-compact-grid -->
         </div>
         <div class="layer-compact-grid">
 
@@ -2264,12 +2274,15 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:var(--cyan); border-color:var(--cyan)40;">📊</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">00</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer0')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">00</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer0')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">Sequence Input</div>
-                <div class="compact-desc">24-hour historical window of 15 physics-informed solar features. The bedrock of our prediction.</div>
+                <div class="compact-desc">24-hour historical window of 15 physics-informed solar features. The bedrock
+                    of our prediction.</div>
                 <div class="compact-badge" style="color:var(--cyan); border-color:var(--cyan)60;">Input Node</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
@@ -2281,12 +2294,15 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:var(--purple); border-color:var(--purple)40;">🔍</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">01</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer1')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">01</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer1')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">1D-Convolution</div>
-                <div class="compact-desc">Advanced CNN-1D filters extracting local temporal gradients from complex atmospheric noise.</div>
+                <div class="compact-desc">Advanced CNN-1D filters extracting local temporal gradients from complex
+                    atmospheric noise.</div>
                 <div class="compact-badge" style="color:var(--purple); border-color:var(--purple)60;">Spatial-Temp</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
@@ -2298,12 +2314,15 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:var(--gold); border-color:var(--gold)40;">🌀</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">02</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer2')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">02</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer2')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">Batch Normalization</div>
-                <div class="compact-desc">Feature standardization ensuring stable gradient flow across the entire network depth.</div>
+                <div class="compact-desc">Feature standardization ensuring stable gradient flow across the entire
+                    network depth.</div>
                 <div class="compact-badge" style="color:var(--gold); border-color:var(--gold)60;">Stabilization</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
@@ -2315,12 +2334,15 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:#E040FB; border-color:#E040FB40;">⚡</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">03</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer3')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">03</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer3')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">ReLU Activation</div>
-                <div class="compact-desc">Non-linear ReLU rectification to spark neural connectivity and discard negative noise.</div>
+                <div class="compact-desc">Non-linear ReLU rectification to spark neural connectivity and discard
+                    negative noise.</div>
                 <div class="compact-badge" style="color:#E040FB; border-color:#E040FB60;">Processing</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
@@ -2332,12 +2354,15 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:#EF4444; border-color:#EF444440;">🛡️</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">04</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer4')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">04</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer4')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">Dropout (1)</div>
-                <div class="compact-desc">Sparse Dropout deactivation at tuned rate to enforce robustness and prevent overfitting.</div>
+                <div class="compact-desc">Sparse Dropout deactivation at tuned rate to enforce robustness and prevent
+                    overfitting.</div>
                 <div class="compact-badge" style="color:#EF4444; border-color:#EF444460;">Regularizer</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
@@ -2349,12 +2374,15 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:var(--green); border-color:var(--green)40;">🧬</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">05</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer5')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">05</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer5')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">BiLSTM Memory</div>
-                <div class="compact-desc">Double-helix BiLSTM capturing forward and backward temporal causality perfectly.</div>
+                <div class="compact-desc">Double-helix BiLSTM capturing forward and backward temporal causality
+                    perfectly.</div>
                 <div class="compact-badge" style="color:var(--green); border-color:var(--green)60;">Bidirectional</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
@@ -2366,12 +2394,15 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:#F59E0B; border-color:#F59E0B40;">💀</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">06</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer6')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">06</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer6')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">Dropout (2)</div>
-                <div class="compact-desc">Post-memory regularization preventing co-adaptation of temporal features from BiLSTM.</div>
+                <div class="compact-desc">Post-memory regularization preventing co-adaptation of temporal features from
+                    BiLSTM.</div>
                 <div class="compact-badge" style="color:#F59E0B; border-color:#F59E0B60;">Post-Memory</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
@@ -2383,12 +2414,15 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:var(--cyan); border-color:var(--cyan)40;">🎯</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">07</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer7')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">07</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer7')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">Fully Connected</div>
-                <div class="compact-desc">Dense neural compression translating complex temporal memory into a solar estimate.</div>
+                <div class="compact-desc">Dense neural compression translating complex temporal memory into a solar
+                    estimate.</div>
                 <div class="compact-badge" style="color:var(--cyan); border-color:var(--cyan)60;">Compression</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
@@ -2400,12 +2434,15 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:var(--purple); border-color:var(--purple)40;">🔥</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">08</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer8')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">08</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer8')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">ReLU Activation (2)</div>
-                <div class="compact-desc">Dense layer activation adding non-linearity before final output projection to GHI.</div>
+                <div class="compact-desc">Dense layer activation adding non-linearity before final output projection to
+                    GHI.</div>
                 <div class="compact-badge" style="color:var(--purple); border-color:var(--purple)60;">Activation</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
@@ -2417,12 +2454,15 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:var(--gold); border-color:var(--gold)40;">☀️</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">09</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer9')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">09</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer9')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">Output (Dense)</div>
-                <div class="compact-desc">Physics-constrained output layer generating the final Global Horizontal Irradiance.</div>
+                <div class="compact-desc">Physics-constrained output layer generating the final Global Horizontal
+                    Irradiance.</div>
                 <div class="compact-badge" style="color:var(--gold); border-color:var(--gold)60;">Prediction</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
@@ -2434,19 +2474,22 @@
                 <div class="compact-card-header">
                     <div class="compact-icon" style="color:#E040FB; border-color:#E040FB40;">📉</div>
                     <div style="display:flex; gap:12px; align-items:center;">
-                        <span style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">10</span>
-                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer10')" title="الشرح بالعربية">ℹ️</div>
+                        <span
+                            style="font-family:'Outfit', sans-serif; font-weight:800; font-size:22px; color:rgba(255,255,255,0.15);">10</span>
+                        <div class="compact-ar-btn" onclick="event.stopPropagation(); openArPanel('layer10')"
+                            title="الشرح بالعربية">ℹ️</div>
                     </div>
                 </div>
                 <div class="compact-title">Regression Output</div>
-                <div class="compact-desc">Loss computation and gradient backpropagation. RMSE convergence driving model optimization.</div>
+                <div class="compact-desc">Loss computation and gradient backpropagation. RMSE convergence driving model
+                    optimization.</div>
                 <div class="compact-badge" style="color:#E040FB; border-color:#E040FB60;">Loss Engine</div>
                 <div class="compact-enter">
                     <span>ENTER LAYER</span>
                     <span>↗</span>
                 </div>
             </div>
-</div>
+        </div>
     </section>
     <!-- Chapter: Conclusion & Future Directions -->
     <section class="story-section">
@@ -3023,9 +3066,12 @@
     <script>
         // SUDAN 3D NEURAL COMMAND CENTER - MASTERPIECE EDITION
         (function initSudanFinal() {
-            const container = document.getElementById('sudan-globe-container');
+            const container = document.getElementById('sudan-globe-container'); // Masterpiece Active
             const canvas = document.getElementById('globe-canvas');
-            if (!container || !canvas) return;
+            if (!container || !canvas) {
+                console.error("Globe container or canvas not found");
+                return;
+            }
 
             // 1. SCENE SETUP
             const scene = new THREE.Scene();
@@ -3051,10 +3097,17 @@
 
             // Texture Loader for Realism
             const tl = new THREE.TextureLoader();
-            // Using reliable unpkg CDN for three-globe assets
-            const earthMap = tl.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
-            const earthBump = tl.load('https://unpkg.com/three-globe/example/img/earth-topology.png');
-            const earthWater = tl.load('https://unpkg.com/three-globe/example/img/earth-water.png');
+
+            // Texture loading with error handling
+            const loadTexture = (path) => {
+                return tl.load(path, undefined, undefined, (err) => {
+                    console.warn(`Failed to load texture: ${path}`);
+                });
+            };
+
+            const earthMap = loadTexture('assets/globe/earth-blue-marble.jpg');
+            const earthBump = loadTexture('assets/globe/earth-topology.png');
+            const earthWater = loadTexture('assets/globe/earth-water.png');
 
             // Realistic Material
             const globeMat = new THREE.MeshPhongMaterial({
@@ -3078,13 +3131,14 @@
             mainGroup.add(grid);
 
             // Cloud Layer for extra realism
-            const earthClouds = tl.load('https://unpkg.com/three-globe/example/img/earth-clouds10k.png');
+            const earthClouds = loadTexture('assets/globe/earth-clouds10k.png');
             const cloudsMat = new THREE.MeshLambertMaterial({
                 map: earthClouds,
                 transparent: true,
-                opacity: 0.6,
+                opacity: 0.4,
                 blending: THREE.AdditiveBlending,
-                side: THREE.DoubleSide
+                side: THREE.DoubleSide,
+                depthWrite: false
             });
             const cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(radius + 0.08, 64, 64), cloudsMat);
             mainGroup.add(cloudMesh);
@@ -3129,7 +3183,7 @@
 
             // Deep Space Background (Milky Way)
             const bgMat = new THREE.MeshBasicMaterial({
-                map: tl.load('https://unpkg.com/three-globe/example/img/night-sky.png'),
+                map: tl.load('assets/globe/night-sky.png'),
                 side: THREE.BackSide,
                 color: 0x555555, // Darken slightly
                 transparent: true,

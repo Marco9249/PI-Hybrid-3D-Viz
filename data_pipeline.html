@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PI-Hybrid: Data Pipeline</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
+    <script src="assets/lib/tailwind.min.js"></script>
+    <script src="assets/lib/react.production.min.js"></script>
+    <script src="assets/lib/react-dom.production.min.js"></script>
+    <script src="assets/lib/babel.min.js"></script>
+    <script src="assets/lib/lucide.min.js"></script>
+    <script src="assets/lib/lucide-react.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -73,15 +73,15 @@
             }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="assets/lib/gsap.min.js"></script>
+    <script src="assets/lib/ScrollTrigger.min.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@200;300;400;600;800&family=Outfit:wght@200;400;600;900&family=Space+Mono:wght@400;700&display=swap"
         rel="stylesheet">
     <!-- KaTeX for professional math rendering -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    <link rel="stylesheet" href="assets/lib/katex.min.css">
+    <script defer src="assets/lib/katex.min.js"></script>
+    <script defer src="assets/lib/auto-render.min.js"
         onload="renderMathInElement(document.body);"></script>
     <style>
         :root {
@@ -119,12 +119,16 @@
             margin-bottom: 20px;
             letter-spacing: 0.3px;
         }
-        strong, b {
+
+        strong,
+        b {
             color: rgba(255, 255, 255, 0.95);
             font-weight: 600;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
-        em, i {
+
+        em,
+        i {
             color: var(--cyan);
             font-style: italic;
         }
@@ -263,6 +267,104 @@
         .reveal.active {
             opacity: 1;
             transform: translateY(0)
+        }
+
+        /* Feature Matrix Capsules - Creative Edition */
+        .feat-capsule {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 18px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+            /* Automatically stretch to fill space */
+            min-width: 65px;
+            min-height: 50px;
+        }
+
+        .feat-capsule::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, var(--fc), transparent 60%);
+            opacity: 0.03;
+            transition: all 0.5s;
+            pointer-events: none;
+        }
+
+        .feat-capsule:hover {
+            border-color: var(--fc);
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.05);
+            /* Cyber glow */
+            transform: translateY(-3px) scale(1.02);
+            z-index: 2;
+        }
+
+        .feat-capsule:hover::before {
+            opacity: 0.15;
+        }
+
+        .feat-capsule .feat-en {
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            /* BIGGER Math */
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .feat-capsule .feat-en sub {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .feat-capsule .feat-ar-label {
+            position: absolute;
+            font-family: 'Dubai', 'Segoe UI', Tahoma, sans-serif;
+            font-size: 14px;
+            /* BIGGER Arabic */
+            color: #fff;
+            text-shadow: 0 0 10px var(--fc);
+            /* Glow matches its group */
+            font-weight: 700;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            pointer-events: none;
+            width: 100%;
+        }
+
+        .feat-capsule.active-ar {
+            border-color: var(--fc);
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: inset 0 0 15px var(--fc), 0 0 10px var(--fc);
+        }
+
+        .feat-capsule.active-ar::before {
+            opacity: 0.25;
+        }
+
+        .feat-capsule.active-ar .feat-en {
+            opacity: 0;
+            transform: scale(0.5) translateY(-20px);
+        }
+
+        .feat-capsule.active-ar .feat-ar-label {
+            opacity: 1;
+            transform: scale(1) translateY(0);
         }
 
         /* Stage indicator */
@@ -637,27 +739,137 @@
                     <div class="terminal-body" id="api-terminal"></div>
                 </div>
                 <div>
-                    <div class="glass">
+                    <div class="glass"
+                        style="padding: 25px; min-height: 460px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
                         <div onclick="openModal('profile')"
-                            style="cursor:pointer;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:15px">
-                            DATASET PROFILE
+                            style="cursor:pointer;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:15px;display:flex;justify-content:space-between;align-items:center">
+                            <span>DATASET PROFILE / 15 FEATURES MATRIX</span>
+                            <span
+                                style="font-size:9px;color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.1);padding:3px 8px;border-radius:10px">CLICK
+                                CAPSULES FOR ARABIC</span>
                         </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
-                            <div class="live-stat">
-                                <div class="val" style="color:var(--cyan)">131,400</div>
-                                <div class="lbl">Total Records</div>
+
+                        <!-- Feature Group 1: Target -->
+                        <div
+                            style="margin-bottom:12px; display:flex; flex-direction:column; flex:1; justify-content:center;">
+                            <div
+                                style="font-size:8px;letter-spacing:2px;color:var(--gold);margin-bottom:8px;font-family:'Space Mono',monospace;opacity:0.7">
+                                ▎TARGET</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="الإشعاع الشمسي (GHI)"
+                                    style="--fc:#F59E0B">
+                                    <span class="feat-en" style="font-style:italic;">GHI</span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
                             </div>
-                            <div class="live-stat">
-                                <div class="val" style="color:var(--purple)">15</div>
-                                <div class="lbl">Features</div>
+                        </div>
+
+                        <!-- Feature Group 2: Solar Components -->
+                        <div
+                            style="margin-bottom:12px; display:flex; flex-direction:column; flex:1; justify-content:center;">
+                            <div
+                                style="font-size:8px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px;font-family:'Space Mono',monospace;opacity:0.7">
+                                ▎SOLAR COMPONENTS</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="الإشعاع النظري"
+                                    style="--fc:#06B6D4">
+                                    <span class="feat-en" style="font-style:italic;">GHI<sub>cs</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="الإشعاع المباشر"
+                                    style="--fc:#3B82F6">
+                                    <span class="feat-en" style="font-style:italic;">DNI</span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="الإشعاع المشتت"
+                                    style="--fc:#3B82F6">
+                                    <span class="feat-en" style="font-style:italic;">DHI</span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
                             </div>
-                            <div class="live-stat">
-                                <div class="val" style="color:var(--gold)">15 yrs</div>
-                                <div class="lbl">Time Span</div>
+                        </div>
+
+                        <!-- Feature Group 3: Atmospheric -->
+                        <div
+                            style="margin-bottom:12px; display:flex; flex-direction:column; flex:1; justify-content:center;">
+                            <div
+                                style="font-size:8px;letter-spacing:2px;color:var(--purple);margin-bottom:8px;font-family:'Space Mono',monospace;opacity:0.7">
+                                ▎ATMOSPHERIC STATE</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="درجة الحرارة"
+                                    style="--fc:#8B5CF6">
+                                    <span class="feat-en" style="font-style:italic;">T<sub>amb</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="الرطوبة النسبية"
+                                    style="--fc:#8B5CF6">
+                                    <span class="feat-en" style="font-style:italic;">RH</span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="نقطة الندى"
+                                    style="--fc:#C084FC">
+                                    <span class="feat-en" style="font-style:italic;">T<sub>dew</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="الحرارة الرطبة"
+                                    style="--fc:#C084FC">
+                                    <span class="feat-en" style="font-style:italic;">T<sub>wet</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
                             </div>
-                            <div class="live-stat">
-                                <div class="val" style="color:var(--green)">1 hr</div>
-                                <div class="lbl">Resolution</div>
+                        </div>
+
+                        <!-- Feature Group 4: Transmittance -->
+                        <div
+                            style="margin-bottom:12px; display:flex; flex-direction:column; flex:1; justify-content:center;">
+                            <div
+                                style="font-size:8px;letter-spacing:2px;color:var(--green);margin-bottom:8px;font-family:'Space Mono',monospace;opacity:0.7">
+                                ▎TRANSMITTANCE INDICES</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="مؤشر الصفاء السماء"
+                                    style="--fc:#10B981">
+                                    <span class="feat-en" style="font-style:italic;">K<sub>T</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="مؤشر الصفاء الفضائي"
+                                    style="--fc:#10B981">
+                                    <span class="feat-en" style="font-style:italic;">K<sub>T,sat</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="تقلبات الإشعاع"
+                                    style="--fc:#34D399">
+                                    <span class="feat-en" style="font-style:italic;">V<sub>ol</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Feature Group 5: Time Encoding -->
+                        <div style="display:flex; flex-direction:column; flex:1; justify-content:center;">
+                            <div
+                                style="font-size:8px;letter-spacing:2px;color:var(--red);margin-bottom:8px;font-family:'Space Mono',monospace;opacity:0.7">
+                                ▎CYCLICAL TIME ENCODING</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="ترميز الساعة (جيب)"
+                                    style="--fc:#EF4444">
+                                    <span class="feat-en" style="font-style:italic;">H<sub>sin</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="ترميز الساعة (جتا)"
+                                    style="--fc:#EF4444">
+                                    <span class="feat-en" style="font-style:italic;">H<sub>cos</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="ترميز اليوم (جيب)"
+                                    style="--fc:#F87171">
+                                    <span class="feat-en" style="font-style:italic;">D<sub>sin</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
+                                <div class="feat-capsule" onclick="toggleFeatureAr(this)" data-ar="ترميز اليوم (جتا)"
+                                    style="--fc:#F87171">
+                                    <span class="feat-en" style="font-style:italic;">D<sub>cos</sub></span>
+                                    <span class="feat-ar-label"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -729,13 +941,104 @@
         </section>
 
         <!-- =============================== -->
-        <!-- STAGE 2: Night Masking -->
+        <!-- STAGE 2: Cyclical Time Embedding -->
+        <!-- =============================== -->
+        <section class="section" style="padding: 40px; border-bottom: 1px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.01);">
+            <div class="reveal">
+                <div class="stage-header" style="margin-bottom: 25px;">
+                    <div class="stage-num"
+                        style="background:rgba(6, 182, 212, 0.1); color:var(--cyan); border:2px solid var(--cyan)">2
+                    </div>
+                    <div>
+                        <h2 style="margin-bottom:0; cursor:pointer;" onclick="openArPanel('dp_stage_time')">Temporal Cyclical Embedding</h2>
+                        <div style="font-size: 10px; color:rgba(6, 182, 212, 0.6); letter-spacing: 2px; margin-top: 4px; font-family: 'Space Mono'; text-transform: uppercase;">Physics-Consistent Logic</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-2 reveal" style="gap: 25px; align-items: stretch;">
+                <!-- Visual Side -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="glass" style="padding: 20px; border-color: rgba(6, 182, 212, 0.1); background: rgba(6, 182, 212, 0.05); position: relative; overflow: hidden;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; position: relative; z-index: 2;">
+                            <span style="font-size: 10px; color: var(--cyan); letter-spacing: 2px; font-family: 'Space Mono';">NEURAL RADAR PROJECTOR</span>
+                            <span id="linear-discontinuity" style="font-size: 9px; color: var(--red); opacity: 0; font-weight: bold; letter-spacing: 1px; transition: opacity 0.3s;">⚠️ CONTINUITY ACTIVE</span>
+                        </div>
+                        
+                        <div style="position: relative; width: 100%; height: 340px; background: rgba(0,0,0,0.4); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+                            <canvas id="time-circle-canvas" style="width:100%; height:100%;"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass" style="padding: 12px 20px; border-color: rgba(255,255,255,0.05); display: flex; align-items: center; gap: 15px;">
+                        <span style="font-size: 10px; color: rgba(255,255,255,0.4); font-family: 'Space Mono';">00:00</span>
+                        <div style="flex-grow: 1; height: 6px; background: rgba(0,0,0,0.6); border-radius: 3px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                            <div id="linear-time-bar" style="height: 100%; width: 50%; background: var(--cyan); box-shadow: 0 0 15px var(--cyan);"></div>
+                        </div>
+                        <span style="font-size: 10px; color: rgba(255,255,255,0.4); font-family: 'Space Mono';">24:00</span>
+                    </div>
+                </div>
+
+                <!-- Data Side -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="glass" style="padding: 25px; display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                        <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 25px">
+                            <div>
+                                <div style="font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 2px; margin-bottom: 5px;">TIME VECTOR</div>
+                                <div id="time-current-hour" style="font-family:'Outfit',sans-serif; font-size:4rem; font-weight:900; color:white; line-height: 1;">12:00</div>
+                            </div>
+                            <button class="btn-action" onclick="toggleAutoTime()" id="btn-auto-time" 
+                                style="padding: 12px 24px; font-size: 11px; letter-spacing: 2px; background: rgba(6, 182, 212, 0.1); border-color: var(--cyan); color: var(--cyan); border-radius: 30px;">⏸ PAUSE</button>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px">
+                            <div class="glass" style="padding:15px; background:rgba(0,0,0,0.4); border-color: rgba(239, 68, 68, 0.2);">
+                                <div style="font-size:9px; color:rgba(255,255,255,0.4); letter-spacing: 1px; margin-bottom:8px">SINE (LATITUDE)</div>
+                                <div id="time-val-sin" style="font-family:'Space Mono',monospace; font-size:24px; color:var(--red); font-weight:700;">+0.000</div>
+                                <div style="width: 100%; height: 2px; background: rgba(239, 68, 68, 0.1); margin-top: 8px;">
+                                    <div id="sin-bar" style="width: 0%; height: 100%; background: var(--red); box-shadow: 0 0 8px var(--red); transition: width 0.1s;"></div>
+                                </div>
+                            </div>
+                            <div class="glass" style="padding:15px; background:rgba(0,0,0,0.4); border-color: rgba(139, 92, 246, 0.2);">
+                                <div style="font-size:9px; color:rgba(255,255,255,0.4); letter-spacing: 1px; margin-bottom:8px">COSINE (LONGITUDE)</div>
+                                <div id="time-val-cos" style="font-family:'Space Mono',monospace; font-size:24px; color:var(--purple); font-weight:700;">+1.000</div>
+                                <div style="width: 100%; height: 2px; background: rgba(139, 92, 246, 0.1); margin-top: 8px;">
+                                    <div id="cos-bar" style="width: 0%; height: 100%; background: var(--purple); box-shadow: 0 0 8px var(--purple); transition: width 0.1s;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="kat-math-time" style="background:rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius:12px; padding:20px; font-size:1.2rem; color:white; text-align:center; position: relative;">
+                            <div style="position: absolute; top: -10px; left: 20px; background: #0a0a1a; padding: 0 10px; font-size: 10px; color: var(--cyan); letter-spacing: 2px; font-family: 'Space Mono'; border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 4px;">UNIT CIRCLE MANIFOLD</div>
+                            $$\vec{T}_{hour} = \begin{bmatrix} \sin\left(\frac{2\pi \cdot hour}{24}\right) \\ \cos\left(\frac{2\pi \cdot hour}{24}\right) \end{bmatrix}$$
+                        </div>
+
+                        <div class="insight-box" style="margin-top: 25px; padding: 20px; border-left: 3px solid var(--cyan); background: rgba(6, 182, 212, 0.05);">
+                            <h4 style="font-size: 11px; color: var(--cyan); letter-spacing: 2px; margin-bottom: 10px; font-family: 'Space Mono'; text-transform: uppercase;">Neural Intelligence Rationale</h4>
+                            <p style="font-size:13px; color:rgba(255,255,255,0.7); margin:0; line-height:1.7;">
+                                Standard models fail at <b>00:00</b> because the distance between 23:59 and 00:01 is mistakenly perceived as a max-to-min jump. By projecting time onto a <b>Euclidean unit circle</b>, we resolve the discontinuity, capturing the periodic nature of solar patterns for superior prediction accuracy.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; display: flex; align-items: center; gap: 20px;">
+                <div style="font-size: 10px; font-family: 'Space Mono'; color: rgba(255,255,255,0.4); white-space: nowrap; letter-spacing: 2px;">TIME CYCLE CONTROL</div>
+                <input type="range" id="time-encoder-slider" min="0" max="23.99" step="0.01" value="12"
+                    style="width:100%; -webkit-appearance:none; height:4px; border-radius: 2px; background: rgba(255,255,255,0.05); outline:none;"
+                    oninput="updateTimeEncoding()">
+            </div>
+        </section>
+
+        <!-- =============================== -->
+        <!-- STAGE 3: Night Masking -->
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
                 <div class="stage-header">
                     <div class="stage-num"
-                        style="background:rgba(139,92,246,0.15);color:var(--purple);border:2px solid var(--purple)">2
+                        style="background:rgba(139,92,246,0.15);color:var(--purple);border:2px solid var(--purple)">3
                     </div>
                     <div>
                         <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage2')">Physics-Guided
@@ -811,15 +1114,15 @@
 
 
         <!-- =============================== -->
-        <!-- STAGE 3: Log Transformation     -->
+        <!-- STAGE 4: Log Transformation     -->
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
                 <div class="stage-header">
                     <div class="stage-num"
-                        style="background:rgba(251,146,60,0.15);color:#fb923c;border:2px solid #fb923c">3</div>
+                        style="background:rgba(251,146,60,0.15);color:#fb923c;border:2px solid #fb923c">4</div>
                     <div>
-                        <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_log')">Logarithmic
+                        <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage3')">Logarithmic
                             Transformation</h2>
                     </div>
                 </div>
@@ -895,15 +1198,15 @@
         </section>
 
         <!-- =============================== -->
-        <!-- STAGE 4: Hybrid Normalization   -->
+        <!-- STAGE 5: Hybrid Normalization   -->
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
                 <div class="stage-header">
                     <div class="stage-num"
-                        style="background:rgba(6,182,212,0.15);color:var(--cyan);border:2px solid var(--cyan)">4</div>
+                        style="background:rgba(6,182,212,0.15);color:var(--cyan);border:2px solid var(--cyan)">5</div>
                     <div>
-                        <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage3')">Hybrid
+                        <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage4')">Hybrid
                             Normalization
                         </h2>
                     </div>
@@ -950,15 +1253,15 @@
 
 
         <!-- =============================== -->
-        <!-- STAGE 5: Sliding Window  -->
+        <!-- STAGE 6: Sliding Window  -->
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
                 <div class="stage-header">
                     <div class="stage-num"
-                        style="background:rgba(245,158,11,0.15);color:var(--gold);border:2px solid var(--gold)">5</div>
+                        style="background:rgba(245,158,11,0.15);color:var(--gold);border:2px solid var(--gold)">6</div>
                     <div>
-                        <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage4')">Sliding Window
+                        <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage5')">Sliding Window
                             Formation
                         </h2>
                     </div>
@@ -1000,16 +1303,16 @@
         </section>
 
         <!-- =============================== -->
-        <!-- STAGE 6: Chronological Split -->
+        <!-- STAGE 7: Chronological Split -->
         <!-- =============================== -->
         <section class="section">
             <div class="reveal">
                 <div class="stage-header">
                     <div class="stage-num"
-                        style="background:rgba(16,185,129,0.15);color:var(--green);border:2px solid var(--green)">6
+                        style="background:rgba(16,185,129,0.15);color:var(--green);border:2px solid var(--green)">7
                     </div>
                     <div>
-                        <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage5')">Chronological
+                        <h2 style="margin-bottom:0;cursor:pointer" onclick="openArPanel('dp_stage6')">Chronological
                             Split
                         </h2>
                     </div>
@@ -1522,7 +1825,7 @@
         </script>
 
         <!-- Three.js Starry Background -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script src="assets/globe/three.min.js"></script>
         <script>
             let scene, camera, renderer, bgParticles;
             function initPortal() {
@@ -1916,16 +2219,21 @@
     </div>
 
     <!-- 3D Sudan Globe Script (Chapter 01) - MASTERPIECE EDITION -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="assets/globe/textures.js"></script>
     <script>
         // SUDAN 3D NEURAL COMMAND CENTER - MASTERPIECE EDITION
-        (function initSudanFinal() {
+        function initSudanFinal() {
+            console.log("Initiating Sudan Globe...");
             const container = document.getElementById('sudan-globe-container');
             const canvas = document.getElementById('globe-canvas');
-            if (!container || !canvas) return;
+            if (!container || !canvas) {
+                console.error("Globe container or canvas not found!");
+                return;
+            }
 
-            // 1. SCENE SETUP
-            const scene = new THREE.Scene();
+            try {
+                // 1. SCENE SETUP
+                const scene = new THREE.Scene();
 
             // Realistic Sunlight
             scene.add(new THREE.AmbientLight(0xffffff, 0.15));
@@ -1946,9 +2254,9 @@
             // 2. REALISTIC EARTH GLOBE (Blue Marble)
             const radius = 8;
             const tl = new THREE.TextureLoader();
-            const earthMap = tl.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
-            const earthBump = tl.load('https://unpkg.com/three-globe/example/img/earth-topology.png');
-            const earthWater = tl.load('https://unpkg.com/three-globe/example/img/earth-water.png');
+            const earthMap = tl.load(EARTH_MAP_B64);
+            const earthBump = tl.load(EARTH_BUMP_B64);
+            const earthWater = tl.load(EARTH_WATER_B64);
 
             const globeMat = new THREE.MeshPhongMaterial({
                 map: earthMap,
@@ -1965,14 +2273,14 @@
             const gridMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4, wireframe: true, transparent: true, opacity: 0.05 });
             mainGroup.add(new THREE.Mesh(new THREE.SphereGeometry(radius + 0.05, 48, 48), gridMat));
 
-            // Cloud Layer
-            const earthClouds = tl.load('https://unpkg.com/three-globe/example/img/earth-clouds10k.png');
-            const cloudsMat = new THREE.MeshLambertMaterial({
-                map: earthClouds, transparent: true, opacity: 0.6,
-                blending: THREE.AdditiveBlending, side: THREE.DoubleSide
-            });
-            const cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(radius + 0.08, 64, 64), cloudsMat);
-            mainGroup.add(cloudMesh);
+            // Cloud Layer (Disabled for offline mode as texture is not available)
+            // const earthClouds = tl.load('https://unpkg.com/three-globe/example/img/earth-clouds10k.png');
+            // const cloudsMat = new THREE.MeshLambertMaterial({
+            //     map: earthClouds, transparent: true, opacity: 0.6,
+            //     blending: THREE.AdditiveBlending, side: THREE.DoubleSide
+            // });
+            // const cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(radius + 0.08, 64, 64), cloudsMat);
+            // mainGroup.add(cloudMesh);
 
             // High-Resolution Atmospheric Scattering Glow (Shader)
             const atmVertex = `
@@ -2009,7 +2317,7 @@
 
             // Deep Space Background (Milky Way)
             const bgMat = new THREE.MeshBasicMaterial({
-                map: tl.load('https://unpkg.com/three-globe/example/img/night-sky.png'),
+                map: tl.load(NIGHT_SKY_B64),
                 side: THREE.BackSide, color: 0x555555, transparent: true, opacity: 0.5
             });
             scene.add(new THREE.Mesh(new THREE.SphereGeometry(600, 64, 64), bgMat));
@@ -2189,8 +2497,8 @@
                 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
                 stars.rotation.y += 0.0005;
-                cloudMesh.rotation.y += 0.0003;
-                cloudMesh.rotation.x -= 0.0001;
+                // cloudMesh.rotation.y += 0.0003;
+                // cloudMesh.rotation.x -= 0.0001;
 
                 // Animate Rings
                 ringGroup.children.forEach(r => {
@@ -2215,7 +2523,253 @@
             };
             window.addEventListener('resize', resize);
             resize();
-        })();
+            console.log("Sudan Globe Initialized Successfully.");
+            } catch (error) {
+                console.error("Globe Initialization Error:", error);
+            }
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(initSudanFinal, 100);
+        });
+    </script>
+    <!-- Feature Capsule Toggle Script -->
+    <script>
+        function toggleFeatureAr(el) {
+            const labelSpan = el.querySelector('.feat-ar-label');
+
+            // If it's already active, deactivate it
+            if (el.classList.contains('active-ar')) {
+                el.classList.remove('active-ar');
+                setTimeout(() => {
+                    labelSpan.textContent = '';
+                }, 300); // Wait for transition to finish
+                return;
+            }
+
+            // Text logic
+            const arText = el.getAttribute('data-ar');
+            labelSpan.textContent = arText;
+
+            // Force reflow
+            void el.offsetWidth;
+
+            // Close other active capsules in this group or globally if desired
+            // (Currently allowing multiple to be open, but we can restrict it)
+
+            el.classList.add('active-ar');
+        }
+    </script>
+    <script>
+        // Cyclical Time Encoding Animation Engine - HIGH FIDELITY NEURAL EDITION
+        const timeCanvas = document.getElementById('time-circle-canvas');
+        const timeCtx = timeCanvas.getContext('2d');
+        const timeSlider = document.getElementById('time-encoder-slider');
+        let isAutoTime = true; // Set to true by default for auto-wow
+        let autoTimeReq;
+        let timePulse = 0;
+
+        function drawTimeEncoding(hourVal) {
+            const ratio = window.devicePixelRatio || 1;
+            const w = timeCanvas.offsetWidth;
+            const h = timeCanvas.offsetHeight;
+            timeCanvas.width = w * ratio;
+            timeCanvas.height = h * ratio;
+            timeCtx.scale(ratio, ratio);
+            
+            timeCtx.clearRect(0, 0, w, h);
+            
+            const cx = w / 2;
+            const cy = h / 2;
+            const r = Math.min(w, h) / 3.4;
+            timePulse += 0.04;
+
+            // 1. Futuristic Radar Grid
+            timeCtx.save();
+            timeCtx.translate(cx, cy);
+            
+            // Outer Ring Neon Glow
+            timeCtx.beginPath();
+            timeCtx.arc(0, 0, r, 0, Math.PI * 2);
+            timeCtx.strokeStyle = 'rgba(6, 182, 212, 0.15)';
+            timeCtx.lineWidth = 1;
+            timeCtx.stroke();
+
+            // Rotating Radar Sweep
+            const sweepAngle = (timePulse % (Math.PI * 2));
+            const sweepGrad = timeCtx.createRadialGradient(0, 0, 0, 0, 0, r);
+            sweepGrad.addColorStop(0, 'rgba(6, 182, 212, 0)');
+            sweepGrad.addColorStop(1, 'rgba(6, 182, 212, 0.03)');
+            
+            timeCtx.beginPath();
+            timeCtx.moveTo(0,0);
+            timeCtx.arc(0,0, r, sweepAngle - 0.6, sweepAngle);
+            timeCtx.fillStyle = sweepGrad;
+            timeCtx.fill();
+
+            // Concentric Help Rings
+            timeCtx.strokeStyle = 'rgba(255,255,255,0.02)';
+            for(let i=1; i<4; i++) {
+                timeCtx.beginPath();
+                timeCtx.arc(0,0, r * (i/4), 0, Math.PI*2);
+                timeCtx.stroke();
+            }
+
+            // Crosshair Axes
+            timeCtx.beginPath();
+            timeCtx.moveTo(-r - 30, 0); timeCtx.lineTo(r + 30, 0);
+            timeCtx.moveTo(0, -r - 30); timeCtx.lineTo(0, r + 30);
+            timeCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+            timeCtx.stroke();
+
+            // Hour Graduation Ticks
+            for(let i=0; i<24; i++) {
+                const angle = (i/24) * Math.PI*2 - Math.PI/2;
+                const isMajor = i % 6 === 0;
+                timeCtx.beginPath();
+                timeCtx.moveTo(Math.cos(angle) * (r - (isMajor ? 12 : 6)), Math.sin(angle) * (r - (isMajor ? 12 : 6)));
+                timeCtx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
+                timeCtx.strokeStyle = isMajor ? 'rgba(6, 182, 212, 0.6)' : 'rgba(255,255,255,0.15)';
+                timeCtx.lineWidth = isMajor ? 2 : 1;
+                timeCtx.stroke();
+                
+                if(isMajor) {
+                    timeCtx.fillStyle = 'rgba(255,255,255,0.3)';
+                    timeCtx.font = 'bold 10px "Space Mono"';
+                    timeCtx.textAlign = 'center';
+                    const lx = Math.cos(angle) * (r + 26);
+                    const ly = Math.sin(angle) * (r + 26) + 4;
+                    timeCtx.fillText(i + 'h', lx, ly);
+                }
+            }
+            timeCtx.restore();
+
+            // 2. Active Projection
+            const theta = (hourVal / 24) * Math.PI * 2 - Math.PI / 2;
+            const px = cx + Math.cos(theta) * r;
+            const py = cy + Math.sin(theta) * r;
+            const sinVal = Math.sin((hourVal / 24) * Math.PI * 2);
+            const cosVal = Math.cos((hourVal / 24) * Math.PI * 2);
+
+            // Vector Projections (X/Y)
+            timeCtx.setLineDash([5, 5]);
+            timeCtx.lineWidth = 1;
+            // Cos (X) Trace
+            timeCtx.beginPath(); timeCtx.moveTo(px, py); timeCtx.lineTo(px, cy);
+            timeCtx.strokeStyle = 'rgba(139, 92, 246, 0.4)'; timeCtx.stroke();
+            // Sin (Y) Trace
+            timeCtx.beginPath(); timeCtx.moveTo(px, py); timeCtx.lineTo(cx, py);
+            timeCtx.strokeStyle = 'rgba(239, 68, 68, 0.4)'; timeCtx.stroke();
+            timeCtx.setLineDash([]);
+
+            // Solid Value Bars on Axes
+            timeCtx.lineWidth = 6;
+            timeCtx.lineCap = 'round';
+            // Cosine Bar (Horizontal)
+            timeCtx.beginPath(); timeCtx.moveTo(cx, cy); timeCtx.lineTo(px, cy);
+            timeCtx.strokeStyle = 'var(--purple)'; timeCtx.stroke();
+            // Sine Bar (Vertical)
+            timeCtx.beginPath(); timeCtx.moveTo(cx, cy); timeCtx.lineTo(cx, py);
+            timeCtx.strokeStyle = 'var(--red)'; timeCtx.stroke();
+
+            // Radial Arm with Gradient
+            const armGrad = timeCtx.createLinearGradient(cx, cy, px, py);
+            armGrad.addColorStop(0, 'transparent');
+            armGrad.addColorStop(1, 'rgba(6, 182, 212, 0.8)');
+            timeCtx.beginPath();
+            timeCtx.moveTo(cx, cy);
+            timeCtx.lineTo(px, py);
+            timeCtx.strokeStyle = armGrad;
+            timeCtx.lineWidth = 3;
+            timeCtx.stroke();
+
+            // Glowing Time Cursor
+            timeCtx.shadowBlur = 20;
+            timeCtx.shadowColor = 'var(--cyan)';
+            timeCtx.beginPath();
+            timeCtx.arc(px, py, 7, 0, Math.PI * 2);
+            timeCtx.fillStyle = '#fff';
+            timeCtx.fill();
+            timeCtx.shadowBlur = 0;
+
+            // Embedded Value Display
+            timeCtx.fillStyle = '#fff';
+            timeCtx.font = 'bold 11px "Space Mono"';
+            timeCtx.textAlign = 'center';
+            timeCtx.fillText(`[${cosVal.toFixed(2)}, ${(-sinVal).toFixed(2)}]`, px, py - 20);
+        }
+
+        function updateTimeEncoding() {
+            const val = parseFloat(timeSlider.value);
+            drawTimeEncoding(val);
+            
+            const linearBar = document.getElementById('linear-time-bar');
+            linearBar.style.width = (val / 24 * 100) + '%';
+            
+            const disc = document.getElementById('linear-discontinuity');
+            // Show discontinuity alert near the jump
+            if (val > 23.4 || val < 0.6) {
+                disc.style.opacity = '1';
+                disc.innerHTML = '⚠️ CONTINUITY BRIDGE';
+                linearBar.style.background = 'var(--red)';
+                linearBar.style.boxShadow = '0 0 20px var(--red)';
+            } else {
+                disc.style.opacity = '0.6';
+                disc.innerHTML = '✓ CONTINUOUS DOMAIN';
+                linearBar.style.background = 'var(--cyan)';
+                linearBar.style.boxShadow = '0 0 15px var(--cyan)';
+            }
+
+            const sinVal = Math.sin(Math.PI * 2 * (val/24));
+            const cosVal = Math.cos(Math.PI * 2 * (val/24));
+            
+            document.getElementById('time-val-sin').innerText = (sinVal >= 0 ? '+' : '') + sinVal.toFixed(3);
+            document.getElementById('time-val-cos').innerText = (cosVal >= 0 ? '+' : '') + cosVal.toFixed(3);
+            
+            document.getElementById('sin-bar').style.width = (Math.abs(sinVal) * 100) + '%';
+            document.getElementById('cos-bar').style.width = (Math.abs(cosVal) * 100) + '%';
+
+            const h = Math.floor(val);
+            const m = Math.floor((val % 1) * 60);
+            document.getElementById('time-current-hour').innerText = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+
+            if (window.katex && typeof renderMathInElement === 'function') {
+                renderMathInElement(document.getElementById('kat-math-time'));
+            }
+        }
+
+        function autoTimeLoop() {
+            if (!isAutoTime) return;
+            let val = parseFloat(timeSlider.value);
+            val += 0.035; // Smooth progression
+            if (val >= 24) val = 0;
+            timeSlider.value = val;
+            updateTimeEncoding();
+            autoTimeReq = requestAnimationFrame(autoTimeLoop);
+        }
+
+        function toggleAutoTime() {
+            isAutoTime = !isAutoTime;
+            const btn = document.getElementById('btn-auto-time');
+            if (isAutoTime) {
+                btn.innerHTML = '⏸ PAUSE';
+                btn.classList.add('active');
+                if (autoTimeReq) cancelAnimationFrame(autoTimeReq);
+                autoTimeLoop();
+            } else {
+                btn.innerHTML = '▶ AUTO PLAY';
+                btn.classList.remove('active');
+                cancelAnimationFrame(autoTimeReq);
+            }
+        }
+
+        // Initialize and Start Auto-Play
+        setTimeout(() => {
+            updateTimeEncoding();
+            if (isAutoTime) autoTimeLoop();
+        }, 500);
+
+        window.addEventListener('resize', updateTimeEncoding);
     </script>
 </body>
 
