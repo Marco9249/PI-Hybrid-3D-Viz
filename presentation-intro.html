@@ -758,28 +758,48 @@
 
     <!-- ═══ OPENING SPEECH ═══ -->
     <section class="sec">
-        <div class="grid2 reveal">
-            <div>
-                <h2 class="sh2 ititle" onclick="openArPanel('intro_speech')">The Challenge We Face</h2>
-                <p class="sp">In control engineering, we search for stability and accuracy. But we chose to confront the
-                    most complex non-linear system: <strong style="color:#fff">the Earth's atmosphere</strong>.</p>
-                <p class="sp">The atmosphere is a <strong style="color:var(--cyan)">chaotic dynamical system</strong> —
-                    a suspended speck of dust in Sudan's skies can overturn the energy balance in seconds.</p>
-                <p class="sp">We prove that merging <strong style="color:var(--purple)">atmospheric physics with deep
-                        AI</strong> can decode this chaos and transform reactive systems into proactive ones.</p>
+        <div class="reveal" style="text-align: center; margin-bottom: 40px;">
+            <h2 class="sh2 ititle" onclick="openArPanel('intro_speech')" style="font-family: 'Outfit'; font-size: clamp(2.5rem, 4vw, 3.8rem); font-weight: 900; background: linear-gradient(135deg, #fff 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; line-height: 1.2; cursor: pointer;">
+                The Challenge We Face
+            </h2>
+            <p class="sp" style="max-width:600px;margin:0 auto">Toggle between the challenge we face and our research mission.</p>
+        </div>
+        
+        <div class="toggle-wrap reveal" style="margin-bottom: 40px;">
+            <div class="toggle-sw">
+                <div class="slider reactive" id="slider-intro"></div>
+                <button class="toggle-btn active" id="btn-intro-L" onclick="toggleGeneric('intro', 'left')">⚠️ THE PROBLEM</button>
+                <button class="toggle-btn" id="btn-intro-R" onclick="toggleGeneric('intro', 'right')">✨ OUR MISSION</button>
             </div>
-            <div class="bcard" onclick="openArPanel('intro_speech')" style="cursor:pointer">
-                <div
-                    style="font-family:'Space Mono';font-size:9px;color:var(--cyan);letter-spacing:2px;margin-bottom:15px">
-                    KEY MISSION ℹ️</div>
-                <div style="font-size:40px;margin-bottom:15px">🎯</div>
-                <p style="font-size:14px;color:rgba(255,255,255,.7);line-height:1.9;margin:0">Design a system that
-                    <strong style="color:#fff">anticipates</strong> atmospheric volatility instead of merely reacting to
-                    it — using physics-guided AI and hierarchical control.
-                </p>
-                <div
-                    style="margin-top:20px;padding:12px;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2);border-radius:12px;font-size:11px;color:var(--cyan)">
-                    72 hours × 3 scenarios × 15 features × 5hr prediction horizon</div>
+        </div>
+
+        <div class="panel panel-intro active" id="panel-intro-left">
+            <div class="grid2 reveal" style="align-items: stretch; max-width: 900px; margin: 0 auto;">
+                <div class="bcard presentation-point" style="padding: 25px; border-left: 4px solid var(--purple); cursor: pointer;" onclick="openArPanel('intro_speech')">
+                    <div style="font-family: 'Courier New'; font-size: 11px; color: var(--purple); margin-bottom: 10px; letter-spacing: 2px; font-weight: bold;">01. THE TARGET</div>
+                    <p style="font-size: 15px; margin: 0; color: rgba(255,255,255,0.8); line-height: 1.8;">In control engineering, we search for stability. But we chose to confront the most complex non-linear system: <strong style="color: #fff;">the Earth's atmosphere</strong>.</p>
+                </div>
+                
+                <div class="bcard presentation-point" style="padding: 25px; border-left: 4px solid var(--cyan); cursor: pointer;" onclick="openArPanel('intro_speech')">
+                    <div style="font-family: 'Courier New'; font-size: 11px; color: var(--cyan); margin-bottom: 10px; letter-spacing: 2px; font-weight: bold;">02. THE CHAOS</div>
+                    <p style="font-size: 15px; margin: 0; color: rgba(255,255,255,0.8); line-height: 1.8;">The atmosphere is a <strong style="color: var(--cyan);">chaotic dynamical system</strong> — a suspended speck of dust in Sudan's skies can overturn the energy balance in seconds.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-intro" id="panel-intro-right">
+            <div class="grid2 reveal" style="align-items: stretch; max-width: 900px; margin: 0 auto;">
+                <div class="bcard presentation-point" style="padding: 25px; border-left: 4px solid var(--gold); cursor: pointer;" onclick="openArPanel('intro_speech')">
+                    <div style="font-family: 'Courier New'; font-size: 11px; color: var(--gold); margin-bottom: 10px; letter-spacing: 2px; font-weight: bold;">03. THE SOLUTION</div>
+                    <p style="font-size: 15px; margin: 0; color: rgba(255,255,255,0.8); line-height: 1.8;">We prove that merging <strong style="color: var(--purple);">atmospheric physics with deep AI</strong> can decode this chaos and transform reactive systems into proactive ones.</p>
+                </div>
+
+                <div class="bcard" onclick="openArPanel('intro_speech')" style="display: flex; flex-direction: column; justify-content: center; cursor:pointer; position: relative; overflow: hidden; background: linear-gradient(135deg, rgba(10,10,25,0.8) 0%, rgba(6,182,212,0.1) 100%); border-color: rgba(6,182,212,0.3);">
+                    <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(6,182,212,0.2); filter: blur(50px); pointer-events: none;"></div>
+                    <div style="font-family:'Space Mono';font-size:11px;color:var(--cyan);letter-spacing:3px;margin-bottom:15px; font-weight: bold;">KEY MISSION ℹ️</div>
+                    <p style="font-size:15px;color:rgba(255,255,255,.9);line-height:1.6;margin:0;">Design a system that <strong style="color:#fff;">anticipates</strong> atmospheric volatility instead of merely reacting to it.</p>
+                    <div style="margin-top:20px;padding:10px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.3);border-radius:15px;font-size:11px;color:var(--cyan); font-family: 'Courier New'; font-weight: bold; text-align: center;">72hr × 3 scenarios × 15 features</div>
+                </div>
             </div>
         </div>
     </section>
@@ -858,10 +878,29 @@
         <div class="chaos-wrap reveal">
             <div class="chaos-text">
                 <h2 class="sh2 ititle" onclick="openArPanel('intro_chaos_viz')">Chaos ↔ Order</h2>
-                <p class="sp"><strong style="color:var(--red)">Left:</strong> Chaotic atmospheric data — unpredictable
-                    motion.</p>
-                <p class="sp"><strong style="color:var(--green)">Right:</strong> Physics-guided flow — our hybrid model
-                    imposing constraints.</p>
+                
+                <div class="toggle-wrap" style="justify-content: flex-start; margin: 20px 0;">
+                    <div class="toggle-sw">
+                        <div class="slider reactive" id="slider-chaos"></div>
+                        <button class="toggle-btn active" id="btn-chaos-L" onclick="toggleGeneric('chaos', 'left')">🌪️ THE PROBLEM</button>
+                        <button class="toggle-btn" id="btn-chaos-R" onclick="toggleGeneric('chaos', 'right')">📐 THE SOLUTION</button>
+                    </div>
+                </div>
+                
+                <div class="panel panel-chaos active" id="panel-chaos-left">
+                    <div class="bcard" style="padding: 20px 25px; border-left: 3px solid var(--red); cursor: pointer; margin-top:15px;" onclick="openArPanel('intro_chaos_viz')">
+                        <div style="font-family: 'Courier New'; font-size: 11px; color: var(--red); margin-bottom: 8px; letter-spacing: 1px; font-weight: bold;">CHAOTIC ATMOSPHERE</div>
+                        <p style="margin: 0; font-size: 15px; color: rgba(255,255,255,0.8);">Chaotic atmospheric data — unpredictable, non-linear motion that destroys energy stability.</p>
+                    </div>
+                </div>
+
+                <div class="panel panel-chaos" id="panel-chaos-right">
+                    <div class="bcard" style="padding: 20px 25px; border-left: 3px solid var(--green); cursor: pointer; margin-top:15px;" onclick="openArPanel('intro_chaos_viz')">
+                        <div style="font-family: 'Courier New'; font-size: 11px; color: var(--green); margin-bottom: 8px; letter-spacing: 1px; font-weight: bold;">PHYSICS-GUIDED FLOW</div>
+                        <p style="margin: 0; font-size: 15px; color: rgba(255,255,255,0.8);">Our hybrid model imposing robust thermodynamic constraints to enforce control.</p>
+                    </div>
+                </div>
+
             </div>
             <div class="chaos-box">
                 <canvas id="chaosCanvas"></canvas>
@@ -874,10 +913,29 @@
         <div class="chaos-wrap reveal" style="flex-direction:row-reverse">
             <div class="chaos-text">
                 <h2 class="sh2 ititle" onclick="openArPanel('intro_solution')">Neural Data Flow</h2>
-                <p class="sp"><strong style="color:var(--cyan)">CNN:</strong> Extracts spatial patterns from atmospheric
-                    data with high precision.</p>
-                <p class="sp"><strong style="color:var(--gold)">BiLSTM:</strong> Comprehends temporal sequencing over
-                    time and uncovers complex dependencies.</p>
+                
+                <div class="toggle-wrap" style="justify-content: flex-start; margin: 20px 0;">
+                    <div class="toggle-sw">
+                        <div class="slider reactive" id="slider-neural"></div>
+                        <button class="toggle-btn active" id="btn-neural-L" onclick="toggleGeneric('neural', 'left')">🧠 SPATIAL CNN</button>
+                        <button class="toggle-btn" id="btn-neural-R" onclick="toggleGeneric('neural', 'right')">⏱️ TEMPORAL BiLSTM</button>
+                    </div>
+                </div>
+                
+                <div class="panel panel-neural active" id="panel-neural-left">
+                    <div class="bcard" style="padding: 20px 25px; border-left: 3px solid var(--cyan); cursor: pointer; margin-top:15px;" onclick="openArPanel('intro_solution')">
+                        <div style="font-family: 'Courier New'; font-size: 11px; color: var(--cyan); margin-bottom: 8px; letter-spacing: 1px; font-weight: bold;">STEP 01: SPATIAL EXTRACTOR</div>
+                        <p style="margin: 0; font-size: 15px; color: rgba(255,255,255,0.8);"><strong style="color: #fff;">CNN</strong> extracts spatial patterns from atmospheric data with high precision.</p>
+                    </div>
+                </div>
+
+                <div class="panel panel-neural" id="panel-neural-right">
+                    <div class="bcard" style="padding: 20px 25px; border-left: 3px solid var(--gold); cursor: pointer; margin-top:15px;" onclick="openArPanel('intro_solution')">
+                        <div style="font-family: 'Courier New'; font-size: 11px; color: var(--gold); margin-bottom: 8px; letter-spacing: 1px; font-weight: bold;">STEP 02: TEMPORAL ENGINE</div>
+                        <p style="margin: 0; font-size: 15px; color: rgba(255,255,255,0.8);"><strong style="color: #fff;">BiLSTM</strong> comprehends temporal sequencing over time and uncovers complex dependencies.</p>
+                    </div>
+                </div>
+                
             </div>
             <div class="chaos-box">
                 <canvas id="networkCanvas"></canvas>
@@ -885,50 +943,89 @@
         </div>
     </section>
 
-
     <!-- ═══ OBJECTIVES ═══ -->
     <section class="sec">
         <div class="reveal" style="text-align:center;margin-bottom:40px">
-            <h2 class="sh2 ititle" onclick="openArPanel('intro_objectives')">Objectives & Scope</h2>
+            <h2 class="sh2 ititle" onclick="openArPanel('intro_objectives')">Objectives &amp; Scope</h2>
+            <p class="sp" style="max-width:600px;margin:0 auto">Navigate through the 4 research objectives. Click any card to learn more.</p>
         </div>
-        <div style="max-width:800px;margin:0 auto" class="reveal">
-            <div class="acc open" onclick="openArPanel('intro_obj1')">
-                <div class="acc-h" onclick="toggleAcc(this,event)">
-                    <h3>01 — Hybrid Prediction Architecture ℹ️</h3><span class="acc-arr">▼</span>
-                </div>
-                <div class="acc-b">
-                    <div class="acc-in">CNN for spatial feature extraction + BiLSTM for temporal sequence — guided by 15
-                        physics-informed features, optimized via Bayesian hyperparameter tuning.</div>
-                </div>
-            </div>
-            <div class="acc" onclick="openArPanel('intro_obj2')">
-                <div class="acc-h" onclick="toggleAcc(this,event)">
-                    <h3>02 — Advanced Hierarchical Control ℹ️</h3><span class="acc-arr">▼</span>
-                </div>
-                <div class="acc-b">
-                    <div class="acc-in">FOPID + MPC strategy for intelligent proactive energy and water management —
-                        shifting from reactive to anticipatory decision-making.</div>
-                </div>
-            </div>
-            <div class="acc" onclick="openArPanel('intro_obj3')">
-                <div class="acc-h" onclick="toggleAcc(this,event)">
-                    <h3>03 — Integrated Simulation Platform ℹ️</h3><span class="acc-arr">▼</span>
-                </div>
-                <div class="acc-b">
-                    <div class="acc-in">MATLAB/Simulink simulation combining forecasting + PV pumping under
-                        hyper-realistic scenarios — benchmarking against LSTM, GRU, Transformer baselines.</div>
+
+        <!-- Step indicator -->
+        <div class="reveal" style="display:flex; justify-content:center; gap:12px; margin-bottom:30px;" id="obj-dots">
+            <button onclick="showObj(0)" id="obj-dot-0" style="width:36px; height:36px; border-radius:50%; border:2px solid var(--cyan); background:rgba(6,182,212,0.2); color:var(--cyan); font-family:'Courier New'; font-size:12px; font-weight:bold; cursor:pointer; transition:.3s;">01</button>
+            <button onclick="showObj(1)" id="obj-dot-1" style="width:36px; height:36px; border-radius:50%; border:2px solid rgba(255,255,255,0.1); background:transparent; color:rgba(255,255,255,0.3); font-family:'Courier New'; font-size:12px; font-weight:bold; cursor:pointer; transition:.3s;">02</button>
+            <button onclick="showObj(2)" id="obj-dot-2" style="width:36px; height:36px; border-radius:50%; border:2px solid rgba(255,255,255,0.1); background:transparent; color:rgba(255,255,255,0.3); font-family:'Courier New'; font-size:12px; font-weight:bold; cursor:pointer; transition:.3s;">03</button>
+            <button onclick="showObj(3)" id="obj-dot-3" style="width:36px; height:36px; border-radius:50%; border:2px solid rgba(255,255,255,0.1); background:transparent; color:rgba(255,255,255,0.3); font-family:'Courier New'; font-size:12px; font-weight:bold; cursor:pointer; transition:.3s;">04</button>
+        </div>
+
+        <div style="max-width:800px;margin:0 auto; position:relative;">
+            <!-- Obj 1 -->
+            <div class="obj-panel active" id="obj-panel-0" style="animation: fadeUp .4s ease">
+                <div class="bcard" onclick="openArPanel('intro_obj1')" style="cursor:pointer; border-color:rgba(6,182,212,0.3); position:relative; overflow:hidden;">
+                    <div style="position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(6,182,212,0.15);filter:blur(40px);"></div>
+                    <div style="font-family:'Courier New';font-size:11px;color:var(--cyan);letter-spacing:3px;margin-bottom:15px;font-weight:bold;">OBJECTIVE 01 ℹ️</div>
+                    <h3 style="font-family:'Outfit';font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:15px;">Hybrid Prediction Architecture</h3>
+                    <p style="font-size:15px;color:rgba(255,255,255,0.7);line-height:1.9;margin:0;">CNN for spatial feature extraction + BiLSTM for temporal sequence — guided by <strong style="color:#fff;">15 physics-informed features</strong>, optimized via Bayesian hyperparameter tuning.</p>
+                    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <span style="padding:5px 14px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3);border-radius:20px;font-family:'Courier New';font-size:11px;color:var(--cyan);">CNN</span>
+                        <span style="padding:5px 14px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:20px;font-family:'Courier New';font-size:11px;color:var(--purple);">BiLSTM</span>
+                        <span style="padding:5px 14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:20px;font-family:'Courier New';font-size:11px;color:var(--gold);">Bayesian Opt</span>
+                    </div>
                 </div>
             </div>
-            <div class="acc" onclick="openArPanel('intro_obj4')">
-                <div class="acc-h" onclick="toggleAcc(this,event)">
-                    <h3>04 — Economic & Practical Impact ℹ️</h3><span class="acc-arr">▼</span>
+            <!-- Obj 2 -->
+            <div class="obj-panel" id="obj-panel-1">
+                <div class="bcard" onclick="openArPanel('intro_obj2')" style="cursor:pointer; border-color:rgba(139,92,246,0.3); position:relative; overflow:hidden;">
+                    <div style="position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(139,92,246,0.15);filter:blur(40px);"></div>
+                    <div style="font-family:'Courier New';font-size:11px;color:var(--purple);letter-spacing:3px;margin-bottom:15px;font-weight:bold;">OBJECTIVE 02 ℹ️</div>
+                    <h3 style="font-family:'Outfit';font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:15px;">Advanced Hierarchical Control</h3>
+                    <p style="font-size:15px;color:rgba(255,255,255,0.7);line-height:1.9;margin:0;">FOPID + MPC strategy for intelligent proactive energy and water management — shifting from <strong style="color:var(--red);">reactive</strong> to <strong style="color:var(--green);">anticipatory</strong> decision-making.</p>
+                    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <span style="padding:5px 14px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:20px;font-family:'Courier New';font-size:11px;color:var(--purple);">FOPID</span>
+                        <span style="padding:5px 14px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:20px;font-family:'Courier New';font-size:11px;color:var(--green);">MPC</span>
+                    </div>
                 </div>
-                <div class="acc-b">
-                    <div class="acc-in">Eliminating expensive sensors through zero-cost solar geometry features and
-                        extending mechanical equipment lifespan via proactive, wear-reducing control.</div>
+            </div>
+            <!-- Obj 3 -->
+            <div class="obj-panel" id="obj-panel-2">
+                <div class="bcard" onclick="openArPanel('intro_obj3')" style="cursor:pointer; border-color:rgba(245,158,11,0.3); position:relative; overflow:hidden;">
+                    <div style="position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(245,158,11,0.15);filter:blur(40px);"></div>
+                    <div style="font-family:'Courier New';font-size:11px;color:var(--gold);letter-spacing:3px;margin-bottom:15px;font-weight:bold;">OBJECTIVE 03 ℹ️</div>
+                    <h3 style="font-family:'Outfit';font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:15px;">Integrated Simulation Platform</h3>
+                    <p style="font-size:15px;color:rgba(255,255,255,0.7);line-height:1.9;margin:0;">MATLAB/Simulink simulation combining forecasting + PV pumping under <strong style="color:#fff;">hyper-realistic scenarios</strong> — benchmarking against LSTM, GRU, and Transformer baselines.</p>
+                    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <span style="padding:5px 14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:20px;font-family:'Courier New';font-size:11px;color:var(--gold);">MATLAB</span>
+                        <span style="padding:5px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;font-family:'Courier New';font-size:11px;color:rgba(255,255,255,0.5);">vs LSTM</span>
+                        <span style="padding:5px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;font-family:'Courier New';font-size:11px;color:rgba(255,255,255,0.5);">vs GRU</span>
+                        <span style="padding:5px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;font-family:'Courier New';font-size:11px;color:rgba(255,255,255,0.5);">vs Transformer</span>
+                    </div>
                 </div>
+            </div>
+            <!-- Obj 4 -->
+            <div class="obj-panel" id="obj-panel-3">
+                <div class="bcard" onclick="openArPanel('intro_obj4')" style="cursor:pointer; border-color:rgba(16,185,129,0.3); position:relative; overflow:hidden;">
+                    <div style="position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(16,185,129,0.15);filter:blur(40px);"></div>
+                    <div style="font-family:'Courier New';font-size:11px;color:var(--green);letter-spacing:3px;margin-bottom:15px;font-weight:bold;">OBJECTIVE 04 ℹ️</div>
+                    <h3 style="font-family:'Outfit';font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:15px;">Economic &amp; Practical Impact</h3>
+                    <p style="font-size:15px;color:rgba(255,255,255,0.7);line-height:1.9;margin:0;">Eliminating expensive sensors through <strong style="color:#fff;">zero-cost solar geometry features</strong> and extending mechanical equipment lifespan via proactive, wear-reducing control.</p>
+                    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <span style="padding:5px 14px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:20px;font-family:'Courier New';font-size:11px;color:var(--green);">Zero-Cost Sensors</span>
+                        <span style="padding:5px 14px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:20px;font-family:'Courier New';font-size:11px;color:var(--green);">Longer Lifespan</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Arrows -->
+            <div style="display:flex;justify-content:space-between;margin-top:20px;">
+                <button onclick="stepObj(-1)" style="padding:10px 28px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:30px;color:rgba(255,255,255,0.5);font-family:'Outfit';font-weight:700;font-size:13px;cursor:pointer;transition:.3s;" onmouseover="this.style.borderColor='var(--cyan)';this.style.color='var(--cyan)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.5)'">← PREV</button>
+                <button onclick="stepObj(1)" style="padding:10px 28px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:30px;color:rgba(255,255,255,0.5);font-family:'Outfit';font-weight:700;font-size:13px;cursor:pointer;transition:.3s;" onmouseover="this.style.borderColor='var(--cyan)';this.style.color='var(--cyan)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.5)'">NEXT →</button>
             </div>
         </div>
+
+        <style>
+            .obj-panel { display: none; animation: fadeUp .4s ease; }
+            .obj-panel.active { display: block; }
+        </style>
     </section>
 
     <!-- ═══ STATS ═══ -->
@@ -1027,12 +1124,46 @@
 
         // ═══ PARADIGM TOGGLE ═══
         function showPanel(m) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            // Only affect the original paradigm panels so we don't break it
+            document.querySelectorAll('#panel-reactive, #panel-proactive').forEach(p => p.classList.remove('active'));
             document.getElementById('panel-' + m).classList.add('active');
             const s = document.getElementById('slider'), bR = document.getElementById('btnR'), bP = document.getElementById('btnP');
             if (m === 'reactive') { s.className = 'slider reactive'; bR.classList.add('active'); bP.classList.remove('active') }
             else { s.className = 'slider proactive'; bP.classList.add('active'); bR.classList.remove('active') }
         }
+
+        function toggleGeneric(group, state) {
+            document.querySelectorAll('.panel-' + group).forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-' + group + '-' + state).classList.add('active');
+            const s = document.getElementById('slider-' + group);
+            const bL = document.getElementById('btn-' + group + '-L');
+            const bR = document.getElementById('btn-' + group + '-R');
+            if (state === 'left') { s.className = 'slider reactive'; bL.classList.add('active'); bR.classList.remove('active'); }
+            else { s.className = 'slider proactive'; bR.classList.add('active'); bL.classList.remove('active'); }
+        }
+
+        // ═══ OBJECTIVES NAVIGATOR ═══
+        let currentObj = 0;
+        const OBJ_COLORS = ['var(--cyan)', 'var(--purple)', 'var(--gold)', 'var(--green)'];
+        const OBJ_BG = ['rgba(6,182,212,0.2)', 'rgba(139,92,246,0.2)', 'rgba(245,158,11,0.2)', 'rgba(16,185,129,0.2)'];
+        function showObj(idx) {
+            document.querySelectorAll('.obj-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('obj-panel-' + idx).classList.add('active');
+            for (let i = 0; i < 4; i++) {
+                const dot = document.getElementById('obj-dot-' + i);
+                if (i === idx) {
+                    dot.style.borderColor = OBJ_COLORS[i];
+                    dot.style.background = OBJ_BG[i];
+                    dot.style.color = OBJ_COLORS[i];
+                } else {
+                    dot.style.borderColor = 'rgba(255,255,255,0.1)';
+                    dot.style.background = 'transparent';
+                    dot.style.color = 'rgba(255,255,255,0.3)';
+                }
+            }
+            currentObj = idx;
+        }
+        function stepObj(dir) { showObj((currentObj + dir + 4) % 4); }
 
         // ═══ ACCORDION ═══
         function toggleAcc(h, e) { if (e) e.stopPropagation(); const it = h.parentElement; const o = it.classList.contains('open'); it.parentElement.querySelectorAll('.acc').forEach(i => i.classList.remove('open')); if (!o) it.classList.add('open') }
