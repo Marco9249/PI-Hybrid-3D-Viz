@@ -948,173 +948,131 @@
     </section>
 
     <!-- ═══ PART 4: MPC ═══ -->
+    
+    <!-- STATE MACHINE -->
     <section class="sec" id="sec4">
-        <div class="grid2">
-            <div class="reveal">
-                <h2 class="sh2 ititle" onclick="openArPanel('ctrl_mpc')">MPC Manager + Controller</h2>
-                <p class="sp"><strong style="color:var(--gold)">Manager</strong> decides WHEN & HOW MUCH. <strong
-                        style="color:var(--cyan)">Controller</strong> finds the SMOOTHEST PATH.</p>
-                <div class="acc open">
-                    <div class="acc-h" onclick="toggleAcc(this)">
-                        <h3>📋 MPC Manager (Strategy)</h3><span class="acc-arr">▼</span>
-                    </div>
-                    <div class="acc-b">
-                        <div class="acc-in"><strong>Safe Start:</strong> 5 min above 2400W. <strong>Smart
-                                Braking:</strong> √-based flow reduction. <strong>Anti Short-Cycling:</strong> 2-min
-                            minimum off-time.</div>
-                    </div>
-                </div>
-                <div class="acc">
-                    <div class="acc-h" onclick="toggleAcc(this)">
-                        <h3>🎯 MPC Controller (Execution)</h3><span class="acc-arr">▼</span>
-                    </div>
-                    <div class="acc-b">
-                        <div class="acc-in"><strong>Ts=60s</strong>, <strong>300-step horizon</strong> (5hr). Output
-                            Weight Q: LOW. Rate Weight R: 20× HIGH. Inverse tuning eliminates oscillations.</div>
-                    </div>
-                </div>
+      <div class="reveal" style="text-align:center;margin-bottom:40px">
+        <div class="stag" style="color:var(--gold)">BLOCK 4 — MPC MANAGER & CONTROLLER</div>
+        <h2 class="sh2 ititle" onclick="openArPanel('ctrl_mpc_mgr')">Hierarchical MPC System</h2>
+        <p class="sp" style="max-width:640px;margin:0 auto">The brain of the system. Uses AI forecasts to manage water proactively.</p>
+      </div>
+      <div class="glass-card reveal" style="padding:50px;max-width:1150px;margin:0 auto;border-radius:40px;box-shadow:0 40px 100px rgba(0,0,0,0.6);border:1px solid rgba(245,158,11,0.18);background:linear-gradient(135deg,rgba(10,10,25,0.8),rgba(3,3,8,0.9));backdrop-filter:blur(30px)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:start">
+          <div>
+            <div class="stag" style="color:var(--purple);margin-bottom:16px">1. MPC MANAGER (STRATEGY)</div>
+            <div class="sm-state sm-active" onclick="document.querySelectorAll('.sm-state').forEach(s=>s.classList.remove('sm-active'));this.classList.add('sm-active')">
+              <div class="sm-state-h"><div class="sm-dot" style="background:#6b7280"></div>🔴 IDLE</div>
+              <div class="sm-body"><strong>Condition:</strong> P_available &lt; 2400W<br><strong>Action:</strong> Pump OFF, monitors GHI every 60s.<br><strong>Exit:</strong> P ≥ 2400W sustained for 300s.</div>
             </div>
-            <div class="bcard reveal" style="text-align:center">
-                <div
-                    style="font-family:'Space Mono';font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:12px">
-                    RESPONSE COMPARISON</div>
-                <canvas id="responseCanvas" onclick="openArPanel('ctrl_response')"
-                    style="width:100%;height:200px;display:block;border-radius:12px;cursor:pointer"></canvas>
-                <div
-                    style="margin-top:10px;display:flex;justify-content:center;gap:12px;font-size:9px;font-family:'Space Mono'">
-                    <span style="color:var(--red)">— PID (OSCILLATING)</span><span style="color:var(--green)">—
-                        MPC+FOPID (SMOOTH)</span><span style="color:rgba(255,255,255,.3)">--- TARGET</span>
-                </div>
+            <div class="sm-state" onclick="document.querySelectorAll('.sm-state').forEach(s=>s.classList.remove('sm-active'));this.classList.add('sm-active')">
+              <div class="sm-state-h"><div class="sm-dot" style="background:var(--gold)"></div>🟡 STARTING</div>
+              <div class="sm-body"><strong>Duration:</strong> 5 min stable power.<br><strong>Why:</strong> Prevents motor short-cycling at cloud edges.</div>
             </div>
+            <div class="sm-state" onclick="document.querySelectorAll('.sm-state').forEach(s=>s.classList.remove('sm-active'));this.classList.add('sm-active')">
+              <div class="sm-state-h"><div class="sm-dot" style="background:var(--green)"></div>🟢 RUNNING</div>
+              <div class="sm-body"><strong>Action:</strong> Sends Flow_Ref to MPC Controller.<br>If Future_GHI drops AND Tank &lt; Safe_Level → <strong>Flow_Ref = Max</strong> (store water early).</div>
+            </div>
+            <div class="sm-state" onclick="document.querySelectorAll('.sm-state').forEach(s=>s.classList.remove('sm-active'));this.classList.add('sm-active')">
+              <div class="sm-state-h"><div class="sm-dot" style="background:var(--cyan)"></div>🔵 BRAKING</div>
+              <div class="sm-body"><strong>Formula:</strong> Flow = Flow_max × √(1 − Level/Max_Level)<br><strong>Why:</strong> Gradual slowdown prevents hydraulic hammer.</div>
+            </div>
+          </div>
+          <div>
+            <div class="stag" style="color:var(--cyan);margin-bottom:16px">2. MPC CONTROLLER (EXECUTION)</div>
+            <div class="ibox c" style="margin-bottom:16px;font-size:12px">
+              <strong>Role:</strong> Computes the optimal <code>Speed_Ref</code> over a 300-step future horizon based on the Manager's <code>Flow_Ref</code>.
+            </div>
+            <div style="font-family:'Space Mono';font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:10px">PID vs MPC+FOPID RESPONSE</div>
+            <canvas id="responseCanvas" onclick="openArPanel('ctrl_response')" style="width:100%;height:150px;display:block;border-radius:12px;cursor:pointer"></canvas>
+            <div style="margin-top:8px;display:flex;justify-content:center;gap:12px;font-size:9px;font-family:'Space Mono'">
+              <span style="color:var(--red)">— PID</span><span style="color:var(--green)">— MPC+FOPID</span><span style="color:rgba(255,255,255,.3)">--- TARGET</span>
+            </div>
+          </div>
         </div>
+      </div>
     </section>
 
-    <!-- ═══ PART 5: FOPID ═══ -->
+    <!-- FOPID -->
     <section class="sec" id="sec5">
-        <div class="grid2">
-            <div class="bcard reveal">
-                <div
-                    style="font-family:'Space Mono';font-size:9px;color:var(--red);letter-spacing:2px;margin-bottom:12px">
-                    FOPID PARAMETERS</div>
-                <div class="pgrid">
-                    <div class="pm">
-                        <div class="v">1.0</div>
-                        <div class="l">Kp</div>
-                    </div>
-                    <div class="pm">
-                        <div class="v">0.5</div>
-                        <div class="l">Ki</div>
-                    </div>
-                    <div class="pm">
-                        <div class="v">0.01</div>
-                        <div class="l">Kd</div>
-                    </div>
-                    <div class="pm">
-                        <div class="v" style="color:var(--gold)">0.9</div>
-                        <div class="l">λ LAMBDA</div>
-                    </div>
-                    <div class="pm">
-                        <div class="v" style="color:var(--gold)">0.7</div>
-                        <div class="l">μ MU</div>
-                    </div>
-                    <div class="pm">
-                        <div class="v" style="color:var(--red)">±400W</div>
-                        <div class="l">HYSTERESIS</div>
-                    </div>
-                </div>
-                <div class="ibox y" style="cursor:pointer" onclick="openArPanel('ctrl_fopid')"><strong>🛡️
-                        Hysteresis:</strong> ON > 2400W · OFF < 2000W — eliminates chattering at sunrise/sunset.
-                        ℹ️</div>
-                </div>
-                <div class="reveal">
-                    <h2 class="sh2 ititle" onclick="openArPanel('ctrl_fopid')">FOPID: Shock Absorber</h2>
-                    <p class="sp">Fractional-Order PID with 2 extra degrees of freedom (λ, μ). Parameters optimized via
-                        <strong style="color:#fff">Finite Difference</strong> gradient search.
-                    </p>
-                    <p class="sp">Output: a single, <strong style="color:var(--green)">silky-smooth control
-                            signal</strong> (P_control) sent to VFD — ensuring soft starts and no inrush currents.</p>
-                </div>
+      <div class="reveal" style="text-align:center;margin-bottom:40px">
+        <div class="stag" style="color:var(--red)">BLOCK 5 — FOPID CONTROLLER</div>
+        <h2 class="sh2 ititle" onclick="openArPanel('ctrl_fopid')">FOPID: The Shock Absorber</h2>
+        <p class="sp" style="max-width:640px;margin:0 auto">Converts Speed_Ref from MPC into a smooth P_control signal for the VFD.</p>
+      </div>
+      <div class="glass-card reveal" style="padding:50px;max-width:1150px;margin:0 auto;border-radius:40px;box-shadow:0 40px 100px rgba(0,0,0,0.6);border:1px solid rgba(239,68,68,0.15);background:linear-gradient(135deg,rgba(10,10,25,0.8),rgba(3,3,8,0.9));backdrop-filter:blur(30px)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start">
+          <div>
+            <div class="pgrid" style="margin-bottom:24px">
+              <div class="pm"><div class="v">1.0</div><div class="l">Kp</div></div>
+              <div class="pm"><div class="v">0.5</div><div class="l">Ki</div></div>
+              <div class="pm"><div class="v">0.01</div><div class="l">Kd</div></div>
+              <div class="pm" style="border-color:rgba(245,158,11,0.4)"><div class="v" style="color:var(--gold)">0.9</div><div class="l">λ INT ORDER</div></div>
+              <div class="pm" style="border-color:rgba(245,158,11,0.4)"><div class="v" style="color:var(--gold)">0.7</div><div class="l">μ DER ORDER</div></div>
             </div>
+            <div class="ibox y"><strong>Hysteresis Guard:</strong> ON > 2400W | OFF < 2000W<br><span style="font-size:11px;opacity:0.8">A 400W deadband kills motor chattering at sunrise/sunset transitions.</span></div>
+          </div>
+          <div class="bcard" style="text-align:center">
+            <div style="font-family:'Space Mono';font-size:9px;color:var(--red);letter-spacing:2px;margin-bottom:10px">HYSTERESIS BAND — LIVE</div>
+            <canvas id="hysteresisCanvas" onclick="openArPanel('ctrl_hysteresis')" style="width:100%;height:125px;display:block;border-radius:12px;cursor:pointer"></canvas>
+            <div style="font-family:'Space Mono';font-size:9px;color:var(--cyan);letter-spacing:2px;margin-bottom:10px">PID vs FOPID SMOOTHNESS</div>
+            <canvas id="pidVsFopidCanvas" onclick="openArPanel('ctrl_pid_fopid')" style="width:100%;height:125px;display:block;border-radius:12px;cursor:pointer"></canvas>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- ═══ PARTS 6-8: VFD + PUMP + TANK ═══ -->
-    <section class="sec" id="sec6">
-        <div class="reveal" style="text-align:center;margin-bottom:40px">
-            <h2 class="sh2 ititle" onclick="openArPanel('ctrl_vfd')">VFD → Pump → Tank</h2>
-        </div>
-        <div class="grid2 reveal" id="sec7">
-            <div>
-                <div class="acc open">
-                    <div class="acc-h" onclick="toggleAcc(this)">
-                        <h3>⚙️ VFD (Inverter + Drive)</h3><span class="acc-arr">▼</span>
-                    </div>
-                    <div class="acc-b">
-                        <div class="acc-in"><strong>Soft Start:</strong> Calculated burst for stiction then smooth ramp.
-                            <strong>Hydraulic Saturation:</strong> Clips excess commands. <strong>Dead Zone:</strong>
-                            Below 690 RPM → full cutoff.
-                        </div>
-                    </div>
-                </div>
-                <div class="acc">
-                    <div class="acc-h" onclick="toggleAcc(this)">
-                        <h3>💧 Pump (State Observer)</h3><span class="acc-arr">▼</span>
-                    </div>
-                    <div class="acc-b">
-                        <div class="acc-in">Linear centrifugal pump model with mechanical saturation at <strong>1550
-                                RPM</strong>. Converts flow to speed for monitoring.</div>
-                    </div>
-                </div>
-                <div class="acc">
-                    <div class="acc-h" onclick="toggleAcc(this)">
-                        <h3>🏗️ Water Tank (Gravity Battery)</h3><span class="acc-arr">▼</span>
-                    </div>
-                    <div class="acc-b">
-                        <div class="acc-in">Stores excess solar energy as <strong>gravitational potential</strong>.
-                            (Q_in − Q_out) × (1/A) → ∫ → Level. Feeds back to MPC Manager → <strong>loop
-                                closed!</strong></div>
-                    </div>
-                </div>
+    <!-- VFD + PUMP + TANK -->
+    <section class="sec" id="sec6" style="padding-bottom:100px">
+      <div class="reveal" style="text-align:center;margin-bottom:40px">
+        <div class="stag" style="color:var(--cyan)">BLOCKS 6-8 — PHYSICAL EXECUTION</div>
+        <h2 class="sh2 ititle" onclick="openArPanel('ctrl_vfd_curve')">VFD → Pump → Tank</h2>
+        <p class="sp" style="max-width:640px;margin:0 auto">Converts the FOPID control signal into physical water flow, closing the loop.</p>
+      </div>
+      <div class="glass-card reveal" style="padding:50px;max-width:1150px;margin:0 auto;border-radius:40px;box-shadow:0 40px 100px rgba(0,0,0,0.6);border:1px solid rgba(6,182,212,0.15);background:linear-gradient(135deg,rgba(10,10,25,0.8),rgba(3,3,8,0.9));backdrop-filter:blur(30px)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start">
+          <div>
+            <div class="acc open"><div class="acc-h" onclick="toggleAcc(this)"><h3>⚙️ VFD Block</h3><span class="acc-arr">▼</span></div>
+              <div class="acc-b"><div class="acc-in">
+                <strong>Input:</strong> P_control from FOPID.<br>
+                <strong>Soft Start:</strong> Burst torque to overcome stiction → smooth ramp up.<br>
+                <strong>Dead Zone:</strong> Speed &lt; 690 RPM → full cutoff.<br>
+                <strong>Saturation:</strong> Clips above 1550 RPM.
+              </div></div>
             </div>
-            <div class="bcard" style="text-align:center">
-                <div
-                    style="font-family:'Space Mono';font-size:9px;color:var(--cyan);letter-spacing:2px;margin-bottom:12px">
-                    LIVE TANK SIMULATION</div>
-                <div class="tank-box" style="justify-content:center">
-                    <div class="tank" onclick="openArPanel('ctrl_tank')" style="cursor:pointer">
-                        <div class="tank-w" id="tankW" style="height:20%"></div>
-                        <div class="tank-lbl" id="tankLbl">20%</div>
-                    </div>
-                    <div style="text-align:left;flex:1;max-width:220px">
-                        <div style="font-size:11px;margin-bottom:8px"><span style="color:var(--green)">▲ PUMP:</span>
-                            <span id="pIn">0.8</span> L/s
-                        </div>
-                        <div style="font-size:11px;margin-bottom:8px"><span style="color:var(--red)">▼ DEMAND:</span>
-                            <span id="pOut">0.3</span> L/s
-                        </div>
-                        <div style="font-size:11px;margin-bottom:12px"><span style="color:var(--cyan)">NET:</span> <span
-                                id="pNet">+0.5</span> L/s</div>
-                        <div style="font-size:9px;color:var(--gold)">⟳ FEEDBACK → MPC MANAGER</div>
-                    </div>
-                </div>
+            <div class="acc"><div class="acc-h" onclick="toggleAcc(this)"><h3>💧 Pump Block</h3><span class="acc-arr">▼</span></div>
+              <div class="acc-b"><div class="acc-in">
+                Linear centrifugal model. Converts RPM to actual flow (L/s).
+              </div></div>
             </div>
+            <div class="acc"><div class="acc-h" onclick="toggleAcc(this)"><h3>🏗️ Tank Block</h3><span class="acc-arr">▼</span></div>
+              <div class="acc-b"><div class="acc-in">
+                <code>Level(t) = ∫(Q_in − Q_demand) × (1/Area) dt</code><br>
+                Max capacity: 9800L. Feeds back to MPC_Manager.
+              </div></div>
+            </div>
+          </div>
+          <div>
+            <div class="bcard" style="text-align:center;margin-bottom:16px">
+              <div style="font-family:'Space Mono';font-size:9px;color:var(--cyan);letter-spacing:2px;margin-bottom:10px">VFD INPUT→OUTPUT CURVE</div>
+              <canvas id="vfdCanvas" onclick="openArPanel('ctrl_vfd_curve')" style="width:100%;height:165px;display:block;border-radius:12px;cursor:pointer"></canvas>
+            </div>
+            <div class="tank-box" style="justify-content:center">
+              <div class="tank" onclick="openArPanel('ctrl_tank')" style="cursor:pointer">
+                <div class="tank-w" id="tankW" style="height:20%"></div>
+                <div class="tank-lbl" id="tankLbl">20%</div>
+              </div>
+              <div style="text-align:left;flex:1;max-width:200px;padding-left:12px">
+                <div style="font-size:11px;margin-bottom:6px;font-family:'Space Mono'"><span style="color:var(--green)">▲ Q_in:</span> <span id="pIn">0.8</span> L/s</div>
+                <div style="font-size:11px;margin-bottom:6px;font-family:'Space Mono'"><span style="color:var(--red)">▼ Q_demand:</span> <span id="pOut">0.3</span> L/s</div>
+                <div style="font-size:11px;margin-bottom:10px;font-family:'Space Mono'"><span style="color:var(--cyan)">NET:</span> <span id="pNet">+0.5</span> L/s</div>
+                <div style="font-size:10px;color:var(--gold);font-weight:bold">⟳ Level → MPC_Manager</div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </section>
-
-    <!-- ═══ CTA ═══ -->
-    <section class="sec" style="text-align:center">
-        <div class="reveal">
-            <h2 class="sh2"
-                style="background:linear-gradient(90deg,#fff,var(--green));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">
-                The Loop Is Closed</h2>
-            <p class="sp" style="max-width:600px;margin:0 auto 30px">From predicting clouds to delivering every drop of
-                water — <strong style="color:var(--green)">a system that anticipates nature.</strong></p>
-            <a href="presentation-conclusion.html" class="cta-btn fill">CONCLUSIONS & VISION →</a>
-            <a href="index.html" class="cta-btn out">EXPLORE CHAPTERS</a>
-            <a href="presentation-intro.html" class="cta-btn out">INTRODUCTION</a>
-        </div>
-    </section>
-
-    <footer>
+<footer>
         <div style="font-family:'Outfit';font-weight:900;font-size:22px;margin-bottom:8px">PI-HYBRID VIZ</div>
         <p style="color:rgba(255,255,255,.3);font-size:11px">© 2026 Advanced Neural Forecasting Laboratory</p>
     </footer>
@@ -1276,6 +1234,74 @@
             requestAnimationFrame(simT)
         })();
     </script>
+
+<script>
+(function(){
+  var c=document.getElementById('vfdCanvas');if(!c)return;
+  var ctx=c.getContext('2d');
+  function draw(){
+    c.width=c.parentElement.clientWidth;c.height=165;ctx.clearRect(0,0,c.width,c.height);
+    var W=c.width,H=c.height;
+    ctx.fillStyle='rgba(239,68,68,0.1)';ctx.fillRect(40,0,W*0.2,H-20);
+    ctx.fillStyle='rgba(245,158,11,0.1)';ctx.fillRect(W*0.88,0,W*0.12,H-20);
+    ctx.fillStyle='var(--red)';ctx.font='8px "Space Mono"';ctx.fillText('DEAD',42,14);ctx.fillText('ZONE',42,26);
+    ctx.fillStyle='var(--gold)';ctx.fillText('SAT',W*0.89,14);
+    for(var i=0;i<5;i++){var y=H-20-i*(H-30)/4;ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(40,y);ctx.lineTo(W,y);ctx.stroke();}
+    ctx.strokeStyle='var(--cyan)';ctx.lineWidth=2.5;ctx.beginPath();
+    for(var x=40;x<W;x++){var n=(x-40)/(W-50);var s=n<0.2?0:n>0.88?1:(n-0.2)/0.68;var y2=H-20-s*(H-30);x===40?ctx.moveTo(x,y2):ctx.lineTo(x,y2);}ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='9px "Space Mono"';ctx.fillText('P_control Input',40,H-4);
+  }draw();window.addEventListener('resize',draw);
+})();
+(function(){
+  var c=document.getElementById('hysteresisCanvas');if(!c)return;
+  var ctx=c.getContext('2d');var t=0;
+  function draw(){
+    c.width=c.parentElement.clientWidth;c.height=125;ctx.clearRect(0,0,c.width,c.height);
+    var W=c.width,H=c.height;
+    ctx.fillStyle='rgba(245,158,11,0.08)';ctx.fillRect(0,H*0.28,W,H*0.25);
+    ctx.setLineDash([4,4]);ctx.lineWidth=1;
+    ctx.strokeStyle='rgba(16,185,129,0.7)';ctx.beginPath();ctx.moveTo(0,H*0.22);ctx.lineTo(W,H*0.22);ctx.stroke();
+    ctx.strokeStyle='rgba(239,68,68,0.7)';ctx.beginPath();ctx.moveTo(0,H*0.53);ctx.lineTo(W,H*0.53);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='var(--green)';ctx.font='8px "Space Mono"';ctx.fillText('2400W ON',4,H*0.19);
+    ctx.fillStyle='var(--red)';ctx.fillText('2000W OFF',4,H*0.65);
+    ctx.strokeStyle='var(--cyan)';ctx.lineWidth=2;ctx.beginPath();
+    for(var x=0;x<W;x++){var y=H*0.38+Math.sin(x*0.04+t)*H*0.28+Math.sin(x*0.13)*H*0.07;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.stroke();t+=0.025;requestAnimationFrame(draw);
+  }draw();
+})();
+(function(){
+  var c=document.getElementById('pidVsFopidCanvas');if(!c)return;
+  var ctx=c.getContext('2d');var t=0;
+  function draw(){
+    c.width=c.parentElement.clientWidth;c.height=125;ctx.clearRect(0,0,c.width,c.height);
+    var W=c.width,H=c.height,TGT=H*0.35;
+    ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(0,TGT);ctx.lineTo(W,TGT);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='var(--red)';ctx.lineWidth=2;ctx.beginPath();
+    for(var x=0;x<W;x++){var p=x/W;var y=TGT+Math.sin(p*20+t)*H*0.28*Math.exp(-p*2.5);x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();
+    ctx.strokeStyle='var(--green)';ctx.lineWidth=2;ctx.beginPath();
+    for(var x=0;x<W;x++){var p2=x/W;var y2=TGT-Math.exp(-p2*5)*H*0.28;x===0?ctx.moveTo(x,y2):ctx.lineTo(x,y2);}ctx.stroke();
+    t+=0.015;requestAnimationFrame(draw);
+  }draw();
+})();
+(function(){
+  var c=document.getElementById('responseCanvas');if(!c)return;
+  var ctx=c.getContext('2d');var t=0;
+  function draw(){
+    c.width=c.parentElement.clientWidth;c.height=150;ctx.clearRect(0,0,c.width,c.height);
+    var W=c.width,H=c.height,TGT=H*0.35;
+    ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(0,TGT);ctx.lineTo(W,TGT);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='var(--red)';ctx.lineWidth=2;ctx.beginPath();
+    for(var x=0;x<W;x++){var p=x/W;var y=TGT+Math.sin(p*20+t)*H*0.28*Math.exp(-p*2.5);x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();
+    ctx.strokeStyle='var(--green)';ctx.lineWidth=2;ctx.beginPath();
+    for(var x=0;x<W;x++){var p2=x/W;var y2=TGT-Math.exp(-p2*5)*H*0.28;x===0?ctx.moveTo(x,y2):ctx.lineTo(x,y2);}ctx.stroke();
+    t+=0.015;requestAnimationFrame(draw);
+  }draw();
+})();
+</script>
+
 </body>
 
 </html>

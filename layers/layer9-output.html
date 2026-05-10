@@ -209,21 +209,28 @@
             gap: 12px;
         }
 
-        .left-panel {
+        .left-panel, .right-panel {
             position: fixed;
-            left: 24px;
             top: 112px;
             width: 320px;
             max-height: calc(100vh - 140px);
-            background: rgba(10, 10, 20, 0.8);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(8, 8, 22, 0.65);
+            -webkit-backdrop-filter: blur(35px) saturate(140%);
+            backdrop-filter: blur(35px) saturate(140%);
+            border: 1px solid rgba(6, 182, 212, 0.2);
             border-radius: 24px;
             padding: 24px;
             z-index: 50;
             overflow-y: auto;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(255, 255, 255, 0.02);
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .left-panel { left: 24px; }
+        .right-panel { right: 24px; }
+        .left-panel:hover, .right-panel:hover {
+            border-color: rgba(6, 182, 212, 0.45);
+            transform: translateY(-5px);
+            box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6), 0 0 30px rgba(6, 182, 212, 0.1);
         }
 
         .ghi-display {
@@ -292,13 +299,21 @@
         }
 
         .constraint-card {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 14px;
             padding: 16px 20px;
             display: flex;
             align-items: center;
             gap: 15px;
             border-left: 4px solid var(--green);
+            transition: all 0.3s;
+        }
+        .constraint-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+            border-color: rgba(6, 182, 212, 0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         .constraint-card.warning {
@@ -330,24 +345,7 @@
         }
 
         /* Right Panel */
-        .right-panel {
-            position: fixed;
-            right: 24px;
-            top: 112px;
-            width: 320px;
-            max-height: calc(100vh - 140px);
-            background: rgba(10, 10, 20, 0.8);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 24px;
-            z-index: 50;
-            overflow-y: auto;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-        }
-
-        /* Time Control */
+/* Time Control */
         .time-display {
             background: rgba(0, 0, 0, 0.4);
             border-radius: 16px;
@@ -466,10 +464,17 @@
 
         /* Equation */
         .equation-card {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 16px;
             padding: 20px;
             border-left: 4px solid var(--gold);
+            transition: all 0.3s;
+        }
+        .equation-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
         }
 
         .equation-title {
@@ -617,13 +622,7 @@
 
         /* Panel Tilt Effect */
         .left-panel,
-        .right-panel {
-            transition: transform 0.1s;
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-
-        .left-panel:hover,
+.left-panel:hover,
         .right-panel:hover {
             border-color: rgba(245, 158, 11, 0.5);
         }
@@ -686,6 +685,7 @@
             transition: all 0.2s;
         }
     </style>
+    <link rel="stylesheet" href="../ar-panel.css">
 </head>
 
 <body>
@@ -744,7 +744,7 @@
     <div class="left-panel">
         <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(245, 158, 11, 0.2); padding-bottom:12px;">
             <div class="section-title" style="margin-bottom:0; border-bottom:none; padding-bottom:0;">☀️ GHI Prediction</div>
-            <button id="btn-info" style="pointer-events: auto; width:22px; height:22px; border-radius:50%; background:rgba(245,158,11,0.2); border:1px solid rgba(245,158,11,0.5); color:#fff; cursor:pointer; font-size:12px; font-weight:bold; display:flex; align-items:center; justify-content:center; transition:0.2s;" title="Detailed Explanation">i</button>
+            <div class="ar-icon-inline" onclick="openArPanel('layer9_output')" style="pointer-events: auto; width:28px; height:28px; border-radius:50%; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.5); color:#06B6D4; cursor:pointer; font-size:14px; font-weight:bold; font-family:'Space Mono', monospace; display:flex; align-items:center; justify-content:center; transition:0.3s;" onmouseover="this.style.background='#06B6D4'; this.style.color='#000'; this.style.transform='scale(1.1)';" onmouseout="this.style.background='rgba(6,182,212,0.1)'; this.style.color='#06B6D4'; this.style.transform='scale(1)';" title="شرح عربي">ع</div>
         </div>
         <div class="ghi-display">
             <div class="ghi-value" id="ghiValue">542</div>
@@ -1498,65 +1498,18 @@
         updateSunPosition();
     </script>
 
-    <!-- Info Modal -->
-    <div id="info-modal">
-        <div class="modal-content">
-            <button class="modal-close" id="btn-close-modal">✕</button>
-            <div class="modal-body">
-                <style>@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');</style>
-                <h2 style="color: #4CC9F0; font-weight: 700; margin-bottom: 20px; font-size: 26px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">المحرك التحليلي: طبقة التوقعات النهائية (Output Layer)</h2>
-                <div style="display:none;">
-                    <h2 style="direction:ltr; text-align:right;">Final Stage: Physics-Constrained Output</h2>
-                    <h2 style="margin-top:-10px;">المحرك التحليلي: طبقة التوقعات النهائية (Output Layer)</h2>
-                </div>
 
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-right: 4px solid #4CC9F0; margin-bottom: 20px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">
-                    <h3 style="color: #4CC9F0; font-size: 18px; margin-bottom: 10px;">ما الذي يحدث في هذه المرحلة الحاسمة؟</h3>
-                    <p style="font-size: 15px; line-height: 1.8; color: #e0e0e0; margin: 0;">
-                        هذه الطبقة هي "المتحدث الرسمي" باسم النموذج. بعد آلاف العمليات الحسابية والتحليلات الزمنية، تقوم هذه الطبقة بتجميع كل تلك المعرفة في رقم واحد: كمية الإشعاع الشمسي (GHI) المتوقعة.
-                    </p>
-                </div>
-                <div style="display:none;">
-                    <p>
-                        <strong>ما الذي يحدث في هذه المرحلة الحاسمة؟</strong><br>
-                        هذه الطبقة هي "المتحدث الرسمي" باسم النموذج. بعد آلاف العمليات الحسابية والتحليلات الزمنية عبر BiLSTM،
-                        تقوم هذه الطبقة بتجميع كل تلك المعرفة في رقم واحد: كمية الإشعاع الشمسي (GHI) المتوقعة للساعة القادمة.
-                    </p>
-                </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-right: 4px solid #F59E0B; margin-bottom: 20px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">
-                    <h3 style="color: #F59E0B; font-size: 18px; margin-bottom: 10px;">الميزة التنافسية (القيود الفيزيائية)</h3>
-                    <p style="font-size: 15px; line-height: 1.8; color: #e0e0e0; margin: 0;">
-                        ما يميز هذا النموذج هو أنه ليس مجرد نموذج تعلم آلي اعتيادي، بل هو مدعوم بقوانين الفيزياء (Physics-Informed). طبقة الإخراج مقيدة بحدود طبيعية صارمة فلا يمكن أن تكون التوقعات سالبة، ولا يمكن أن تتجاوز الثابت الشمسي (Solar Constant). تضمن هذه القيود توافق التنبؤات مع الواقع الفعلي مما يرفع الدقة لمستويات قياسية.
-                    </p>
-                </div>
-                <div style="display:none;">
-                    <p>
-                        <strong>الميزة التنافسية (Physics Constraints):</strong><br>
-                        ما يميز هذا النموذج هو أنه ليس مجرد ذكاء اصطناعي "أعمى"، بل هو مدعوم بقوانين الفيزياء. طبقة الإخراج هنا
-                        مقيدة بحدود فيزيائية وجغرافية صارمة؛ فهي تضمن أن التوقعات لا يمكن أن تكون سالبة أبداً، ولا يمكن أن تتجاوز
-                        "الثابت الشمسي" (Solar Constant). كما أنها "تتأكد" برمجياً من موقع الشمس الافتراضي لضمان عدم وجود طاقة
-                        ليلاً، مما يجعل الدقة تصل لمستويات قياسية.
-                    </p>
-                </div>
-                <div style="margin-top:25px; text-align:center; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">
-                    <p style="font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 1px;">
-                        للتواصل: <span style="color: var(--cyan); font-weight: bold; letter-spacing: 2px;">IZZELDEENM@GMAIL.COM</span>
-                    </p>
-                </div>
-                <div style="display:none;">
-                    <div style="margin-top:20px; text-align:center; font-size:10px; opacity:0.3;">
-                        للتواصل: IZZELDEENM@GMAIL.COM
-                    </div>
-                </div>
-            </div>
+
+    <!-- ARABIC EXPLANATION PANEL -->
+    <div id="ar-panel-overlay" onclick="closeArPanel()"></div>
+    <div id="ar-panel">
+        <div class="ar-close">
+            <div class="ar-close-btn" onclick="closeArPanel()">✕</div>
         </div>
+        <div class="ar-panel-content" id="ar-panel-inner"></div>
     </div>
-    <script>
-        const infoModal = document.getElementById('info-modal');
-        document.getElementById('btn-info').addEventListener('click', () => infoModal.classList.add('show'));
-        document.getElementById('btn-close-modal').addEventListener('click', () => infoModal.classList.remove('show'));
-        infoModal.addEventListener('click', (e) => { if (e.target === infoModal) infoModal.classList.remove('show'); });
-    </script>
+    <script src="../ar-panel.js"></script>
+
 </body>
 
 </html>

@@ -999,7 +999,7 @@
             </table>
             <div class="ibox g" style="margin-top:15px;cursor:pointer" onclick="openArPanel('conc_sim_analysis')">
                 <strong>🛡️ Key Finding:</strong> Even under worst-case cloudy conditions, system efficiency remained
-                above <strong style="color:#fff">80%</strong> — proving the MPC+FOPID strategy's resilience. ℹ️
+                above <strong style="color:#fff">80%</strong> — proving the MPC+FOPID strategy's resilience. 
             </div>
         </div>
     </section>
@@ -1009,7 +1009,7 @@
     <!-- ═══ SCIENTIFIC CONTRIBUTIONS ═══ -->
     <section class="sec">
         <div class="reveal" style="text-align:center;margin-bottom:50px">
-            <h2 class="sh2 ititle" onclick="openArPanel('conc_contributions')">Scientific Contributions ℹ️</h2>
+            <h2 class="sh2 ititle" onclick="openArPanel('conc_contributions')">Scientific Contributions </h2>
             <p class="sp" style="max-width:600px;margin:0 auto">The fundamental novelties that set this research apart
                 from standard solar forecasting implementations.</p>
         </div>
@@ -1064,7 +1064,7 @@
         <div style="max-width:850px;margin:0 auto" class="reveal">
             <div class="acc open" onclick="openArPanel('conc_c1')">
                 <div class="acc-h" onclick="toggleAcc(this,event)">
-                    <h3>01 — Physics Is All You Need ℹ️</h3><span class="acc-arr">▼</span>
+                    <h3>01 — Physics Is All You Need </h3><span class="acc-arr">▼</span>
                 </div>
                 <div class="acc-b">
                     <div class="acc-in">The 15-feature physics-guided model proved its value as the definitive
@@ -1075,7 +1075,7 @@
             </div>
             <div class="acc" onclick="openArPanel('conc_c2')">
                 <div class="acc-h" onclick="toggleAcc(this,event)">
-                    <h3>02 — Lightweight Model Suffices for Control ℹ️</h3><span class="acc-arr">▼</span>
+                    <h3>02 — Lightweight Model Suffices for Control </h3><span class="acc-arr">▼</span>
                 </div>
                 <div class="acc-b">
                     <div class="acc-in">The operational LSTM model with only <strong>4 physics inputs</strong> (GHI, T,
@@ -1086,7 +1086,7 @@
             </div>
             <div class="acc" onclick="openArPanel('conc_c3')">
                 <div class="acc-h" onclick="toggleAcc(this,event)">
-                    <h3>03 — Attention Mechanism Is Redundant ℹ️</h3><span class="acc-arr">▼</span>
+                    <h3>03 — Attention Mechanism Is Redundant </h3><span class="acc-arr">▼</span>
                 </div>
                 <div class="acc-b">
                     <div class="acc-in">Adding Self-Attention <strong>degraded</strong> accuracy from 19.53 to 30.64
@@ -1097,7 +1097,7 @@
             </div>
             <div class="acc" onclick="openArPanel('conc_c4')">
                 <div class="acc-h" onclick="toggleAcc(this,event)">
-                    <h3>04 — Hierarchical Control Proves Resilient ℹ️</h3><span class="acc-arr">▼</span>
+                    <h3>04 — Hierarchical Control Proves Resilient </h3><span class="acc-arr">▼</span>
                 </div>
                 <div class="acc-b">
                     <div class="acc-in"><strong>MPC Supervisor</strong> scheduled pump operation proactively using
@@ -1108,7 +1108,7 @@
             </div>
             <div class="acc" onclick="openArPanel('conc_c5')">
                 <div class="acc-h" onclick="toggleAcc(this,event)">
-                    <h3>05 — Multi-Modal Storage Strategy ℹ️</h3><span class="acc-arr">▼</span>
+                    <h3>05 — Multi-Modal Storage Strategy </h3><span class="acc-arr">▼</span>
                 </div>
                 <div class="acc-b">
                     <div class="acc-in">The water tank serves as a <strong>"gravity battery"</strong> and the soil acts
@@ -1141,7 +1141,8 @@
 
     <!-- ═══ LIMITATIONS ═══ -->
     <section class="sec">
-        <div class="grid2">
+        <div class="glass-card reveal" style="padding:50px; max-width:1150px; margin:0 auto; border-radius:40px; box-shadow:0 40px 100px rgba(0,0,0,0.6), inset 0 0 40px rgba(255,255,255,0.02); border:1px solid rgba(239,68,68,0.15); background:linear-gradient(135deg, rgba(10,10,25,0.8) 0%, rgba(3,3,8,0.9) 100%); backdrop-filter:blur(30px);">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;">
             <div class="reveal">
                 <h2 class="sh2 ititle" onclick="openArPanel('conc_limitations')">Limitations</h2>
                 <p class="sp">Every rigorous study acknowledges its boundaries. These limitations define the conditions
@@ -1155,7 +1156,7 @@
                     <strong>🌍 Site-Specific Calibration</strong><br>
                     The operational model relies on local sensor readings for maximum accuracy. Deploying to a new
                     geographic region requires a short <strong>recalibration period</strong> to adapt to local cloud
-                    patterns. ℹ️
+                    patterns. 
                 </div>
                 <div class="ibox y" style="cursor:pointer; transition:0.3s; border-radius: 12px; margin-top: 15px;"
                     onclick="openArPanel('conc_lim2')"
@@ -1164,7 +1165,7 @@
                     <strong>⏰ Short-Horizon Focus</strong><br>
                     The system prioritizes autonomous, internet-independent operation. Prediction accuracy is
                     concentrated on <strong>shorter horizons</strong> using local sensors, though satellite data can be
-                    added as an auxiliary layer. ℹ️
+                    added as an auxiliary layer. 
                 </div>
                 <div class="ibox p" style="cursor:pointer; transition:0.3s; border-radius: 12px; margin-top: 15px;"
                     onclick="openArPanel('conc_lim3')"
@@ -1173,9 +1174,10 @@
                     <strong>🔬 Idealized Assumptions</strong><br>
                     Simulations assumed clean panels, ideal computation precision, and zero communication latency. Field
                     deployment requires <strong>site tuning</strong> with dust correction factors and real-time
-                    processing constraints. ℹ️
+                    processing constraints. 
                 </div>
             </div>
+        </div>
         </div>
     </section>
 
@@ -1186,14 +1188,15 @@
         <div class="reveal" style="text-align:center;margin-bottom:40px">
             <h2 class="sh2 ititle" onclick="openArPanel('conc_recommendations')">From Lab to Field</h2>
         </div>
-        <div class="grid2 reveal">
+        <div class="glass-card reveal" style="padding:50px; max-width:1150px; margin:0 auto; border-radius:40px; box-shadow:0 40px 100px rgba(0,0,0,0.6), inset 0 0 40px rgba(255,255,255,0.02); border:1px solid rgba(6,182,212,0.15); background:linear-gradient(135deg, rgba(10,10,25,0.8) 0%, rgba(3,3,8,0.9) 100%); backdrop-filter:blur(30px);">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;">
             <div class="bcard" onclick="openArPanel('conc_rec_storage')"
                 style="cursor:pointer; transition:0.4s; border-radius: 20px;"
                 onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 10px 30px rgba(16,185,129,0.15)';this.style.borderColor='rgba(16,185,129,0.5)'"
                 onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';this.style.borderColor='rgba(255,255,255,0.05)'">
                 <div
                     style="font-family:'Space Mono';font-size:9px;color:var(--green);letter-spacing:2px;margin-bottom:15px">
-                    MULTI-MODAL STORAGE ℹ️</div>
+                    MULTI-MODAL STORAGE </div>
                 <div style="font-size:35px;margin-bottom:15px">🔋💧🌱</div>
                 <h3 style="font-family:'Outfit';font-size:18px;font-weight:700;margin-bottom:12px;color:#fff;">Batteries
                     + Tank + Soil</h3>
@@ -1208,7 +1211,7 @@
                 onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';this.style.borderColor='rgba(255,255,255,0.05)'">
                 <div
                     style="font-family:'Space Mono';font-size:9px;color:var(--purple);letter-spacing:2px;margin-bottom:15px">
-                    EDGE AI DEPLOYMENT ℹ️</div>
+                    EDGE AI DEPLOYMENT </div>
                 <div style="font-size:35px;margin-bottom:15px">🧠⚡</div>
                 <h3 style="font-family:'Outfit';font-size:16px;font-weight:700;margin-bottom:8px">Knowledge Distillation
                     Path</h3>
@@ -1236,6 +1239,7 @@
                 </div>
             </div>
         </div>
+        </div>
     </section>
 
     <div class="sec-divider"></div>
@@ -1252,25 +1256,25 @@
                 <div class="icon">📊</div>
                 <h3>Probabilistic Forecasting</h3>
                 <p>Move from single-value predictions to <strong style="color:var(--cyan)">confidence intervals</strong>
-                    — enabling risk-aware irrigation scheduling under uncertainty. ℹ️</p>
+                    — enabling risk-aware irrigation scheduling under uncertainty. </p>
             </div>
             <div class="fc" onclick="openArPanel('conc_fut_rl')">
                 <div class="icon">🤖</div>
                 <h3>Hierarchical RL-MPC</h3>
                 <p>Deep Reinforcement Learning as the <strong style="color:var(--purple)">top-level supervisor</strong>
-                    for long-term strategy, with MPC handling real-time stability. ℹ️</p>
+                    for long-term strategy, with MPC handling real-time stability. </p>
             </div>
             <div class="fc" onclick="openArPanel('conc_fut_hil')">
                 <div class="icon">🔌</div>
                 <h3>Hardware-in-the-Loop</h3>
                 <p>Connect simulation to <strong style="color:var(--gold)">real controllers</strong> (HIL testing) to
-                    validate code flexibility under processing and communication constraints. ℹ️</p>
+                    validate code flexibility under processing and communication constraints. </p>
             </div>
             <div class="fc" onclick="openArPanel('conc_fut_sky')">
                 <div class="icon">📷</div>
                 <h3>Sky Image Integration</h3>
                 <p>Fuse <strong style="color:var(--green)">local sky camera</strong> image processing with the current
-                    model for ultra-short-term (seconds-to-minutes) cloud motion detection. ℹ️</p>
+                    model for ultra-short-term (seconds-to-minutes) cloud motion detection. </p>
             </div>
         </div>
     </section>

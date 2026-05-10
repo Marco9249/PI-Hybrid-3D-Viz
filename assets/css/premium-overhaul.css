@@ -1,0 +1,179 @@
+/* Premium Overhaul for PI-Hybrid-3D-Viz - v2 Refined */
+
+/* Smooth Scrolling Setup */
+html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
+body {
+    background: #05050A !important;
+}
+
+/* 1. True Glassmorphism & Sizing */
+.glass, .metric-card, .compare-row, .insight-box {
+    background: rgba(15, 15, 25, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 24px !important;
+    backdrop-filter: blur(24px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.05) !important;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative;
+    overflow: hidden;
+    padding: 25px !important; /* Reduced padding to fit screen */
+}
+
+.glass::before, .metric-card::before, .compare-row::before, .insight-box::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at top left, rgba(255,255,255,0.1) 0%, transparent 40%);
+    transform: rotate(30deg);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.glass > *, .metric-card > *, .compare-row > *, .insight-box > * {
+    position: relative;
+    z-index: 1;
+}
+
+.glass:hover, .metric-card:hover, .compare-row:hover {
+    border-color: rgba(0, 240, 255, 0.5) !important;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(0, 240, 255, 0.15) !important;
+    transform: translateY(-3px) !important;
+}
+
+/* 2. Refined Headings & Text Sizing */
+.section h2 {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 2.8rem !important; /* Adjusted for better fit */
+    font-weight: 800 !important;
+    margin-bottom: 15px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #00F0FF 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    letter-spacing: -1px !important;
+    line-height: 1.2 !important;
+    filter: drop-shadow(0 5px 15px rgba(0, 240, 255, 0.3));
+}
+
+.section h3 {
+    font-size: 1.6rem !important;
+    letter-spacing: -0.5px !important;
+    background: linear-gradient(90deg, #fff, rgba(255,255,255,0.7)) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    margin-bottom: 10px !important;
+}
+
+p {
+    font-size: 15px !important;
+    line-height: 1.8 !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    margin-bottom: 15px !important;
+}
+
+/* 3. Colors Overrides for Vividness */
+:root {
+    --cyan: #00F0FF !important;
+    --purple: #8B5CF6 !important; /* Reduced intensity */
+    --gold: #FFB800 !important;
+    --green: #00FF85 !important;
+    --red: #FF0055 !important;
+}
+
+/* 4. Layout Adjustments to fit Canvas fully */
+.section {
+    padding: 100px 40px 40px !important; /* Less vertical padding */
+    min-height: auto !important; /* Prevent strict 100vh overflow */
+}
+
+.grid-2 {
+    gap: 30px !important;
+}
+
+/* Make canvas elements responsive height */
+#gp-canvas, #ei-canvas, #conv-canvas {
+    height: 35vh !important;
+    min-height: 250px !important;
+    max-height: 380px !important;
+}
+
+/* 5. Smooth Reveal Animation Override */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* 6. Glowing Ambient Background Orbs */
+body::before {
+    content: '';
+    position: fixed;
+    top: 10%; left: 10%;
+    width: 50vw; height: 50vh;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 60%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    bottom: 5%; right: 5%;
+    width: 60vw; height: 60vh;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.04) 0%, transparent 60%); /* Reduced purple opacity from 0.1 to 0.04 */
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* 7. Enhanced Sliders & Controls */
+.hp-slider {
+    height: 6px !important;
+    margin: 8px 0 !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5) !important;
+}
+.hp-slider::-webkit-slider-thumb {
+    width: 20px !important;
+    height: 20px !important;
+    background: #00F0FF !important;
+    box-shadow: 0 0 10px #00F0FF, 0 0 20px rgba(0,240,255,0.5) !important;
+    border: 2px solid #fff !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.hp-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.3) !important;
+}
+
+/* 8. Top Nav & Buttons */
+.top-nav {
+    padding: 15px 40px !important;
+    background: rgba(5, 5, 10, 0.6) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+}
+.btn-glow {
+    padding: 12px 30px !important;
+    font-size: 13px !important;
+    border-radius: 50px !important;
+    background: rgba(255,255,255,0.05) !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.btn-glow:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3) !important;
+}
