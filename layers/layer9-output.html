@@ -1,40 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Layer 7: Output | Solar Reactor Core</title>
+    <title>Layer 9: Output | HUD Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../ar-panel.css">
     <style>
         :root {
-            /* Unifying to Blue/Cyan Theme */
-            --gold: #06B6D4;
-            --orange: #3B82F6;
-            --red: #8B5CF6;
-            --cyan: #06B6D4;
-            --green: #10B981;
-            --bg-dark: #050510;
-            --panel-bg: rgba(5, 5, 20, 0.95);
-            --glass-border: rgba(6, 182, 212, 0.3);
+            --hud-cyan: #00F2FF;
+            --hud-gold: #FFB800;
+            --hud-red: #FF3366;
+            --hud-green: #00FF66;
+            --hud-bg: rgba(4, 6, 14, 0.85);
+            --hud-border: rgba(0, 242, 255, 0.3);
+            --hud-glow: 0 0 20px rgba(0, 242, 255, 0.2);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html,
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Outfit', sans-serif;
-            font-size: 15px;
-            font-weight: 400;
-            line-height: 1.6;
-            background: #050510;
+            background: #020308;
             color: #fff;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
         }
 
         #canvas-container {
@@ -43,1464 +33,369 @@
             z-index: 1;
         }
 
-        /* Header - Solar Theme */
-        /* Header - Cinematic Glass */
-        .header {
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+
+        /* HUD Overlay Container */
+        .hud-wrapper {
             position: fixed;
-            top: 24px;
-            left: 24px;
-            right: 24px;
-            height: 64px;
-            background: rgba(10, 10, 20, 0.7);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            z-index: 1000;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            padding: 100px 30px 30px 30px;
+            gap: 30px;
+        }
+
+        .hud-panel {
+            pointer-events: auto;
+            background: var(--hud-bg);
+            border: 1px solid var(--hud-border);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            box-shadow: inset 0 0 30px rgba(0, 242, 255, 0.05), 0 10px 40px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(0 20px, 20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+        }
+
+        .hud-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 40px; height: 3px;
+            background: var(--hud-cyan);
+            box-shadow: var(--hud-glow);
+        }
+
+        /* TOP NAV HUD */
+        .hud-top {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 80px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 28px;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(90deg, rgba(0,242,255,0.1) 0%, transparent 20%, transparent 80%, rgba(0,242,255,0.1) 100%);
+            border-bottom: 1px solid rgba(0,242,255,0.2);
+            pointer-events: auto;
+            padding: 0 40px;
+            z-index: 20;
         }
 
-        .layer-badge {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
-
-        .layer-icon {
-            width: 70px;
-            height: 70px;
-            background: radial-gradient(circle, var(--gold), var(--orange), var(--red));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            box-shadow: 0 0 60px rgba(245, 158, 11, 0.7), 0 0 120px rgba(249, 115, 22, 0.4);
-            animation: sunPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes sunPulse {
-
-            0%,
-            100% {
-                box-shadow: 0 0 60px rgba(245, 158, 11, 0.7), 0 0 120px rgba(249, 115, 22, 0.4);
-                transform: scale(1);
-            }
-
-            50% {
-                box-shadow: 0 0 80px rgba(245, 158, 11, 0.9), 0 0 160px rgba(249, 115, 22, 0.6);
-                transform: scale(1.05);
-            }
-        }
-
-        .layer-title h1 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 1px;
-            margin: 0;
-        }
-
-        .layer-title p {
-            font-size: 11px;
-            color: var(--gold);
-            letter-spacing: 2px;
+        .hud-title {
+            font-size: 28px;
+            font-weight: 900;
             text-transform: uppercase;
-            font-weight: 600;
-            opacity: 0.8;
-            margin: 0;
-        }
-
-        .header-metrics {
+            letter-spacing: 6px;
+            color: #fff;
+            text-shadow: 0 0 20px var(--hud-cyan);
             display: flex;
+            align-items: center;
             gap: 20px;
         }
 
-        .metric-box {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid var(--glass-border);
-            padding: 12px 24px;
-            border-radius: 12px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .metric-label {
-            font-size: 9px;
-            color: var(--gold);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .metric-value {
-            font-size: 20px;
-            font-weight: 600;
-            color: #fff;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .nav-group {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            z-index: 1000;
-        }
-
+        .nav-links { display: flex; gap: 20px; }
         .nav-btn {
-            padding: 10px 18px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 11px;
-            font-weight: 600;
+            padding: 10px 20px;
+            border: 1px solid var(--hud-cyan);
+            color: var(--hud-cyan);
             text-decoration: none;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s;
-        }
-
-        .nav-btn:hover:not(.disabled) {
-            background: rgba(6, 182, 212, 0.1);
-            color: var(--gold);
-            border-color: var(--gold);
-        }
-
-        .nav-btn.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .back-btn {
-            padding: 14px 28px;
-            background: transparent;
-            border: 2px solid var(--gold);
-            border-radius: 30px;
-            color: var(--gold);
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.4s;
-            text-decoration: none;
             letter-spacing: 2px;
+            transition: all 0.3s;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
-
-        .back-btn:hover {
-            background: var(--gold);
+        .nav-btn:hover {
+            background: var(--hud-cyan);
             color: #000;
-            box-shadow: 0 0 40px rgba(245, 158, 11, 0.5);
+            box-shadow: var(--hud-glow);
         }
 
-        .section-title {
-            font-size: 11px;
-            color: var(--gold);
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+        /* GHI RING */
+        .ghi-circle-container {
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 12px;
-        }
-
-        .left-panel, .right-panel {
-            position: fixed;
-            top: 112px;
-            width: 320px;
-            max-height: calc(100vh - 140px);
-            background: rgba(8, 8, 22, 0.65);
-            -webkit-backdrop-filter: blur(35px) saturate(140%);
-            backdrop-filter: blur(35px) saturate(140%);
-            border: 1px solid rgba(6, 182, 212, 0.2);
-            border-radius: 24px;
-            padding: 24px;
-            z-index: 50;
-            overflow-y: auto;
-            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(255, 255, 255, 0.02);
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-        .left-panel { left: 24px; }
-        .right-panel { right: 24px; }
-        .left-panel:hover, .right-panel:hover {
-            border-color: rgba(6, 182, 212, 0.45);
-            transform: translateY(-5px);
-            box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6), 0 0 30px rgba(6, 182, 212, 0.1);
-        }
-
-        .ghi-display {
-            background: rgba(245, 158, 11, 0.05);
-            border: 1px solid var(--gold);
-            border-radius: 30px;
-            padding: 35px;
-            text-align: center;
-            margin-bottom: 25px;
+            height: 250px;
             position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(20px);
+            margin-bottom: 20px;
         }
-
-        .ghi-display::before {
-            content: '';
+        .ghi-value-text {
             position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at center, rgba(245, 158, 11, 0.1), transparent);
-            animation: ghiPulse 2s ease-in-out infinite;
+            text-align: center;
         }
-
-        @keyframes ghiPulse {
-
-            0%,
-            100% {
-                opacity: 0.5;
-            }
-
-            50% {
-                opacity: 1;
-            }
+        .ghi-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 64px;
+            font-weight: 700;
+            color: var(--hud-gold);
+            text-shadow: 0 0 30px rgba(255, 184, 0, 0.6);
+            line-height: 1;
         }
-
-        .ghi-value {
-            font-size: 72px;
-            font-weight: 200;
-            color: var(--gold);
-            text-shadow: 0 0 40px rgba(245, 158, 11, 0.8);
-            position: relative;
-            z-index: 1;
-            font-family: 'Courier New', monospace;
-        }
-
         .ghi-unit {
-            font-size: 18px;
-            color: var(--orange);
+            font-size: 14px;
+            color: var(--hud-cyan);
             letter-spacing: 4px;
+            text-transform: uppercase;
             margin-top: 5px;
         }
 
-        .ghi-label {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-top: 10px;
+        .circular-chart {
+            display: block;
+            margin: 0 auto;
+            max-width: 80%;
+            max-height: 250px;
+            animation: rotate 20s linear infinite;
+        }
+        .circle-bg {
+            fill: none;
+            stroke: rgba(0, 242, 255, 0.1);
+            stroke-width: 2.5;
+        }
+        .circle {
+            fill: none;
+            stroke: var(--hud-gold);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            animation: dash 2s ease-out forwards;
+        }
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+        @keyframes dash {
+            0% { stroke-dasharray: 0, 100; }
+            100% { stroke-dasharray: 70, 100; }
         }
 
-        /* Physics Constraints */
-        .constraint-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .constraint-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 14px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
+        /* SCADA STATUS CARDS */
+        .scada-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            border-left: 4px solid var(--green);
+        }
+        .scada-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            border-left: 3px solid var(--hud-green);
             transition: all 0.3s;
         }
-        .constraint-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(5px);
-            border-color: rgba(6, 182, 212, 0.3);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        .scada-card:hover {
+            background: rgba(0, 242, 255, 0.1);
+            border-color: var(--hud-cyan);
+            transform: scale(1.05);
         }
-
-        .constraint-card.warning {
-            border-left-color: var(--orange);
-        }
-
-        .constraint-icon {
-            font-size: 24px;
-        }
-
-        .constraint-info {
-            flex: 1;
-        }
-
-        .constraint-name {
-            font-size: 12px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .constraint-value {
-            font-size: 11px;
-            color: var(--cyan);
-            font-family: 'Courier New', monospace;
-        }
-
-        .constraint-status {
-            font-size: 20px;
-        }
-
-        /* Right Panel */
-/* Time Control */
-        .time-display {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 16px;
-            padding: 25px;
-            text-align: center;
-            margin-bottom: 20px;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-        }
-
-        .time-value {
-            font-size: 48px;
-            font-weight: 200;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-        }
-
-        .time-period {
-            font-size: 12px;
-            color: var(--gold);
+        .scada-card.warning { border-left-color: var(--hud-red); }
+        .scada-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
             text-transform: uppercase;
             letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        .scada-val {
+            font-family: 'Space Mono', monospace;
+            color: #fff;
+            font-size: 16px;
         }
 
-        /* Control Sliders */
-        .control-row {
-            margin-bottom: 22px;
-        }
-
-        .control-header {
+        /* RIGHT PANEL: TELEMETRY */
+        .telemetry-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-
-        .control-label {
-            font-size: 11px;
-            color: var(--gold);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .control-value {
+        .telemetry-label {
+            color: var(--hud-cyan);
             font-size: 12px;
-            color: var(--cyan);
-            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .telemetry-val {
+            font-family: 'Space Mono', monospace;
+            font-size: 18px;
+            color: var(--hud-gold);
         }
 
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            -webkit-appearance: none;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: linear-gradient(135deg, var(--gold), var(--orange));
+        /* AR ICON GLOW */
+        .ar-hud-btn {
+            background: rgba(0, 242, 255, 0.1);
+            border: 2px solid var(--hud-cyan);
+            color: var(--hud-cyan);
+            font-family: 'Space Mono', monospace;
+            font-size: 24px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            transition: all 0.3s;
+            animation: pulseAr 2s infinite;
+            pointer-events: auto;
+        }
+        .ar-hud-btn:hover {
+            background: var(--hud-cyan);
+            color: #000;
+            box-shadow: 0 0 40px var(--hud-cyan);
+            transform: scale(1.1);
+        }
+        @keyframes pulseAr {
+            0% { box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(0, 242, 255, 0.6); }
+            100% { box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
         }
 
-        /* Toggle Buttons */
-        .toggle-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+        /* TIME CONTROL RANGE */
+        input[type="range"] {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.2); outline: none; -webkit-appearance: none; margin-top: 15px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 20px; height: 20px; background: var(--hud-cyan); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); cursor: pointer;
         }
 
         .toggle-btn {
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .toggle-btn:hover {
-            background: rgba(245, 158, 11, 0.1);
-            border-color: var(--gold);
-            color: #fff;
-        }
-
-        .toggle-btn.active {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(249, 115, 22, 0.2));
-            border-color: var(--gold);
-            color: #fff;
-        }
-
-        /* Daily Curve */
-        .curve-container {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        #curveCanvas {
             width: 100%;
-            height: 120px;
-            border-radius: 8px;
-        }
-
-        /* Equation */
-        .equation-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 20px;
-            border-left: 4px solid var(--gold);
-            transition: all 0.3s;
-        }
-        .equation-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-        }
-
-        .equation-title {
-            font-size: 10px;
-            color: var(--gold);
+            padding: 12px;
+            background: transparent;
+            border: 1px solid var(--hud-cyan);
+            color: var(--hud-cyan);
+            font-family: 'Space Mono', monospace;
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-bottom: 12px;
-        }
-
-        .equation-content {
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            color: var(--cyan);
-            line-height: 2;
-        }
-
-        /* Stats */
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 12px;
-        }
-
-        .stats-row:last-child {
-            border: none;
-        }
-
-        .stats-key {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .stats-value {
-            color: var(--gold);
-            font-family: 'Courier New', monospace;
-            font-weight: 600;
-        }
-
-        /* Loading */
-        .loading {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-dark);
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.6s;
-        }
-
-        .loading.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loading-sun {
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle, var(--gold), var(--orange));
-            border-radius: 50%;
-            animation: loadingSun 1.5s ease-in-out infinite;
-        }
-
-        @keyframes loadingSun {
-
-            0%,
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 40px var(--gold);
-            }
-
-            50% {
-                transform: scale(1.2);
-                box-shadow: 0 0 80px var(--gold);
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--gold);
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        /* NEW VISUAL EFFECTS */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        #cursor {
-            width: 30px;
-            height: 30px;
-            border: 2px solid var(--gold);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-            transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1);
-            mix-blend-mode: difference;
-        }
-
-        #cursor-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--green);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-            box-shadow: 0 0 10px var(--gold);
-        }
-
-        .layer-title h1 {
-            text-shadow: 0 0 30px rgba(245, 158, 11, 0.5), 0 0 60px rgba(16, 185, 129, 0.3);
-            animation: breathe 4s ease-in-out infinite;
-        }
-
-        @keyframes breathe {
-
-            0%,
-            100% {
-                text-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
-            }
-
-            50% {
-                text-shadow: 0 0 50px rgba(245, 158, 11, 0.8), 0 0 80px rgba(16, 185, 129, 0.5);
-            }
-        }
-
-        /* Panel Tilt Effect */
-        .left-panel,
-.left-panel:hover,
-        .right-panel:hover {
-            border-color: rgba(245, 158, 11, 0.5);
-        }
-
-        /* INFO MODAL */
-        #info-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        #info-modal.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            background: rgba(10, 5, 5, 0.95);
-            border: 1px solid rgba(245, 158, 11, 0.4);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 40px;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 40px rgba(245, 158, 11, 0.15);
-            transform: translateY(20px);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            color: #fff;
-            direction: rtl;
-        }
-
-        #info-modal.show .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 24px;
-            left: 24px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            color: #fff;
             cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+        .toggle-btn.active {
+            background: rgba(0, 242, 255, 0.2);
+            box-shadow: inset 0 0 15px var(--hud-cyan);
+            color: #fff;
+        }
+
+        #curveCanvas { width: 100%; height: 120px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); margin-top: 15px; }
+
+        .section-hdr {
+            font-size: 14px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            gap: 10px;
+        }
+        .section-hdr::before {
+            content: ''; width: 10px; height: 10px; background: var(--hud-cyan); box-shadow: 0 0 10px var(--hud-cyan);
+        }
+        
+        #loading {
+            position: fixed; inset: 0; background: #020308; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.5s;
         }
     </style>
-    <link rel="stylesheet" href="../ar-panel.css">
 </head>
-
 <body>
-    <div id="cursor"></div>
-    <div id="cursor-dot"></div>
-    <canvas id="bg-canvas"></canvas>
-    <div class="loading" id="loading">
-        <div class="loading-sun"></div>
-        <p style="margin-top: 25px; color: var(--gold); letter-spacing: 3px;">INITIALIZING SOLAR REACTOR...</p>
-    </div>
-
-    <header class="header">
-        <div class="layer-badge">
-            <div class="layer-icon" style="background: linear-gradient(135deg, var(--cyan), var(--blue)); border-radius: 12px; font-size: 24px;">☀️</div>
-            <div class="layer-title-text">
-                <h1 style="font-size: 18px; margin: 0;">Solar Prediction</h1>
-                <p style="font-size: 10px; color: var(--cyan); margin: 0; text-transform: uppercase;">Direct Irradiance Output</p>
-            </div>
-        </div>
-
-        <div class="header-metrics">
-            <div class="metric-box">
-                <div class="metric-label">Input</div>
-                <div class="metric-value">64</div>
-            </div>
-            <div class="metric-box">
-                <div class="metric-label">Output</div>
-                <div class="metric-value">1</div>
-            </div>
-            <div class="metric-box">
-                <div class="metric-label">RMSE</div>
-                <div class="metric-value" style="color: var(--cyan);">42.3</div>
-            </div>
-            <div class="metric-box" style="border-right: none;">
-                <div class="metric-label">R²</div>
-                <div class="metric-value">0.967</div>
-            </div>
-        </div>
-
-        <div class="nav-group">
-            <a href="layer8-relu2.html" class="nav-btn">
-                <span style="font-size: 1.2em; line-height: 0;">←</span> Prev
-            </a>
-            <a href="../index.html" class="nav-btn">
-                <span style="font-size: 1.1em; line-height: 0;">⬡</span> HUB
-            </a>
-            <a href="layer10-regression.html" class="nav-btn">
-                Next <span style="font-size: 1.2em; line-height: 0;">→</span>
-            </a>
-        </div>
-    </header>
-
     <div id="canvas-container"></div>
-
-    <!-- Left Panel -->
-    <div class="left-panel">
-        <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(245, 158, 11, 0.2); padding-bottom:12px;">
-            <div class="section-title" style="margin-bottom:0; border-bottom:none; padding-bottom:0;">☀️ GHI Prediction</div>
-            <div class="ar-icon-inline" onclick="openArPanel('layer9_output')" style="pointer-events: auto; width:28px; height:28px; border-radius:50%; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.5); color:#06B6D4; cursor:pointer; font-size:14px; font-weight:bold; font-family:'Space Mono', monospace; display:flex; align-items:center; justify-content:center; transition:0.3s;" onmouseover="this.style.background='#06B6D4'; this.style.color='#000'; this.style.transform='scale(1.1)';" onmouseout="this.style.background='rgba(6,182,212,0.1)'; this.style.color='#06B6D4'; this.style.transform='scale(1)';" title="شرح عربي">ع</div>
+    <div id="hourVal" style="display:none;"></div>
+    
+    <div class="hud-top">
+        <div class="hud-title">
+            <span style="color: var(--hud-cyan);">[SYS]</span> OUTPUT LAYER
+            <div class="ar-hud-btn" onclick="openArPanel('layer9_output')" title="شرح عربي">ع</div>
         </div>
-        <div class="ghi-display">
-            <div class="ghi-value" id="ghiValue">542</div>
-            <div class="ghi-unit">W/m²</div>
-            <div class="ghi-label">Global Horizontal Irradiance</div>
-        </div>
-
-        <div class="section-title">🔒 Physics Constraints</div>
-
-        <div class="constraint-cards">
-            <div class="constraint-card">
-                <span class="constraint-icon">📐</span>
-                <div class="constraint-info">
-                    <div class="constraint-name">Non-Negativity</div>
-                    <div class="constraint-value">GHI ≥ 0 W/m²</div>
-                </div>
-                <span class="constraint-status">✅</span>
-            </div>
-            <div class="constraint-card">
-                <span class="constraint-icon">🌡️</span>
-                <div class="constraint-info">
-                    <div class="constraint-name">Solar Constant</div>
-                    <div class="constraint-value">GHI ≤ 1361 W/m²</div>
-                </div>
-                <span class="constraint-status">✅</span>
-            </div>
-            <div class="constraint-card">
-                <span class="constraint-icon">☁️</span>
-                <div class="constraint-info">
-                    <div class="constraint-name">Clearness Index</div>
-                    <div class="constraint-value" id="kcValue">Kc = 0.82</div>
-                </div>
-                <span class="constraint-status">✅</span>
-            </div>
-            <div class="constraint-card warning">
-                <span class="constraint-icon">🌅</span>
-                <div class="constraint-info">
-                    <div class="constraint-name">Solar Zenith</div>
-                    <div class="constraint-value" id="zenithValue">θz = 45°</div>
-                </div>
-                <span class="constraint-status">⚡</span>
-            </div>
-        </div>
-
-        <div class="section-title">📊 Model Statistics</div>
-
-        <div style="background: rgba(0,0,0,0.3); border-radius: 14px; padding: 15px;">
-            <div class="stats-row">
-                <span class="stats-key">Mean Absolute Error</span>
-                <span class="stats-value">31.2 W/m²</span>
-            </div>
-            <div class="stats-row">
-                <span class="stats-key">Max Error</span>
-                <span class="stats-value">156 W/m²</span>
-            </div>
-            <div class="stats-row">
-                <span class="stats-key">Skill Score</span>
-                <span class="stats-value">0.412</span>
-            </div>
+        <div class="nav-links">
+            <a href="layer8-relu2.html" class="nav-btn">◄ PREV NODE</a>
+            <a href="../index.html" class="nav-btn">CORE HUB</a>
+            <a href="layer10-regression.html" class="nav-btn">NEXT NODE ►</a>
         </div>
     </div>
 
-    <!-- Right Panel -->
-    <div class="right-panel">
-        <div class="section-title">🕐 Time Control</div>
+    <div class="hud-wrapper">
+        <!-- LEFT HUD -->
+        <div class="hud-panel" style="align-self: center;">
+            <div class="section-hdr">GHI PREDICTION CORE</div>
+            
+            <div class="ghi-circle-container">
+                <svg viewBox="0 0 36 36" class="circular-chart">
+                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="circle" stroke-dasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="ghi-value-text">
+                    <div class="ghi-number" id="ghiValue">542</div>
+                    <div class="ghi-unit">W/m²</div>
+                </div>
+            </div>
 
-        <div class="time-display">
-            <div class="time-value" id="timeValue">12:00</div>
-            <div class="time-period" id="timePeriod">Solar Noon</div>
+            <div class="section-hdr" style="margin-top: 30px;">PHYSICS CONSTRAINTS</div>
+            <div class="scada-grid">
+                <div class="scada-card">
+                    <div class="scada-label">Non-Negativity</div>
+                    <div class="scada-val">GHI ≥ 0</div>
+                </div>
+                <div class="scada-card">
+                    <div class="scada-label">Solar Constant</div>
+                    <div class="scada-val">≤ 1361 W/m²</div>
+                </div>
+                <div class="scada-card">
+                    <div class="scada-label">Clearness Idx</div>
+                    <div class="scada-val" id="kcValue">Kc = 0.82</div>
+                </div>
+                <div class="scada-card warning">
+                    <div class="scada-label">Solar Zenith</div>
+                    <div class="scada-val" id="zenithValue">θz = 45°</div>
+                </div>
+            </div>
         </div>
 
-        <div class="control-row">
-            <div class="control-header">
-                <span class="control-label">Hour of Day</span>
-                <span class="control-value" id="hourVal">12</span>
+        <div></div> <!-- CENTER EMPTY SPACE FOR 3D -->
+
+        <!-- RIGHT HUD -->
+        <div class="hud-panel" style="align-self: center;">
+            <div class="section-hdr">TELEMETRY & TIME</div>
+            
+            <div class="telemetry-row">
+                <div class="telemetry-label">System Time</div>
+                <div class="telemetry-val" id="timeValue">12:00</div>
             </div>
+            <div class="telemetry-row">
+                <div class="telemetry-label">Solar Phase</div>
+                <div class="telemetry-val" id="timePeriod" style="color:#fff;">Solar Noon</div>
+            </div>
+
             <input type="range" id="hourSlider" min="0" max="23" value="12">
-        </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="toggle-btn active" id="simToggle">SIMULATE</button>
+                <button class="toggle-btn active" id="raysToggle">RAYS</button>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="toggle-btn active" id="groundToggle">GROUND</button>
+                <button class="toggle-btn active" id="bloomToggle">BLOOM</button>
+            </div>
 
-        <div class="toggle-grid">
-            <button class="toggle-btn active" id="simToggle">▶️ Simulate</button>
-            <button class="toggle-btn active" id="raysToggle">☀️ Rays</button>
-            <button class="toggle-btn active" id="groundToggle">🌍 Ground</button>
-            <button class="toggle-btn active" id="bloomToggle">✨ Bloom</button>
-        </div>
+            <div class="section-hdr" style="margin-top: 30px;">DAILY PROFILE</div>
+            <canvas id="curveCanvas" width="280" height="100"></canvas>
 
-        <div class="section-title">📈 Daily Profile</div>
-
-        <div class="curve-container">
-            <canvas id="curveCanvas" width="280" height="120"></canvas>
-        </div>
-
-        <div class="equation-card">
-            <div class="equation-title">Physics-Informed Loss</div>
-            <div class="equation-content">
-                L = MSE(y, ŷ) + λ·Φ(Kc, τ)<br>
-                GHI = Kc × GHI_clearsky<br>
-                ŷ = max(0, Dense(x))
+            <div class="scada-card" style="margin-top: 20px; border-left-color: var(--hud-gold); width: 100%;">
+                <div class="scada-label">Physics-Informed Loss</div>
+                <div class="scada-val" style="font-size: 13px; color: #fff;">L = MSE(y, ŷ) + λ·Φ(Kc, τ)<br>ŷ = max(0, Dense(x))</div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-    <script>
-        // ═══════════════════════════════════════════════════════════════════════════
-        // CONFIGURATION
-        // ═══════════════════════════════════════════════════════════════════════════
-        const CONFIG = {
-            colors: {
-                sun: 0xF59E0B,
-                corona: 0xF97316,
-                rays: 0xFCD34D,
-                ground: 0x1a1a2e,
-                grid: 0x333344
-            }
-        };
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // GLOBALS
-        // ═══════════════════════════════════════════════════════════════════════════
-        let scene, camera, renderer, controls, composer, clock;
-        let sun, corona, rays, ground, solarPanel;
-        let params = {
-            hour: 12,
-            simulating: true,
-            showRays: true,
-            showGround: true,
-            bloom: true
-        };
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // INIT
-        // ═══════════════════════════════════════════════════════════════════════════
-        function init() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x050505);
-            scene.fog = new THREE.FogExp2(0x050505, 0.008);
-
-            camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 500);
-            camera.position.set(0, 25, 60);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(innerWidth, innerHeight);
-            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.03;
-            controls.autoRotate = true;
-            controls.autoRotateSpeed = 0.3;
-            controls.target.set(0, 10, 0);
-
-            // Reflector Ground Plane
-            const groundGeo = new THREE.PlaneGeometry(1000, 1000);
-            const groundMat = new THREE.MeshStandardMaterial({
-                color: 0x020205,
-                metalness: 0.95,
-                roughness: 0.05
-            });
-            const ground = new THREE.Mesh(groundGeo, groundMat);
-            ground.rotation.x = -Math.PI / 2;
-            ground.position.y = -5;
-            scene.add(ground);
-
-            clock = new THREE.Clock();
-
-            createSun();
-            createCorona();
-            createRays();
-            createGround();
-            createSolarPanel();
-            createEnergyOrbs();
-            setupPostProcessing();
-            setupEvents();
-            drawCurve();
-
-            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 800);
-            animate();
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // SUN CORE
-        // ═══════════════════════════════════════════════════════════════════════════
-        function createSun() {
-            const sunGeo = new THREE.SphereGeometry(6, 64, 64);
-            const sunMat = new THREE.MeshBasicMaterial({
-                color: CONFIG.colors.sun
-            });
-            sun = new THREE.Mesh(sunGeo, sunMat);
-            sun.position.set(0, 30, 0);
-            scene.add(sun);
-
-            // Inner glow
-            const glowGeo = new THREE.SphereGeometry(7, 32, 32);
-            const glowMat = new THREE.MeshBasicMaterial({
-                color: CONFIG.colors.sun,
-                transparent: true,
-                opacity: 0.4,
-                side: THREE.BackSide
-            });
-            const innerGlow = new THREE.Mesh(glowGeo, glowMat);
-            sun.add(innerGlow);
-
-            // Outer glow
-            const outerGlowGeo = new THREE.SphereGeometry(10, 32, 32);
-            const outerGlowMat = new THREE.MeshBasicMaterial({
-                color: CONFIG.colors.corona,
-                transparent: true,
-                opacity: 0.15,
-                side: THREE.BackSide
-            });
-            const outerGlow = new THREE.Mesh(outerGlowGeo, outerGlowMat);
-            sun.add(outerGlow);
-
-            // Light source
-            const sunLight = new THREE.PointLight(CONFIG.colors.sun, 3, 200);
-            sun.add(sunLight);
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // CORONA PARTICLES
-        // ═══════════════════════════════════════════════════════════════════════════
-        function createCorona() {
-            const count = 500;
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(count * 3);
-            const colors = new Float32Array(count * 3);
-
-            for (let i = 0; i < count; i++) {
-                const theta = Math.random() * Math.PI * 2;
-                const phi = Math.acos(2 * Math.random() - 1);
-                const r = 8 + Math.random() * 6;
-
-                positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-                positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) + 30;
-                positions[i * 3 + 2] = r * Math.cos(phi);
-
-                const c = new THREE.Color(CONFIG.colors.rays);
-                colors[i * 3] = c.r;
-                colors[i * 3 + 1] = c.g;
-                colors[i * 3 + 2] = c.b;
-            }
-
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-            const material = new THREE.PointsMaterial({
-                size: 0.3,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.8,
-                blending: THREE.AdditiveBlending
-            });
-
-            corona = new THREE.Points(geometry, material);
-            scene.add(corona);
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // LIGHT RAYS
-        // ═══════════════════════════════════════════════════════════════════════════
-        function createRays() {
-            rays = new THREE.Group();
-            const rayCount = 50;
-
-            for (let i = 0; i < rayCount; i++) {
-                const angle = (i / rayCount) * Math.PI * 2;
-                const length = 20 + Math.random() * 15;
-
-                const points = [
-                    new THREE.Vector3(0, 30, 0),
-                    new THREE.Vector3(
-                        Math.cos(angle) * length,
-                        0,
-                        Math.sin(angle) * length
-                    )
-                ];
-
-                const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                const material = new THREE.LineBasicMaterial({
-                    color: CONFIG.colors.rays,
-                    transparent: true,
-                    opacity: 0.15
-                });
-
-                const ray = new THREE.Line(geometry, material);
-                ray.userData = { baseOpacity: 0.1 + Math.random() * 0.1 };
-                rays.add(ray);
-            }
-
-            scene.add(rays);
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // GROUND
-        // ═══════════════════════════════════════════════════════════════════════════
-        function createGround() {
-            ground = new THREE.Group();
-
-            // Grid
-            const gridHelper = new THREE.GridHelper(100, 40, CONFIG.colors.grid, 0x222233);
-            ground.add(gridHelper);
-
-            // Ground plane
-            const planeGeo = new THREE.CircleGeometry(50, 64);
-            const planeMat = new THREE.MeshPhongMaterial({
-                color: CONFIG.colors.ground,
-                transparent: true,
-                opacity: 0.9,
-                side: THREE.DoubleSide
-            });
-            const plane = new THREE.Mesh(planeGeo, planeMat);
-            plane.rotation.x = -Math.PI / 2;
-            plane.position.y = -0.1;
-            ground.add(plane);
-
-            // Outer ring
-            const ringGeo = new THREE.RingGeometry(48, 50, 64);
-            const ringMat = new THREE.MeshBasicMaterial({
-                color: CONFIG.colors.sun,
-                transparent: true,
-                opacity: 0.5,
-                side: THREE.DoubleSide
-            });
-            const ring = new THREE.Mesh(ringGeo, ringMat);
-            ring.rotation.x = -Math.PI / 2;
-            ring.position.y = 0.1;
-            ground.add(ring);
-
-            scene.add(ground);
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // SOLAR PANEL
-        // ═══════════════════════════════════════════════════════════════════════════
-        function createSolarPanel() {
-            solarPanel = new THREE.Group();
-
-            // Panel frame
-            const frameGeo = new THREE.BoxGeometry(8, 0.3, 5);
-            const frameMat = new THREE.MeshPhongMaterial({ color: 0x333333 });
-            const frame = new THREE.Mesh(frameGeo, frameMat);
-            solarPanel.add(frame);
-
-            // Panel surface (cells)
-            const cellGeo = new THREE.PlaneGeometry(7, 4);
-            const cellMat = new THREE.MeshPhongMaterial({
-                color: 0x1a237e,
-                emissive: 0x1a237e,
-                emissiveIntensity: 0.2,
-                shininess: 100
-            });
-            const cells = new THREE.Mesh(cellGeo, cellMat);
-            cells.position.y = 0.16;
-            cells.rotation.x = -Math.PI / 2;
-            solarPanel.add(cells);
-
-            // Stand
-            const standGeo = new THREE.CylinderGeometry(0.2, 0.3, 3, 8);
-            const standMat = new THREE.MeshPhongMaterial({ color: 0x444444 });
-            const stand = new THREE.Mesh(standGeo, standMat);
-            stand.position.y = -1.5;
-            solarPanel.add(stand);
-
-            solarPanel.position.set(0, 3, 20);
-            solarPanel.rotation.x = -0.5;
-            scene.add(solarPanel);
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // ENERGY ORBS (floating from sun to panel)
-        // ═══════════════════════════════════════════════════════════════════════════
-        let energyOrbs = [];
-
-        function createEnergyOrbs() {
-            for (let i = 0; i < 30; i++) {
-                const orbGeo = new THREE.SphereGeometry(0.3, 8, 8);
-                const orbMat = new THREE.MeshBasicMaterial({
-                    color: CONFIG.colors.sun,
-                    transparent: true,
-                    opacity: 0.8
-                });
-                const orb = new THREE.Mesh(orbGeo, orbMat);
-                orb.userData = {
-                    progress: Math.random(),
-                    speed: 0.003 + Math.random() * 0.005,
-                    offset: new THREE.Vector3(
-                        (Math.random() - 0.5) * 10,
-                        (Math.random() - 0.5) * 5,
-                        (Math.random() - 0.5) * 10
-                    )
-                };
-                energyOrbs.push(orb);
-                scene.add(orb);
-            }
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // POST-PROCESSING
-        // ═══════════════════════════════════════════════════════════════════════════
-        function setupPostProcessing() {
-            composer = new THREE.EffectComposer(renderer);
-            composer.addPass(new THREE.RenderPass(scene, camera));
-            composer.addPass(new THREE.UnrealBloomPass(
-                new THREE.Vector2(innerWidth, innerHeight),
-                0.8, 0.3, 0.8
-            ));
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // DRAW DAILY CURVE
-        // ═══════════════════════════════════════════════════════════════════════════
-        function drawCurve() {
-            const canvas = document.getElementById('curveCanvas');
-            const ctx = canvas.getContext('2d');
-            const w = canvas.width, h = canvas.height;
-
-            ctx.clearRect(0, 0, w, h);
-
-            // Background grid
-            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= 4; i++) {
-                const y = i * h / 4;
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(w, y);
-                ctx.stroke();
-            }
-
-            // Solar curve
-            ctx.strokeStyle = '#F59E0B';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-
-            for (let x = 0; x <= 24; x += 0.2) {
-                let y = h;
-                if (x > 5 && x < 19) {
-                    const angle = ((x - 5) / 14) * Math.PI;
-                    y = h - (Math.sin(angle) * (h - 15));
-                }
-                const px = (x / 24) * w;
-                if (x === 0) ctx.moveTo(px, y);
-                else ctx.lineTo(px, y);
-            }
-            ctx.stroke();
-
-            // Current position dot
-            const cx = (params.hour / 24) * w;
-            let cy = h;
-            if (params.hour > 5 && params.hour < 19) {
-                const angle = ((params.hour - 5) / 14) * Math.PI;
-                cy = h - (Math.sin(angle) * (h - 15));
-            }
-
-            ctx.fillStyle = '#EF4444';
-            ctx.beginPath();
-            ctx.arc(cx, cy, 6, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Glow
-            ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
-            ctx.beginPath();
-            ctx.arc(cx, cy, 12, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // UPDATE SUN POSITION
-        // ═══════════════════════════════════════════════════════════════════════════
-        function updateSunPosition() {
-            const h = params.hour;
-            let ghi = 0;
-            let zenith = 90;
-
-            if (h >= 5 && h <= 19) {
-                const angle = ((h - 5) / 14) * Math.PI;
-                const sunY = Math.sin(angle) * 35;
-                const sunX = Math.cos(angle) * 30;
-
-                sun.position.set(-sunX, sunY + 5, 0);
-                sun.visible = true;
-                rays.visible = params.showRays;
-                corona.visible = true;
-
-                ghi = Math.floor(Math.sin(angle) * 850 + (Math.random() - 0.5) * 20);
-                zenith = Math.floor(90 - (Math.sin(angle) * 90));
-
-                // Update rays
-                rays.children.forEach((ray, i) => {
-                    const points = ray.geometry.attributes.position.array;
-                    points[0] = sun.position.x;
-                    points[1] = sun.position.y;
-                    points[2] = sun.position.z;
-                    ray.geometry.attributes.position.needsUpdate = true;
-                    ray.material.opacity = ray.userData.baseOpacity * Math.sin(angle);
-                });
-
-            } else {
-                sun.visible = false;
-                rays.visible = false;
-                corona.visible = false;
-                ghi = 0;
-                zenith = 90;
-            }
-
-            // Update UI
-            document.getElementById('ghiValue').textContent = Math.max(0, ghi);
-            document.getElementById('zenithValue').textContent = `θz = ${zenith}°`;
-            document.getElementById('kcValue').textContent = `Kc = ${(0.6 + Math.random() * 0.3).toFixed(2)}`;
-
-            const timeStr = h.toString().padStart(2, '0') + ':00';
-            document.getElementById('timeValue').textContent = timeStr;
-            document.getElementById('hourVal').textContent = h;
-
-            let period = 'Night';
-            if (h >= 5 && h < 8) period = 'Sunrise';
-            else if (h >= 8 && h < 12) period = 'Morning';
-            else if (h >= 12 && h < 14) period = 'Solar Noon';
-            else if (h >= 14 && h < 17) period = 'Afternoon';
-            else if (h >= 17 && h < 19) period = 'Sunset';
-            document.getElementById('timePeriod').textContent = period;
-
-            drawCurve();
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // EVENTS
-        // ═══════════════════════════════════════════════════════════════════════════
-        function setupEvents() {
-            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 500);
-            setupTheme();
-            addEventListener('resize', () => {
-                camera.aspect = innerWidth / innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(innerWidth, innerHeight);
-                composer.setSize(innerWidth, innerHeight);
-            });
-
-            document.getElementById('hourSlider').oninput = e => {
-                params.hour = parseInt(e.target.value);
-                params.simulating = false;
-                document.getElementById('simToggle').classList.remove('active');
-                updateSunPosition();
-            };
-
-            document.getElementById('simToggle').onclick = function () {
-                params.simulating = !params.simulating;
-                this.classList.toggle('active');
-                this.innerHTML = params.simulating ? '⏸️ Pause' : '▶️ Simulate';
-            };
-
-            document.getElementById('raysToggle').onclick = function () {
-                this.classList.toggle('active');
-                params.showRays = this.classList.contains('active');
-                rays.visible = params.showRays && sun.visible;
-            };
-
-            document.getElementById('groundToggle').onclick = function () {
-                this.classList.toggle('active');
-                ground.visible = this.classList.contains('active');
-            };
-
-            document.getElementById('bloomToggle').onclick = function () {
-                this.classList.toggle('active');
-                params.bloom = this.classList.contains('active');
-            };
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // ANIMATION
-        // ═══════════════════════════════════════════════════════════════════════════
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-
-            const time = clock.getElapsedTime();
-
-            // Auto simulate day
-            if (params.simulating) {
-                params.hour = (params.hour + 0.02) % 24;
-                document.getElementById('hourSlider').value = Math.floor(params.hour);
-                updateSunPosition();
-            }
-
-            // Corona rotation
-            if (corona) {
-                corona.rotation.y += 0.001;
-            }
-
-            // Animate energy orbs
-            energyOrbs.forEach(orb => {
-                if (sun.visible) {
-                    orb.visible = true;
-                    orb.userData.progress += orb.userData.speed;
-                    if (orb.userData.progress > 1) orb.userData.progress = 0;
-
-                    const t = orb.userData.progress;
-                    const start = sun.position.clone();
-                    const end = solarPanel.position.clone();
-
-                    orb.position.lerpVectors(start, end, t);
-                    orb.position.add(orb.userData.offset.clone().multiplyScalar(Math.sin(t * Math.PI)));
-                    orb.material.opacity = 0.8 - t * 0.6;
-                } else {
-                    orb.visible = false;
-                }
-            });
-
-            // Pulse sun
-            if (sun.visible) {
-                const pulse = 1 + Math.sin(time * 2) * 0.05;
-                sun.scale.setScalar(pulse);
-            }
-
-            // Solar panel tracking
-            if (sun.visible) {
-                solarPanel.lookAt(sun.position);
-                solarPanel.rotation.x -= Math.PI / 2;
-            }
-
-            if (params.bloom) {
-                composer.render();
-            } else {
-                renderer.render(scene, camera);
-            }
-        }
-
-        function setupPostProcessing() {
-            composer = new THREE.EffectComposer(renderer);
-            composer.addPass(new THREE.RenderPass(scene, camera));
-            composer.addPass(new THREE.UnrealBloomPass(
-                new THREE.Vector2(innerWidth, innerHeight),
-                1.5, // Strength (God-Tier)
-                0.5, // Radius
-                0.85 // Threshold
-            ));
-        }
-
-        function setupTheme() {
-            // Cursor
-            const cursor = document.getElementById('cursor');
-            const cursorDot = document.getElementById('cursor-dot');
-            document.addEventListener('mousemove', e => {
-                cursor.style.left = e.clientX - 15 + 'px';
-                cursor.style.top = e.clientY - 15 + 'px';
-                cursorDot.style.left = e.clientX - 4 + 'px';
-                cursorDot.style.top = e.clientY - 4 + 'px';
-            });
-
-            // BG Particles
-            const canvas = document.getElementById('bg-canvas');
-            const bgScene = new THREE.Scene();
-            const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const bgRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-            bgRenderer.setSize(window.innerWidth, window.innerHeight);
-
-            const particleCount = 200;
-            const particles = new THREE.BufferGeometry();
-            const posArray = new Float32Array(particleCount * 3);
-            const particlesData = [];
-
-            for (let i = 0; i < particleCount; i++) {
-                posArray[i * 3] = (Math.random() - 0.5) * 30;
-                posArray[i * 3 + 1] = (Math.random() - 0.5) * 30;
-                posArray[i * 3 + 2] = (Math.random() - 0.5) * 30;
-                particlesData.push({
-                    velocity: new THREE.Vector3(-0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02)
-                });
-            }
-            particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const particleMat = new THREE.PointsMaterial({ size: 0.1, color: 0xF59E0B, transparent: true, opacity: 0.6 });
-            const particleMesh = new THREE.Points(particles, particleMat);
-            bgScene.add(particleMesh);
-
-            const lineGeo = new THREE.BufferGeometry();
-            const lineMat = new THREE.LineBasicMaterial({ color: 0x10B981, transparent: true, opacity: 0.15 });
-            const lines = new THREE.LineSegments(lineGeo, lineMat);
-            bgScene.add(lines);
-
-            bgCamera.position.z = 10;
-            let mouseX = 0, mouseY = 0;
-            document.addEventListener('mousemove', (e) => {
-                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-                mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-            });
-
-            function animateBG() {
-                requestAnimationFrame(animateBG);
-                bgScene.rotation.y += 0.001;
-                bgScene.rotation.x += (mouseY * 0.05 - bgScene.rotation.x) * 0.05;
-                bgScene.rotation.y += (mouseX * 0.05 - bgScene.rotation.y) * 0.05;
-
-                const positions = particles.attributes.position.array;
-                const linePositions = [];
-
-                for (let i = 0; i < particleCount; i++) {
-                    positions[i * 3] += particlesData[i].velocity.x;
-                    positions[i * 3 + 1] += particlesData[i].velocity.y;
-                    positions[i * 3 + 2] += particlesData[i].velocity.z;
-
-                    if (positions[i * 3] < -15) positions[i * 3] = 15;
-                    if (positions[i * 3] > 15) positions[i * 3] = -15;
-                    if (positions[i * 3 + 1] < -15) positions[i * 3 + 1] = 15;
-                    if (positions[i * 3 + 1] > 15) positions[i * 3 + 1] = -15;
-                    if (positions[i * 3 + 2] < -15) positions[i * 3 + 2] = 15;
-                    if (positions[i * 3 + 2] > 15) positions[i * 3 + 2] = -15;
-
-                    for (let j = i + 1; j < particleCount; j++) {
-                        const dx = positions[i * 3] - positions[j * 3];
-                        const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
-                        const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
-                        if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 4) {
-                            linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2], positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]);
-                        }
-                    }
-                }
-                particles.attributes.position.needsUpdate = true;
-                lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-                bgRenderer.render(bgScene, bgCamera);
-            }
-            animateBG();
-
-            // Tilt Effect
-            document.querySelectorAll('.left-panel, .right-panel').forEach(panel => {
-                panel.addEventListener('mousemove', (e) => {
-                    const rect = panel.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotateX = ((y - centerY) / centerY) * -2;
-                    const rotateY = ((x - centerX) / centerX) * 2;
-                    panel.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                });
-                panel.addEventListener('mouseleave', () => {
-                    panel.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
-                });
-            });
-        }
-
-        init();
-        updateSunPosition();
-    </script>
-
-
-
-    <!-- ARABIC EXPLANATION PANEL -->
+    <!-- Loading Screen Overlay -->
+    <div id="loading">
+        <div style="color:var(--hud-cyan); font-family:'Space Mono'; font-size:24px; letter-spacing:10px;">INIT SYSTEM...</div>
+    </div>
+
+    <!-- ARABIC PANEL INTEGRATION -->
     <div id="ar-panel-overlay" onclick="closeArPanel()"></div>
     <div id="ar-panel">
         <div class="ar-close">
@@ -1508,8 +403,9 @@
         </div>
         <div class="ar-panel-content" id="ar-panel-inner"></div>
     </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
     <script src="../ar-panel.js"></script>
-
 </body>
-
 </html>
