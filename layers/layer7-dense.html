@@ -1,458 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <style>
+      /* ── Offline Fonts ─────────────────────────────────── */
+      @font-face { font-family: 'Outfit'; font-weight: 200; src: url('../vendor/fonts/outfit-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 400; src: url('../vendor/fonts/outfit-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 600; src: url('../vendor/fonts/outfit-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 900; src: url('../vendor/fonts/outfit-900.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 400; src: url('../vendor/fonts/space-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 700; src: url('../vendor/fonts/space-mono-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 200; src: url('../vendor/fonts/inter-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 300; src: url('../vendor/fonts/inter-300.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 400; src: url('../vendor/fonts/inter-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 600; src: url('../vendor/fonts/inter-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 800; src: url('../vendor/fonts/inter-800.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url('../vendor/fonts/jetbrains-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url('../vendor/fonts/jetbrains-mono-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 400; src: url('../vendor/fonts/cairo-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 600; src: url('../vendor/fonts/cairo-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 700; src: url('../vendor/fonts/cairo-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 400; src: url('../vendor/fonts/cinzel-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 700; src: url('../vendor/fonts/cinzel-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 900; src: url('../vendor/fonts/cinzel-900.ttf') format('truetype'); font-display: swap; }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Layer 7: Dense | Feature Compression</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <title>Layer 7: Dense | PI-Hybrid</title>
+<link rel="stylesheet" href="../ar-panel.css">
     <style>
-        :root {
-            /* Unifying to Blue/Cyan Theme */
-            --neon-green: #06B6D4;
-            --neon-gold: #3B82F6;
-            --neon-blue: #06B6D4;
-            --bg-dark: #050510;
-            --panel-bg: rgba(5, 5, 20, 0.95);
-            --glass-border: rgba(6, 182, 212, 0.3);
-        }
+        :root { --primary:#3B82F6; --accent:#06B6D4; --success:#10B981; --warn:#F59E0B; --danger:#EF4444; --bg:#030712; --panel-bg:rgba(3,7,18,0.88); --border:rgba(59,130,246,0.25); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); color:#e2e8f0; font-family:'Outfit',sans-serif; overflow:hidden; width:100vw; height:100vh; }
+        #canvas-container { position:fixed; inset:0; z-index:1; }
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-thumb { background:var(--primary); border-radius:2px; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .hud-top {
+            position:fixed; top:0; left:0; right:0; height:60px; z-index:20;
+            display:flex; justify-content:space-between; align-items:center;
+            background:rgba(3,7,18,0.92); backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border); padding:0 30px; pointer-events:auto;
         }
+        .hud-title { font-size:16px; font-weight:700; letter-spacing:3px; color:#fff; display:flex; align-items:center; gap:15px; text-transform:uppercase; }
+        .hud-title .tag { color:var(--primary); font-family:'Space Mono',monospace; font-size:13px; }
+        .nav-links { display:flex; gap:10px; }
+        .nav-btn { padding:8px 16px; border:1px solid var(--border); color:var(--accent); text-decoration:none; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1px; transition:all 0.3s; border-radius:6px; text-transform:uppercase; }
+        .nav-btn:hover { background:var(--primary); color:#fff; border-color:var(--primary); }
 
-        body {
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background: linear-gradient(135deg, #050510 0%, #0a0a20 50%, #050510 100%);
-            font-family: 'Outfit', sans-serif;
-            font-size: 15px;
-            font-weight: 400;
-            line-height: 1.6;
-            color: #fff;
-        }
+        .hud-wrapper { position:fixed; inset:0; z-index:10; pointer-events:none; display:grid; grid-template-columns:330px 1fr 330px; padding:75px 20px 20px; gap:20px; }
+        .hud-panel { pointer-events:auto; background:var(--panel-bg); border:1px solid var(--border); border-radius:14px; padding:20px; backdrop-filter:blur(25px); box-shadow:0 0 20px rgba(59,130,246,0.15); display:flex; flex-direction:column; gap:20px; }
+        .hud-panel::before { content:''; position:absolute; top:0; left:20px; width:40px; height:2px; background:var(--primary); box-shadow:0 0 10px var(--primary); }
 
-        #canvas-container {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-        }
+        .section-hdr { font-size:11px; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:3px; display:flex; align-items:center; gap:8px; }
+        .section-hdr::before { content:''; width:8px; height:8px; background:var(--primary); box-shadow:0 0 8px var(--primary); border-radius:2px; }
 
-        /* Header - Cinematic Glass */
-        .header {
-            position: fixed;
-            top: 24px;
-            left: 24px;
-            right: 24px;
-            height: 64px;
-            background: rgba(10, 10, 20, 0.7);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 28px;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
-        }
+        .explain-card { background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.15); border-radius:10px; padding:16px; }
+        .explain-card h4 { font-size:14px; color:var(--accent); margin-bottom:8px; }
+        .explain-card p { font-size:12px; color:rgba(255,255,255,0.6); line-height:1.6; }
+        
+        .math-box { font-family:'Space Mono',monospace; color:#fff; background:rgba(0,0,0,0.5); padding:8px 12px; border-radius:6px; margin-top:10px; font-size:13px; border-left:3px solid var(--accent); display:flex; flex-direction: column; gap: 4px; }
+        .math-box span:first-child { color: rgba(255,255,255,0.5); font-size: 10px; text-transform: uppercase; }
 
-        .layer-title {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
+        .scada-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .scada-card { background:rgba(0,0,0,0.4); border:1px solid rgba(59,130,246,0.15); padding:12px; border-radius:8px; border-left:3px solid var(--accent); }
+        .scada-label { font-size:9px; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:2px; margin-bottom:4px; }
+        .scada-val { font-family:'Space Mono',monospace; font-size:18px; color:#fff; }
 
-        .layer-number {
-            font-size: 32px;
-            font-weight: 900;
-            color: var(--neon-green);
-            text-shadow: 0 0 25px var(--neon-green);
-            transform: scale(1.2);
-        }
+        .control-group { margin-bottom:15px; }
+        .control-label { font-size:10px; color:var(--primary); margin-bottom:8px; display:flex; justify-content:space-between; text-transform:uppercase; letter-spacing:1px; }
+        .control-value { color:var(--accent); font-family:'Space Mono',monospace; }
+        input[type="range"] { width:100%; height:4px; background:rgba(255,255,255,0.12); outline:none; -webkit-appearance:none; border-radius:2px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; background:var(--primary); border-radius:50%; cursor:pointer; box-shadow:0 0 10px var(--primary); }
 
-        .layer-info h1 {
-            font-size: 24px;
-            color: #fff;
-            letter-spacing: 1px;
-            margin-bottom: 2px;
-        }
+        .toggle-btn { width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.7); font-size:11px; border-radius:6px; cursor:pointer; margin-bottom:8px; transition:all 0.2s; font-family:'Space Mono',monospace; text-transform: uppercase;}
+        .toggle-btn:hover { background:rgba(59,130,246,0.1); border-color:var(--primary); color:#fff; }
+        .toggle-btn.active { background:var(--primary); border-color:var(--primary); color:#fff; font-weight:700; box-shadow: 0 0 15px rgba(59,130,246,0.4); }
 
-        .layer-info p {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        .ar-hud-btn { background:rgba(59,130,246,0.15); border:2px solid var(--primary); color:var(--primary); font-size:20px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; cursor:pointer; transition:all 0.3s; animation:pulseAr 2.5s infinite; }
+        .ar-hud-btn:hover { background:var(--primary); color:#fff; box-shadow:0 0 30px var(--primary); transform:scale(1.1); }
+        @keyframes pulseAr { 0%,100%{box-shadow:0 0 8px rgba(59,130,246,0.2)} 50%{box-shadow:0 0 20px rgba(59,130,246,0.5)} }
 
-        .header-stats {
-            display: flex;
-            gap: 12px;
-        }
-
-        .stat-box {
-            background: var(--panel-bg);
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 1px solid var(--glass-border);
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 9px;
-            color: var(--neon-green);
-            text-transform: uppercase;
-            margin-bottom: 2px;
-        }
-
-        .stat-value {
-            font-size: 14px;
-            color: #fff;
-            font-weight: 700;
-            font-family: monospace;
-        }
-
-        .nav-group {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .nav-btn {
-            padding: 10px 18px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 11px;
-            font-weight: 600;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s;
-        }
-
-        .nav-btn:hover {
-            background: rgba(6, 182, 212, 0.1);
-            color: var(--neon-green);
-            border-color: var(--neon-green);
-        }
-
-        .nav-btn:hover:not(.disabled) {
-            background: var(--neon-green);
-            color: #000;
-            box-shadow: 0 0 20px var(--neon-green);
-        }
-
-        .nav-btn.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .back-btn {
-            padding: 8px 16px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--neon-green);
-            border-radius: 6px;
-            color: var(--neon-green);
-            font-size: 11px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .back-btn:hover {
-            background: var(--neon-green);
-            color: #fff;
-        }
-
-        .panel {
-            position: fixed;
-            top: 112px;
-            width: 300px;
-            background: rgba(10, 10, 20, 0.8);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 24px;
-            z-index: 90;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-        }
-
-        .left-panel {
-            left: 20px;
-        }
-
-        .right-panel {
-            right: 20px;
-        }
-
-        .panel-header {
-            color: var(--neon-green);
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 12px;
-        }
-
-        .stat-k {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .stat-v {
-            color: var(--neon-green);
-            font-family: monospace;
-            font-weight: 700;
-        }
-
-        .control-group {
-            margin-bottom: 15px;
-        }
-
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: var(--neon-green);
-            margin-bottom: 8px;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            background: var(--neon-green);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-green);
-        }
-
-        .toggle-btn {
-            width: 100%;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 11px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 8px;
-            transition: all 0.2s;
-        }
-
-        .toggle-btn:hover {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: var(--neon-green);
-            color: #fff;
-        }
-
-        .toggle-btn.active {
-            background: var(--neon-green);
-            border-color: var(--neon-green);
-            color: #000;
-            font-weight: 700;
-        }
-
-        .formula {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 12px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 11px;
-            color: var(--neon-gold);
-            border-left: 3px solid var(--neon-green);
-            line-height: 1.6;
-        }
-
-        /* ═══════════════════════════════════════════════════
-           INFO MODAL (Detailed Explanation)
-           ═══════════════════════════════════════════════════ */
-        #info-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        #info-modal.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            background: rgba(5, 10, 20, 0.95);
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 40px;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 40px rgba(16, 185, 129, 0.15);
-            transform: translateY(20px);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            color: #fff;
-            direction: rtl;
-        }
-
-        #info-modal.show .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 24px;
-            left: 24px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(1.1);
-        }
-
-        .modal-body h2 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            color: var(--neon-green);
-            font-weight: 500;
-        }
-
-        .modal-body p {
-            font-size: 15px;
-            line-height: 1.8;
-            color: #d0d0e0;
-            margin-bottom: 24px;
-        }
+        #loading { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; transition:opacity 0.6s; }
+        .load-spinner { width:40px; height:40px; border:3px solid rgba(59,130,246,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite; }
+        @keyframes spin { 100%{transform:rotate(360deg)} }
     </style>
 </head>
-
 <body>
-    <header class="header">
-        <div class="layer-badge">
-            <div class="layer-icon">07</div>
-            <div class="layer-title-text">
-                <h1>Dense Layer</h1>
-                <p>Feature Compression</p>
-            </div>
-        </div>
-
-        <div class="header-stats">
-            <div class="stat-box">
-                <div class="stat-label">Input</div>
-                <div class="stat-value">420</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Output</div>
-                <div class="stat-value">64</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Param</div>
-                <div class="stat-value">26.9K</div>
-            </div>
-        </div>
-
-        <div class="nav-group">
-            <a href="layer6-dropout2.html" class="nav-btn">← Prev</a>
-            <a href="../index.html" class="nav-btn">HUB</a>
-            <a href="layer8-relu2.html" class="nav-btn">Next →</a>
-        </div>
-    </header>
-
-    <div class="panel left-panel">
-        <div class="panel-header"
-            style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 10px; margin-bottom: 15px;">
-            <div style="border-bottom:none; margin-bottom:0; padding-bottom:0;">Architecture</div>
-            <button id="btn-info"
-                style="pointer-events: auto; width:22px; height:22px; border-radius:50%; background:rgba(16, 185, 129,0.2); border:1px solid rgba(16, 185, 129,0.5); color:#fff; cursor:pointer; font-size:12px; font-weight:bold; display:flex; align-items:center; justify-content:center; transition:0.2s;"
-                title="Detailed Explanation">i</button>
-        </div>
-        <div class="stat-row"><span class="stat-k">Input Vector</span><span class="stat-v"
-                style="color:var(--neon-blue)">BiLSTM Out</span></div>
-        <div class="stat-row"><span class="stat-k">Neurons</span><span class="stat-v">64 Units</span></div>
-        <div class="stat-row"><span class="stat-k">Activation</span><span class="stat-v">ReLU</span></div>
-        <div class="stat-row"><span class="stat-k">Compression</span><span class="stat-v">6.5x</span></div>
-
-        <div class="panel-header" style="margin-top:20px;">Logic</div>
-        <div class="formula">
-            h = ReLU(W⋅x + b)<br>
-            dim(h) = 64
-        </div>
-        <p style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:10px; line-height:1.4;">
-            Compresses high-dimensional temporal features into a dense representation for final regression.
-        </p>
-    </div>
-
-    <div class="panel right-panel">
-        <div class="panel-header">Controls</div>
-        <button class="toggle-btn active" id="btnFlow">🌊 Active Flow</button>
-
-        <div class="control-group">
-            <div class="control-label"><span>Connection Opacity</span><span id="opVal">0.3</span></div>
-            <input type="range" id="opSlider" min="0" max="1" step="0.1" value="0.3">
-        </div>
-
-        <div class="control-group">
-            <div class="control-label"><span>Flow Speed</span><span id="spVal">1.0x</span></div>
-            <input type="range" id="spSlider" min="0.1" max="3" step="0.1" value="1.0">
-        </div>
-    </div>
-
     <div id="canvas-container"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <div class="hud-top">
+        <div class="hud-title">
+            <span class="tag">L7</span> Dense (Feature Compression)
+            <div class="ar-hud-btn" onclick="openArPanel('layer7_dense')" title="شرح عربي">ع</div>
+        </div>
+        <div class="nav-links">
+            <a href="layer6-dropout2.html" class="nav-btn">← Prev</a>
+            <a href="../index.html" class="nav-btn">Hub</a>
+            <a href="layer8-relu2.html" class="nav-btn">Next →</a>
+        </div>
+    </div>
+
+    <div class="hud-wrapper">
+        <!-- LEFT PANEL -->
+        <div class="hud-panel">
+            <div class="section-hdr">Architecture Specs</div>
+            
+            <div class="scada-grid">
+                <div class="scada-card" style="border-left-color:var(--accent);">
+                    <div class="scada-label">Input Size</div>
+                    <div class="scada-val">420</div>
+                </div>
+                <div class="scada-card" style="border-left-color:var(--success);">
+                    <div class="scada-label">Output Units</div>
+                    <div class="scada-val">64</div>
+                </div>
+                <div class="scada-card" style="border-left-color:var(--warn);">
+                    <div class="scada-label">Parameters</div>
+                    <div class="scada-val">26.9K</div>
+                </div>
+                <div class="scada-card" style="border-left-color:var(--primary);">
+                    <div class="scada-label">Compression</div>
+                    <div class="scada-val">6.5x</div>
+                </div>
+            </div>
+
+            <div class="section-hdr">Core Logic</div>
+            <div class="explain-card" style="flex-grow:1;">
+                <h4>Feature Compression</h4>
+                <p>Compresses high-dimensional temporal features into a dense representation for final regression.</p>
+                <div class="math-box">
+                    <span>Formula</span>
+                    <span style="color:var(--accent);">h = ReLU(W &middot; x + b)</span>
+                    <span>Dimensions</span>
+                    <span style="color:var(--primary);">dim(h) = 64</span>
+                </div>
+            </div>
+        </div>
+
+        <div></div> <!-- 3D Space -->
+
+        <!-- RIGHT PANEL -->
+        <div class="hud-panel">
+            <div class="section-hdr">Simulation Controls</div>
+            <button class="toggle-btn active" id="btnFlow">Data Flow: Active</button>
+
+            <div class="control-group" style="margin-top: 15px;">
+                <div class="control-label"><span>Connection Opacity</span><span class="control-value" id="opVal">0.3</span></div>
+                <input type="range" id="opSlider" min="0" max="1" step="0.1" value="0.3">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label"><span>Flow Speed</span><span class="control-value" id="spVal">1.0x</span></div>
+                <input type="range" id="spSlider" min="0.1" max="3" step="0.1" value="1.0">
+            </div>
+            
+            <div class="explain-card" style="background:transparent; padding:0; border:none; margin-top:auto;">
+                <p style="font-size:11px;">The Cyan nodes represent the high-dimensional output from the BiLSTM layer, while the deep Blue nodes are the compressed 64 dense units.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading">
+        <div class="load-spinner"></div>
+        <div style="color:var(--primary);font-family:'Space Mono';font-size:14px;letter-spacing:4px;margin-top:20px;">INITIALIZING...</div>
+    </div>
+
+    <div id="ar-panel-overlay" onclick="closeArPanel()"></div>
+    <div id="ar-panel">
+        <div class="ar-close"><div class="ar-close-btn" onclick="closeArPanel()">✕</div></div>
+        <div class="ar-panel-content" id="ar-panel-inner"></div>
+    </div>
+
+    <script src="../assets/lib/three/three.min.js"></script>
+    <script src="../assets/lib/three/controls/OrbitControls.js"></script>
     <script>
         const CONFIG = {
             inputSize: 64, // Reduced visuall for clarity (420 too dense)
             outputSize: 16, // Reduced (64)
             colors: {
-                input: 0x3B82F6,  // Blue (From BiLSTM)
-                output: 0x10B981, // Green (Dense)
-                conn: 0x10B981
+                input: 0x06B6D4,  // Cyan (From BiLSTM)
+                output: 0x3B82F6, // Blue (Dense)
+                conn: 0x3B82F6
             }
         };
 
@@ -462,8 +190,8 @@
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0a0f);
-            scene.fog = new THREE.FogExp2(0x0a0a0f, 0.015);
+            scene.background = new THREE.Color(0x030712);
+            scene.fog = new THREE.FogExp2(0x030712, 0.015);
 
             camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 1000);
             camera.position.set(0, 5, 40);
@@ -483,19 +211,29 @@
             const pl = new THREE.PointLight(CONFIG.colors.output, 2, 60);
             pl.position.set(10, 10, 20);
             scene.add(pl);
+            const pl2 = new THREE.PointLight(CONFIG.colors.input, 2, 60);
+            pl2.position.set(-10, 10, 20);
+            scene.add(pl2);
 
             createNetwork();
             createParticles();
             setupEvents();
+            
+            document.getElementById('loading').style.opacity = '0';
+            setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 600);
+            
             animate();
         }
 
         function createNetwork() {
-            const sphere = new THREE.SphereGeometry(0.5, 16, 16);
+            const sphere = new THREE.IcosahedronGeometry(0.5, 2);
 
             // Input Layer (Left)
             for (let i = 0; i < CONFIG.inputSize; i++) {
-                const mat = new THREE.MeshPhongMaterial({ color: CONFIG.colors.input, emissive: CONFIG.colors.input, emissiveIntensity: 0.3 });
+                const mat = new THREE.MeshPhysicalMaterial({ 
+                    color: CONFIG.colors.input, emissive: CONFIG.colors.input, emissiveIntensity: 0.6,
+                    roughness: 0.2, metalness: 0.8, clearcoat: 1.0
+                });
                 const mesh = new THREE.Mesh(sphere, mat);
                 const y = (i - CONFIG.inputSize / 2) * 0.8;
                 mesh.position.set(-15, y, 0);
@@ -505,7 +243,10 @@
 
             // Output Layer (Right)
             for (let i = 0; i < CONFIG.outputSize; i++) {
-                const mat = new THREE.MeshPhongMaterial({ color: CONFIG.colors.output, emissive: CONFIG.colors.output, emissiveIntensity: 0.5 });
+                const mat = new THREE.MeshPhysicalMaterial({ 
+                    color: CONFIG.colors.output, emissive: CONFIG.colors.output, emissiveIntensity: 0.8,
+                    roughness: 0.2, metalness: 0.8, clearcoat: 1.0
+                });
                 const mesh = new THREE.Mesh(sphere, mat);
                 const y = (i - CONFIG.outputSize / 2) * 1.5;
                 mesh.position.set(15, y, 0);
@@ -532,22 +273,22 @@
         }
 
         function createParticles() {
-            const count = 400;
+            const count = 800;
             const geo = new THREE.BufferGeometry();
             const pos = new Float32Array(count * 3);
 
             for (let i = 0; i < count; i++) {
-                pos[i * 3] = (Math.random() - 0.5) * 30; // x
+                pos[i * 3] = -15 + Math.random() * 30; // x
                 pos[i * 3 + 1] = (Math.random() - 0.5) * 20; // y
-                pos[i * 3 + 2] = (Math.random() - 0.5) * 5;  // z
+                pos[i * 3 + 2] = (Math.random() - 0.5) * 8;  // z
             }
             geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
 
             const mat = new THREE.PointsMaterial({
-                color: CONFIG.colors.output,
-                size: 0.2,
+                color: 0x06B6D4, // Cyan particles
+                size: 0.15,
                 transparent: true,
-                opacity: 0.6,
+                opacity: 0.8,
                 blending: THREE.AdditiveBlending
             });
             particles = new THREE.Points(geo, mat);
@@ -555,6 +296,12 @@
         }
 
         function setupEvents() {
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
             document.getElementById('opSlider').oninput = e => {
                 const v = parseFloat(e.target.value);
                 connections.material.opacity = v;
@@ -568,6 +315,7 @@
                 params.flow = !params.flow;
                 particles.visible = params.flow;
                 this.classList.toggle('active');
+                this.textContent = params.flow ? "Data Flow: Active" : "Data Flow: Paused";
             };
         }
 
@@ -602,75 +350,6 @@
 
         init();
     </script>
-
-    <!-- Info Modal -->
-    <div id="info-modal">
-        <div class="modal-content">
-            <button class="modal-close" id="btn-close-modal">✕</button>
-            <div class="modal-body">
-                <style>
-                    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-                </style>
-                <h2
-                    style="color: #10B981; font-weight: 700; margin-bottom: 20px; font-size: 26px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">
-                    نظرة عميقة: الطبقة الكثيفة (Dense)</h2>
-                <div style="display:none;">
-                    <h2 style="direction:ltr; text-align:right;">Deep Dive: Dense Layer</h2>
-                    <h2 style="margin-top:-10px;">نظرة عميقة: الطبقة الكثيفة (Dense)</h2>
-                </div>
-
-                <div
-                    style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-right: 4px solid #10B981; margin-bottom: 20px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">
-                    <h3 style="color: #10B981; font-size: 18px; margin-bottom: 10px;">ما الذي تفعله هذه الطبقة فعلياً؟
-                    </h3>
-                    <p style="font-size: 15px; line-height: 1.8; color: #e0e0e0; margin: 0;">
-                        تعمل الطبقة الكثيفة كضاغط رئيسي للبيانات والميزات المستخلصة. تأخذ التمثيل الواسع والثري الذي
-                        أنشأته الطبقة السابقة وتقوم بضغطه بقوة في مساحة أضيق بكثير تبلغ 64 بُعداً فقط.
-                    </p>
-                </div>
-                <div style="display:none;">
-                    <p>
-                        <strong>ما الذي تفعله هذه الطبقة فعلياً؟</strong><br>
-                        تعمل الطبقة الكثيفة كضاغط رئيسي للبيانات والميزات المستخلصة. تأخذ التمثيل الواسع والثري الذي
-                        أنشأته وحدة الـ BiLSTM (والمكون من 420 ميزة) وتقوم بضغطه بقوة في مساحة أضيق بكثير تبلغ 64 بُعداً
-                        فقط.
-                    </p>
-                </div>
-                <div
-                    style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-right: 4px solid #3B82F6; margin-bottom: 20px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">
-                    <h3 style="color: #3B82F6; font-size: 18px; margin-bottom: 10px;">التركيب الديناميكي للميزات</h3>
-                    <p style="font-size: 15px; line-height: 1.8; color: #e0e0e0; margin: 0;">
-                        من خلال ربط كل عقدة إدخال بكل عقدة إخراج، تتعلم هذه الطبقة التراكيب المعقدة للميزات الزمنية
-                        وتستخلص "خلاصة" الموقف الجوي والمناخي الحالي المتنبأ به.
-                    </p>
-                </div>
-                <div style="display:none;">
-                    <p>
-                        من خلال ربط كل عقدة إدخال بكل عقدة إخراج، تتعلم هذه الطبقة التراكيب المعقدة للميزات الزمنية
-                        المعلومات من 210 خلية BiLSTM مضاعفة، وتضغطها بذكاء لتفهم "خلاصة" الموقف الجوي الحالي.
-                </div>
-                <div
-                    style="margin-top:25px; text-align:center; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">
-                    <p style="font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 1px;">
-                        للتواصل: <span
-                            style="color: var(--cyan); font-weight: bold; letter-spacing: 2px;">IZZELDEENM@GMAIL.COM</span>
-                    </p>
-                </div>
-                <div style="display:none;">
-                    <div style="margin-top:20px; text-align:center; font-size:10px; opacity:0.3;">
-                        للتواصل: IZZELDEENM@GMAIL.COM
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-        // Info Modal Logic
-        const infoModal = document.getElementById('info-modal');
-        document.getElementById('btn-info').addEventListener('click', () => infoModal.classList.add('show'));
-        document.getElementById('btn-close-modal').addEventListener('click', () => infoModal.classList.remove('show'));
-        infoModal.addEventListener('click', (e) => { if (e.target === infoModal) infoModal.classList.remove('show'); });
-    </script>
+    <script src="../ar-panel.js"></script>
 </body>
-
 </html>

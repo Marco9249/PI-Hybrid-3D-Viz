@@ -2,13 +2,32 @@
 <html lang="en">
 
 <head>
+    <style>
+      /* ── Offline Fonts ─────────────────────────────────── */
+      @font-face { font-family: 'Outfit'; font-weight: 200; src: url('../vendor/fonts/outfit-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 400; src: url('../vendor/fonts/outfit-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 600; src: url('../vendor/fonts/outfit-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 900; src: url('../vendor/fonts/outfit-900.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 400; src: url('../vendor/fonts/space-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 700; src: url('../vendor/fonts/space-mono-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 200; src: url('../vendor/fonts/inter-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 300; src: url('../vendor/fonts/inter-300.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 400; src: url('../vendor/fonts/inter-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 600; src: url('../vendor/fonts/inter-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 800; src: url('../vendor/fonts/inter-800.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url('../vendor/fonts/jetbrains-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url('../vendor/fonts/jetbrains-mono-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 400; src: url('../vendor/fonts/cairo-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 600; src: url('../vendor/fonts/cairo-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 700; src: url('../vendor/fonts/cairo-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 400; src: url('../vendor/fonts/cinzel-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 700; src: url('../vendor/fonts/cinzel-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 900; src: url('../vendor/fonts/cinzel-900.ttf') format('truetype'); font-display: swap; }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Layer 10: Linear Regression Output | Physics Is All You Need</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
-        rel="stylesheet">
-    <style>
+<style>
         :root {
             /* Unifying to Blue/Cyan Theme */
             --cyan: #06B6D4;
@@ -1179,14 +1198,14 @@
         <div id="hudBadge" class="hud-badge racing">EPOCH 0 / 100</div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="../assets/lib/three/three.min.js"></script>
+    <script src="../assets/lib/three/controls/OrbitControls.js"></script>
+    <script src="../assets/lib/three/shaders/CopyShader.js"></script>
+    <script src="../assets/lib/three/shaders/LuminosityHighPassShader.js"></script>
+    <script src="../assets/lib/three/postprocessing/EffectComposer.js"></script>
+    <script src="../assets/lib/three/postprocessing/ShaderPass.js"></script>
+    <script src="../assets/lib/three/postprocessing/RenderPass.js"></script>
+    <script src="../assets/lib/three/postprocessing/UnrealBloomPass.js"></script>
 
     <script>
         // ═════════════════════════════════════════════════
@@ -2218,7 +2237,7 @@
         <div class="modal-content">
             <button class="modal-close" id="btn-close-modal">✕</button>
             <div class="modal-body">
-                <style>@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');</style>
+                <style>/* fonts loaded via @font-face */</style>
                 <h2 style="color: #FF5555; font-weight: 700; margin-bottom: 20px; font-size: 26px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">العقل المصحح: محرك الانحدار والتعلم (Regression Engine)</h2>
                 <div style="display:none;">
                     <h2 style="direction:ltr; text-align:right;">Final Brain: Regression & Learning Engine</h2>

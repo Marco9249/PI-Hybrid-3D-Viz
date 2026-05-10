@@ -2,6 +2,28 @@
 <html lang="en">
 
 <head>
+    <style>
+      /* ── Offline Fonts ─────────────────────────────────── */
+      @font-face { font-family: 'Outfit'; font-weight: 200; src: url('../vendor/fonts/outfit-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 400; src: url('../vendor/fonts/outfit-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 600; src: url('../vendor/fonts/outfit-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 900; src: url('../vendor/fonts/outfit-900.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 400; src: url('../vendor/fonts/space-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 700; src: url('../vendor/fonts/space-mono-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 200; src: url('../vendor/fonts/inter-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 300; src: url('../vendor/fonts/inter-300.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 400; src: url('../vendor/fonts/inter-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 600; src: url('../vendor/fonts/inter-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 800; src: url('../vendor/fonts/inter-800.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url('../vendor/fonts/jetbrains-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url('../vendor/fonts/jetbrains-mono-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 400; src: url('../vendor/fonts/cairo-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 600; src: url('../vendor/fonts/cairo-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 700; src: url('../vendor/fonts/cairo-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 400; src: url('../vendor/fonts/cinzel-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 700; src: url('../vendor/fonts/cinzel-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 900; src: url('../vendor/fonts/cinzel-900.ttf') format('truetype'); font-display: swap; }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Layer 1: Conv1D | Temporal Feature Extractor</title>
@@ -909,8 +931,8 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="../assets/lib/three/three.min.js"></script>
+    <script src="../assets/lib/three/controls/OrbitControls.js"></script>
     <script>
         window.onerror = function (msg, url, line) {
             const loading = document.getElementById('loading');
@@ -1589,15 +1611,13 @@
     </script>
 
     <!-- Info Modal -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
-    <!-- KaTeX for Professional Equations -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+<!-- KaTeX for Professional Equations -->
+    <link rel="stylesheet" href="../assets/lib/katex.min.css">
+    <script defer src="../assets/lib/katex.min.js"></script>
+    <script defer src="../assets/lib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
     <link rel="stylesheet" href="../ar-panel.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+        /* fonts loaded via @font-face */
     </style>
     <div id="info-modal">
         <div class="modal-content"

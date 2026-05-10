@@ -2,14 +2,36 @@
 <html lang="en">
 
 <head>
+    <style>
+      /* -- Offline Fonts -- */
+      @font-face { font-family: 'Outfit'; font-weight: 200; src: url('../vendor/fonts/outfit-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 400; src: url('../vendor/fonts/outfit-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 600; src: url('../vendor/fonts/outfit-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 900; src: url('../vendor/fonts/outfit-900.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 400; src: url('../vendor/fonts/space-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 700; src: url('../vendor/fonts/space-mono-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 200; src: url('../vendor/fonts/inter-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 300; src: url('../vendor/fonts/inter-300.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 400; src: url('../vendor/fonts/inter-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 600; src: url('../vendor/fonts/inter-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 800; src: url('../vendor/fonts/inter-800.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url('../vendor/fonts/jetbrains-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url('../vendor/fonts/jetbrains-mono-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 400; src: url('../vendor/fonts/cairo-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 600; src: url('../vendor/fonts/cairo-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 700; src: url('../vendor/fonts/cairo-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 400; src: url('../vendor/fonts/cinzel-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 700; src: url('../vendor/fonts/cinzel-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 900; src: url('../vendor/fonts/cinzel-900.ttf') format('truetype'); font-display: swap; }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PI-HYBRID | SOLAR FLARE NEBULA</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="../assets/lib/three/three.min.js"></script>
+    <script src="../assets/lib/gsap.min.js"></script>
+    <script src="../assets/lib/ScrollTrigger.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;400;900&family=Cinzel:wght@900&display=swap');
+        /* fonts loaded via @font-face */
 
         :root {
             --primary: #f59e0b;

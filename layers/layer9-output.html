@@ -1,327 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+      /* ── Offline Fonts ─────────────────────────────────── */
+      @font-face { font-family: 'Outfit'; font-weight: 200; src: url('../vendor/fonts/outfit-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 400; src: url('../vendor/fonts/outfit-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 600; src: url('../vendor/fonts/outfit-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 900; src: url('../vendor/fonts/outfit-900.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 400; src: url('../vendor/fonts/space-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 700; src: url('../vendor/fonts/space-mono-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 200; src: url('../vendor/fonts/inter-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 300; src: url('../vendor/fonts/inter-300.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 400; src: url('../vendor/fonts/inter-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 600; src: url('../vendor/fonts/inter-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 800; src: url('../vendor/fonts/inter-800.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url('../vendor/fonts/jetbrains-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url('../vendor/fonts/jetbrains-mono-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 400; src: url('../vendor/fonts/cairo-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 600; src: url('../vendor/fonts/cairo-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 700; src: url('../vendor/fonts/cairo-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 400; src: url('../vendor/fonts/cinzel-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 700; src: url('../vendor/fonts/cinzel-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 900; src: url('../vendor/fonts/cinzel-900.ttf') format('truetype'); font-display: swap; }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Layer 9: Output | HUD Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../ar-panel.css">
+<link rel="stylesheet" href="../ar-panel.css">
     <style>
         :root {
-            --hud-cyan: #00F2FF;
-            --hud-gold: #FFB800;
-            --hud-red: #FF3366;
-            --hud-green: #00FF66;
-            --hud-bg: rgba(4, 6, 14, 0.85);
-            --hud-border: rgba(0, 242, 255, 0.3);
-            --hud-glow: 0 0 20px rgba(0, 242, 255, 0.2);
+            --primary: #3B82F6;
+            --accent: #06B6D4;
+            --success: #10B981;
+            --warn: #F59E0B;
+            --danger: #EF4444;
+            --bg: #030712;
+            --panel-bg: rgba(3, 7, 18, 0.88);
+            --border: rgba(59, 130, 246, 0.25);
+            --glow: 0 0 20px rgba(59, 130, 246, 0.15);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #020308;
-            color: #fff;
-            font-family: 'Outfit', sans-serif;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-        }
+        body { background: var(--bg); color: #e2e8f0; font-family: 'Outfit', sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
+        #canvas-container { position: fixed; inset: 0; z-index: 1; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; }
+        ::-webkit-scrollbar-track { background: transparent; }
 
-        #canvas-container {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-        }
-
-        .hidden { display: none !important; opacity: 0; pointer-events: none; }
-
-        /* HUD Overlay Container */
-        .hud-wrapper {
-            position: fixed;
-            inset: 0;
-            z-index: 10;
-            pointer-events: none;
-            display: grid;
-            grid-template-columns: 350px 1fr 350px;
-            padding: 100px 30px 30px 30px;
-            gap: 30px;
-        }
-
-        .hud-panel {
-            pointer-events: auto;
-            background: var(--hud-bg);
-            border: 1px solid var(--hud-border);
-            border-radius: 16px;
-            padding: 25px;
-            backdrop-filter: blur(20px);
-            box-shadow: inset 0 0 30px rgba(0, 242, 255, 0.05), 0 10px 40px rgba(0,0,0,0.5);
-            position: relative;
-            overflow: hidden;
-            clip-path: polygon(0 20px, 20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
-        }
-
-        .hud-panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 40px; height: 3px;
-            background: var(--hud-cyan);
-            box-shadow: var(--hud-glow);
-        }
-
-        /* TOP NAV HUD */
+        /* TOP NAV */
         .hud-top {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 80px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(90deg, rgba(0,242,255,0.1) 0%, transparent 20%, transparent 80%, rgba(0,242,255,0.1) 100%);
-            border-bottom: 1px solid rgba(0,242,255,0.2);
-            pointer-events: auto;
-            padding: 0 40px;
-            z-index: 20;
+            position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 20;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(3, 7, 18, 0.92); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); padding: 0 30px; pointer-events: auto;
         }
-
         .hud-title {
-            font-size: 28px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 6px;
-            color: #fff;
-            text-shadow: 0 0 20px var(--hud-cyan);
-            display: flex;
-            align-items: center;
-            gap: 20px;
+            font-size: 16px; font-weight: 700; letter-spacing: 3px; color: #fff;
+            display: flex; align-items: center; gap: 15px; text-transform: uppercase;
         }
-
-        .nav-links { display: flex; gap: 20px; }
+        .hud-title .tag { color: var(--primary); font-family: 'Space Mono', monospace; font-size: 13px; opacity: 0.8; }
+        .nav-links { display: flex; gap: 10px; }
         .nav-btn {
-            padding: 10px 20px;
-            border: 1px solid var(--hud-cyan);
-            color: var(--hud-cyan);
-            text-decoration: none;
-            font-family: 'Space Mono', monospace;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.3s;
-            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            padding: 8px 16px; border: 1px solid var(--border); color: var(--accent);
+            text-decoration: none; font-family: 'Space Mono', monospace; font-size: 11px;
+            letter-spacing: 1px; transition: all 0.3s; border-radius: 6px; text-transform: uppercase;
         }
-        .nav-btn:hover {
-            background: var(--hud-cyan);
-            color: #000;
-            box-shadow: var(--hud-glow);
+        .nav-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        /* PANELS */
+        .hud-wrapper {
+            position: fixed; inset: 0; z-index: 10; pointer-events: none;
+            display: grid; grid-template-columns: 310px 1fr 310px;
+            padding: 75px 20px 20px 20px; gap: 20px;
+        }
+        .hud-panel {
+            pointer-events: auto; background: var(--panel-bg); border: 1px solid var(--border);
+            border-radius: 14px; padding: 20px; backdrop-filter: blur(25px);
+            box-shadow: var(--glow); overflow-y: auto; max-height: calc(100vh - 95px);
+            position: relative;
+        }
+        .hud-panel::before {
+            content: ''; position: absolute; top: 0; left: 20px; width: 40px; height: 2px;
+            background: var(--primary); box-shadow: 0 0 10px var(--primary);
         }
 
         /* GHI RING */
-        .ghi-circle-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 250px;
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .ghi-value-text {
-            position: absolute;
-            text-align: center;
-        }
-        .ghi-number {
-            font-family: 'Space Mono', monospace;
-            font-size: 64px;
-            font-weight: 700;
-            color: var(--hud-gold);
-            text-shadow: 0 0 30px rgba(255, 184, 0, 0.6);
-            line-height: 1;
-        }
-        .ghi-unit {
-            font-size: 14px;
-            color: var(--hud-cyan);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-top: 5px;
-        }
-
-        .circular-chart {
-            display: block;
-            margin: 0 auto;
-            max-width: 80%;
-            max-height: 250px;
-            animation: rotate 20s linear infinite;
-        }
-        .circle-bg {
-            fill: none;
-            stroke: rgba(0, 242, 255, 0.1);
-            stroke-width: 2.5;
-        }
-        .circle {
-            fill: none;
-            stroke: var(--hud-gold);
-            stroke-width: 2.5;
-            stroke-linecap: round;
-            animation: dash 2s ease-out forwards;
-        }
+        .ghi-circle-container { display: flex; justify-content: center; align-items: center; height: 180px; position: relative; margin-bottom: 15px; }
+        .ghi-value-text { position: absolute; text-align: center; }
+        .ghi-number { font-family: 'Space Mono', monospace; font-size: 48px; font-weight: 700; color: var(--accent); text-shadow: 0 0 25px rgba(6,182,212,0.5); line-height: 1; }
+        .ghi-unit { font-size: 12px; color: var(--primary); letter-spacing: 3px; margin-top: 4px; }
+        .circular-chart { display: block; margin: 0 auto; max-width: 75%; max-height: 180px; animation: rotate 25s linear infinite; }
+        .circle-bg { fill: none; stroke: rgba(59,130,246,0.12); stroke-width: 2.5; }
+        .circle { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; animation: dash 2s ease-out forwards; }
         @keyframes rotate { 100% { transform: rotate(360deg); } }
-        @keyframes dash {
-            0% { stroke-dasharray: 0, 100; }
-            100% { stroke-dasharray: 70, 100; }
-        }
+        @keyframes dash { 0% { stroke-dasharray: 0, 100; } 100% { stroke-dasharray: 70, 100; } }
 
-        /* SCADA STATUS CARDS */
-        .scada-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+        /* SCADA CARDS */
+        .scada-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .scada-card {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px;
-            border-left: 3px solid var(--hud-green);
-            transition: all 0.3s;
+            background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.15);
+            padding: 12px; border-left: 3px solid var(--success); border-radius: 8px; transition: all 0.3s;
         }
-        .scada-card:hover {
-            background: rgba(0, 242, 255, 0.1);
-            border-color: var(--hud-cyan);
-            transform: scale(1.05);
-        }
-        .scada-card.warning { border-left-color: var(--hud-red); }
-        .scada-label {
-            font-size: 10px;
-            color: rgba(255,255,255,0.5);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
-        }
-        .scada-val {
-            font-family: 'Space Mono', monospace;
-            color: #fff;
-            font-size: 16px;
-        }
+        .scada-card:hover { background: rgba(59,130,246,0.12); transform: translateY(-2px); }
+        .scada-card.warning { border-left-color: var(--warn); }
+        .scada-label { font-size: 9px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+        .scada-val { font-family: 'Space Mono', monospace; color: #e2e8f0; font-size: 14px; }
 
-        /* RIGHT PANEL: TELEMETRY */
-        .telemetry-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .telemetry-label {
-            color: var(--hud-cyan);
-            font-size: 12px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        .telemetry-val {
-            font-family: 'Space Mono', monospace;
-            font-size: 18px;
-            color: var(--hud-gold);
-        }
+        /* TELEMETRY */
+        .telemetry-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .telemetry-label { color: var(--primary); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; }
+        .telemetry-val { font-family: 'Space Mono', monospace; font-size: 16px; color: var(--accent); }
 
-        /* AR ICON GLOW */
+        /* EXPLANATION CARDS */
+        .explain-card {
+            background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15);
+            border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; transition: all 0.3s;
+        }
+        .explain-card:hover { background: rgba(59,130,246,0.12); border-color: var(--primary); }
+        .explain-card h4 { font-size: 12px; color: var(--accent); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; }
+        .explain-card p { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+        .explain-card .math { font-family: 'Space Mono', monospace; color: var(--accent); font-size: 13px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; margin-top: 8px; display: block; }
+
+        /* AR BUTTON */
         .ar-hud-btn {
-            background: rgba(0, 242, 255, 0.1);
-            border: 2px solid var(--hud-cyan);
-            color: var(--hud-cyan);
-            font-family: 'Space Mono', monospace;
-            font-size: 24px;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
-            transition: all 0.3s;
-            animation: pulseAr 2s infinite;
-            pointer-events: auto;
+            background: rgba(59,130,246,0.15); border: 2px solid var(--primary); color: var(--primary);
+            font-size: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; cursor: pointer; transition: all 0.3s; animation: pulseAr 2.5s infinite; pointer-events: auto;
         }
-        .ar-hud-btn:hover {
-            background: var(--hud-cyan);
-            color: #000;
-            box-shadow: 0 0 40px var(--hud-cyan);
-            transform: scale(1.1);
-        }
-        @keyframes pulseAr {
-            0% { box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
-            50% { box-shadow: 0 0 30px rgba(0, 242, 255, 0.6); }
-            100% { box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
-        }
+        .ar-hud-btn:hover { background: var(--primary); color: #fff; box-shadow: 0 0 30px var(--primary); transform: scale(1.1); }
+        @keyframes pulseAr { 0%,100% { box-shadow: 0 0 8px rgba(59,130,246,0.2); } 50% { box-shadow: 0 0 20px rgba(59,130,246,0.5); } }
 
-        /* TIME CONTROL RANGE */
-        input[type="range"] {
-            width: 100%; height: 4px; background: rgba(255,255,255,0.2); outline: none; -webkit-appearance: none; margin-top: 15px;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 20px; height: 20px; background: var(--hud-cyan); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); cursor: pointer;
-        }
-
+        /* CONTROLS */
+        input[type="range"] { width: 100%; height: 4px; background: rgba(255,255,255,0.12); outline: none; -webkit-appearance: none; margin-top: 12px; border-radius: 2px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--primary); border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px var(--primary); }
         .toggle-btn {
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            border: 1px solid var(--hud-cyan);
-            color: var(--hud-cyan);
-            font-family: 'Space Mono', monospace;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: 0.3s;
+            width: 100%; padding: 10px; background: transparent; border: 1px solid var(--border);
+            color: rgba(255,255,255,0.6); font-family: 'Space Mono', monospace; font-size: 10px;
+            text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-top: 8px; transition: 0.3s; border-radius: 6px;
         }
-        .toggle-btn.active {
-            background: rgba(0, 242, 255, 0.2);
-            box-shadow: inset 0 0 15px var(--hud-cyan);
-            color: #fff;
-        }
-
-        #curveCanvas { width: 100%; height: 120px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); margin-top: 15px; }
-
+        .toggle-btn.active { background: rgba(59,130,246,0.2); border-color: var(--primary); color: #fff; }
+        #curveCanvas { width: 100%; height: 100px; background: rgba(0,0,0,0.4); border: 1px solid rgba(59,130,246,0.1); margin-top: 12px; border-radius: 8px; }
         .section-hdr {
-            font-size: 14px;
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 3px;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
         }
-        .section-hdr::before {
-            content: ''; width: 10px; height: 10px; background: var(--hud-cyan); box-shadow: 0 0 10px var(--hud-cyan);
-        }
-        
-        #loading {
-            position: fixed; inset: 0; background: #020308; z-index: 9999;
-            display: flex; justify-content: center; align-items: center;
-            transition: opacity 0.5s;
-        }
+        .section-hdr::before { content: ''; width: 8px; height: 8px; background: var(--primary); box-shadow: 0 0 8px var(--primary); border-radius: 2px; }
+        #loading { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s; }
+        .load-spinner { width: 40px; height: 40px; border: 3px solid rgba(59,130,246,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div id="canvas-container"></div>
     <div id="hourVal" style="display:none;"></div>
-    
+
     <div class="hud-top">
         <div class="hud-title">
-            <span style="color: var(--hud-cyan);">[SYS]</span> OUTPUT LAYER
+            <span class="tag">L9</span> Output Layer — GHI Prediction
             <div class="ar-hud-btn" onclick="openArPanel('layer9_output')" title="شرح عربي">ع</div>
         </div>
         <div class="nav-links">
-            <a href="layer8-relu2.html" class="nav-btn">◄ PREV NODE</a>
-            <a href="../index.html" class="nav-btn">CORE HUB</a>
-            <a href="layer10-regression.html" class="nav-btn">NEXT NODE ►</a>
+            <a href="layer8-relu2.html" class="nav-btn">← Prev</a>
+            <a href="../index.html" class="nav-btn">Hub</a>
+            <a href="layer10-regression.html" class="nav-btn">Next →</a>
         </div>
     </div>
 
     <div class="hud-wrapper">
-        <!-- LEFT HUD -->
-        <div class="hud-panel" style="align-self: center;">
-            <div class="section-hdr">GHI PREDICTION CORE</div>
-            
+        <!-- LEFT PANEL -->
+        <div class="hud-panel">
+            <div class="section-hdr">GHI Prediction</div>
             <div class="ghi-circle-container">
                 <svg viewBox="0 0 36 36" class="circular-chart">
                     <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -333,79 +180,328 @@
                 </div>
             </div>
 
-            <div class="section-hdr" style="margin-top: 30px;">PHYSICS CONSTRAINTS</div>
+            <div class="section-hdr">Physics Constraints</div>
             <div class="scada-grid">
-                <div class="scada-card">
-                    <div class="scada-label">Non-Negativity</div>
-                    <div class="scada-val">GHI ≥ 0</div>
-                </div>
-                <div class="scada-card">
-                    <div class="scada-label">Solar Constant</div>
-                    <div class="scada-val">≤ 1361 W/m²</div>
-                </div>
-                <div class="scada-card">
-                    <div class="scada-label">Clearness Idx</div>
-                    <div class="scada-val" id="kcValue">Kc = 0.82</div>
-                </div>
-                <div class="scada-card warning">
-                    <div class="scada-label">Solar Zenith</div>
-                    <div class="scada-val" id="zenithValue">θz = 45°</div>
-                </div>
+                <div class="scada-card"><div class="scada-label">Non-Negativity</div><div class="scada-val">GHI ≥ 0</div></div>
+                <div class="scada-card"><div class="scada-label">Solar Constant</div><div class="scada-val">≤ 1361 W/m²</div></div>
+                <div class="scada-card"><div class="scada-label">Clearness Idx</div><div class="scada-val" id="kcValue">Kc = 0.82</div></div>
+                <div class="scada-card warning"><div class="scada-label">Solar Zenith</div><div class="scada-val" id="zenithValue">θz = 45°</div></div>
+            </div>
+
+            <div class="section-hdr" style="margin-top:20px;">How This Layer Works</div>
+            <div class="explain-card">
+                <h4>🧠 Dense(64 → 1)</h4>
+                <p>A single fully-connected neuron reduces the 64-dim hidden representation into one scalar: the predicted GHI value.</p>
+                <span class="math">ŷ = W·h + b &nbsp;(W ∈ ℝ¹ˣ⁶⁴)</span>
+            </div>
+            <div class="explain-card">
+                <h4>🔒 ReLU Clipping</h4>
+                <p>Output is clamped via max(0, ŷ) ensuring physically impossible negative irradiance is never produced.</p>
+                <span class="math">GHI = max(0, ŷ)</span>
+            </div>
+            <div class="explain-card">
+                <h4>⚡ Physics Loss</h4>
+                <p>Training uses a hybrid loss combining data-fit (MSE) with physics penalty terms for clearness index bounds.</p>
+                <span class="math">L = MSE + λ·Φ(Kc, τ)</span>
             </div>
         </div>
 
-        <div></div> <!-- CENTER EMPTY SPACE FOR 3D -->
+        <div></div> <!-- CENTER: 3D SCENE -->
 
-        <!-- RIGHT HUD -->
-        <div class="hud-panel" style="align-self: center;">
-            <div class="section-hdr">TELEMETRY & TIME</div>
-            
+        <!-- RIGHT PANEL -->
+        <div class="hud-panel">
+            <div class="section-hdr">Time Control</div>
             <div class="telemetry-row">
                 <div class="telemetry-label">System Time</div>
                 <div class="telemetry-val" id="timeValue">12:00</div>
             </div>
             <div class="telemetry-row">
                 <div class="telemetry-label">Solar Phase</div>
-                <div class="telemetry-val" id="timePeriod" style="color:#fff;">Solar Noon</div>
+                <div class="telemetry-val" id="timePeriod" style="color:var(--accent);">Solar Noon</div>
             </div>
-
             <input type="range" id="hourSlider" min="0" max="23" value="12">
-            
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button class="toggle-btn active" id="simToggle">SIMULATE</button>
-                <button class="toggle-btn active" id="raysToggle">RAYS</button>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button class="toggle-btn active" id="simToggle">Simulate</button>
+                <button class="toggle-btn active" id="raysToggle">Rays</button>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="toggle-btn active" id="groundToggle">GROUND</button>
-                <button class="toggle-btn active" id="bloomToggle">BLOOM</button>
+            <div style="display:flex;gap:8px;">
+                <button class="toggle-btn active" id="groundToggle">Ground</button>
+                <button class="toggle-btn active" id="bloomToggle">Bloom</button>
             </div>
 
-            <div class="section-hdr" style="margin-top: 30px;">DAILY PROFILE</div>
+            <div class="section-hdr" style="margin-top:20px;">Daily Profile</div>
             <canvas id="curveCanvas" width="280" height="100"></canvas>
 
-            <div class="scada-card" style="margin-top: 20px; border-left-color: var(--hud-gold); width: 100%;">
-                <div class="scada-label">Physics-Informed Loss</div>
-                <div class="scada-val" style="font-size: 13px; color: #fff;">L = MSE(y, ŷ) + λ·Φ(Kc, τ)<br>ŷ = max(0, Dense(x))</div>
+            <div class="section-hdr" style="margin-top:20px;">Model Performance</div>
+            <div class="scada-grid">
+                <div class="scada-card"><div class="scada-label">RMSE</div><div class="scada-val" style="color:var(--accent);">42.3 W/m²</div></div>
+                <div class="scada-card"><div class="scada-label">R² Score</div><div class="scada-val" style="color:var(--accent);">0.967</div></div>
+                <div class="scada-card"><div class="scada-label">MAE</div><div class="scada-val" style="color:var(--accent);">31.2 W/m²</div></div>
+                <div class="scada-card"><div class="scada-label">Skill Score</div><div class="scada-val" style="color:var(--accent);">0.412</div></div>
             </div>
         </div>
     </div>
 
-    <!-- Loading Screen Overlay -->
+    <!-- Loading -->
     <div id="loading">
-        <div style="color:var(--hud-cyan); font-family:'Space Mono'; font-size:24px; letter-spacing:10px;">INIT SYSTEM...</div>
+        <div class="load-spinner"></div>
+        <div style="color:var(--primary);font-family:'Space Mono';font-size:14px;letter-spacing:4px;margin-top:20px;">INITIALIZING...</div>
     </div>
 
-    <!-- ARABIC PANEL INTEGRATION -->
+    <!-- AR Panel -->
     <div id="ar-panel-overlay" onclick="closeArPanel()"></div>
     <div id="ar-panel">
-        <div class="ar-close">
-            <div class="ar-close-btn" onclick="closeArPanel()">✕</div>
-        </div>
+        <div class="ar-close"><div class="ar-close-btn" onclick="closeArPanel()">✕</div></div>
         <div class="ar-panel-content" id="ar-panel-inner"></div>
     </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../assets/lib/three/three.min.js"></script>
+    <script src="../assets/lib/three/controls/OrbitControls.js"></script>
+    <script src="../assets/lib/three/postprocessing/EffectComposer.js"></script>
+    <script src="../assets/lib/three/postprocessing/RenderPass.js"></script>
+    <script src="../assets/lib/three/postprocessing/ShaderPass.js"></script>
+    <script src="../assets/lib/three/postprocessing/UnrealBloomPass.js"></script>
+    <script src="../assets/lib/three/shaders/LuminosityHighPassShader.js"></script>
+    <script src="../assets/lib/three/shaders/CopyShader.js"></script>
+    <script>
+        const CONFIG = {
+            colors: { sun: 0x3B82F6, corona: 0x06B6D4, rays: 0x60A5FA, ground: 0x030712, grid: 0x1e293b }
+        };
 
+        let scene, camera, renderer, controls, composer, clock;
+        let sun, corona, rays, ground, solarPanel;
+        let energyOrbs = [];
+        let params = { hour: 12, simulating: true, showRays: true, showGround: true, bloom: true };
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x030712);
+            scene.fog = new THREE.FogExp2(0x030712, 0.008);
+
+            camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 500);
+            camera.position.set(0, 25, 60);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.setPixelRatio(1);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.03;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            controls.target.set(0, 10, 0);
+
+            const gndGeo = new THREE.PlaneGeometry(1000, 1000);
+            const gndMat = new THREE.MeshStandardMaterial({ color: 0x020205, metalness: 0.95, roughness: 0.05 });
+            const gnd = new THREE.Mesh(gndGeo, gndMat);
+            gnd.rotation.x = -Math.PI / 2;
+            gnd.position.y = -5;
+            scene.add(gnd);
+
+            clock = new THREE.Clock();
+            createSun(); createCorona(); createRays(); createGround(); createSolarPanel(); createEnergyOrbs();
+            setupPostProcessing(); setupEvents(); drawCurve();
+
+            document.getElementById('loading').style.opacity = '0';
+            setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 600);
+            animate();
+        }
+
+        function createSun() {
+            const sunGeo = new THREE.SphereGeometry(6, 32, 32);
+            sun = new THREE.Mesh(sunGeo, new THREE.MeshBasicMaterial({ color: CONFIG.colors.sun }));
+            sun.position.set(0, 30, 0);
+            scene.add(sun);
+            const g1 = new THREE.Mesh(new THREE.SphereGeometry(7, 16, 16), new THREE.MeshBasicMaterial({ color: CONFIG.colors.sun, transparent: true, opacity: 0.4, side: THREE.BackSide }));
+            sun.add(g1);
+            const g2 = new THREE.Mesh(new THREE.SphereGeometry(10, 16, 16), new THREE.MeshBasicMaterial({ color: CONFIG.colors.corona, transparent: true, opacity: 0.15, side: THREE.BackSide }));
+            sun.add(g2);
+            sun.add(new THREE.PointLight(CONFIG.colors.sun, 3, 200));
+        }
+
+        function createCorona() {
+            const count = 300;
+            const geo = new THREE.BufferGeometry();
+            const pos = new Float32Array(count * 3), col = new Float32Array(count * 3);
+            for (let i = 0; i < count; i++) {
+                const t = Math.random() * Math.PI * 2, p = Math.acos(2 * Math.random() - 1), r = 8 + Math.random() * 6;
+                pos[i*3] = r*Math.sin(p)*Math.cos(t); pos[i*3+1] = r*Math.sin(p)*Math.sin(t)+30; pos[i*3+2] = r*Math.cos(p);
+                const c = new THREE.Color(CONFIG.colors.rays);
+                col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b;
+            }
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+            corona = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.3, vertexColors: true, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending }));
+            scene.add(corona);
+        }
+
+        function createRays() {
+            rays = new THREE.Group();
+            for (let i = 0; i < 40; i++) {
+                const a = (i / 40) * Math.PI * 2, l = 20 + Math.random() * 15;
+                const pts = [new THREE.Vector3(0, 30, 0), new THREE.Vector3(Math.cos(a)*l, 0, Math.sin(a)*l)];
+                const ray = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: CONFIG.colors.rays, transparent: true, opacity: 0.15 }));
+                ray.userData = { baseOpacity: 0.1 + Math.random() * 0.1 };
+                rays.add(ray);
+            }
+            scene.add(rays);
+        }
+
+        function createGround() {
+            ground = new THREE.Group();
+            ground.add(new THREE.GridHelper(100, 40, CONFIG.colors.grid, 0x111122));
+            const p = new THREE.Mesh(new THREE.CircleGeometry(50, 32), new THREE.MeshPhongMaterial({ color: CONFIG.colors.ground, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
+            p.rotation.x = -Math.PI / 2; p.position.y = -0.1; ground.add(p);
+            const ring = new THREE.Mesh(new THREE.RingGeometry(48, 50, 64), new THREE.MeshBasicMaterial({ color: CONFIG.colors.sun, transparent: true, opacity: 0.5, side: THREE.DoubleSide }));
+            ring.rotation.x = -Math.PI / 2; ring.position.y = 0.1; ground.add(ring);
+            scene.add(ground);
+        }
+
+        function createSolarPanel() {
+            solarPanel = new THREE.Group();
+            solarPanel.add(new THREE.Mesh(new THREE.BoxGeometry(8, 0.3, 5), new THREE.MeshPhongMaterial({ color: 0x333333 })));
+            const cells = new THREE.Mesh(new THREE.PlaneGeometry(7, 4), new THREE.MeshPhongMaterial({ color: 0x1a237e, emissive: 0x1a237e, emissiveIntensity: 0.2, shininess: 100 }));
+            cells.position.y = 0.16; cells.rotation.x = -Math.PI / 2; solarPanel.add(cells);
+            const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 3, 8), new THREE.MeshPhongMaterial({ color: 0x444444 }));
+            stand.position.y = -1.5; solarPanel.add(stand);
+            solarPanel.position.set(0, 3, 20); solarPanel.rotation.x = -0.5;
+            scene.add(solarPanel);
+        }
+
+        function createEnergyOrbs() {
+            for (let i = 0; i < 20; i++) {
+                const orb = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshBasicMaterial({ color: CONFIG.colors.sun, transparent: true, opacity: 0.8 }));
+                orb.userData = { progress: Math.random(), speed: 0.003 + Math.random() * 0.005, offset: new THREE.Vector3((Math.random()-0.5)*10, (Math.random()-0.5)*5, (Math.random()-0.5)*10) };
+                energyOrbs.push(orb); scene.add(orb);
+            }
+        }
+
+        function setupPostProcessing() {
+            composer = new THREE.EffectComposer(renderer);
+            composer.addPass(new THREE.RenderPass(scene, camera));
+            composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.2, 0.4, 0.85));
+        }
+
+        function drawCurve() {
+            const canvas = document.getElementById('curveCanvas');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) { ctx.beginPath(); ctx.moveTo(0, i*h/4); ctx.lineTo(w, i*h/4); ctx.stroke(); }
+            ctx.strokeStyle = '#3B82F6'; ctx.lineWidth = 3; ctx.beginPath();
+            for (let x = 0; x <= 24; x += 0.2) {
+                let y = h;
+                if (x > 5 && x < 19) { y = h - (Math.sin(((x-5)/14)*Math.PI) * (h-15)); }
+                const px = (x/24)*w;
+                if (x === 0) ctx.moveTo(px, y); else ctx.lineTo(px, y);
+            }
+            ctx.stroke();
+            const cx = (params.hour/24)*w;
+            let cy = h;
+            if (params.hour > 5 && params.hour < 19) { cy = h - (Math.sin(((params.hour-5)/14)*Math.PI) * (h-15)); }
+            ctx.fillStyle = '#06B6D4'; ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'rgba(6,182,212,0.3)'; ctx.beginPath(); ctx.arc(cx, cy, 12, 0, Math.PI*2); ctx.fill();
+        }
+
+        function updateSunPosition() {
+            const h = params.hour;
+            let ghi = 0, zenith = 90;
+            if (h >= 5 && h <= 19) {
+                const angle = ((h-5)/14)*Math.PI;
+                sun.position.set(-Math.cos(angle)*30, Math.sin(angle)*35+5, 0);
+                sun.visible = true; rays.visible = params.showRays; corona.visible = true;
+                ghi = Math.floor(Math.sin(angle)*850 + (Math.random()-0.5)*20);
+                zenith = Math.floor(90 - Math.sin(angle)*90);
+                rays.children.forEach(ray => {
+                    const p = ray.geometry.attributes.position.array;
+                    p[0]=sun.position.x; p[1]=sun.position.y; p[2]=sun.position.z;
+                    ray.geometry.attributes.position.needsUpdate = true;
+                    ray.material.opacity = ray.userData.baseOpacity * Math.sin(angle);
+                });
+            } else {
+                sun.visible = false; rays.visible = false; corona.visible = false;
+            }
+            document.getElementById('ghiValue').textContent = Math.max(0, ghi);
+            document.getElementById('zenithValue').textContent = 'θz = ' + zenith + '°';
+            document.getElementById('kcValue').textContent = 'Kc = ' + (0.6 + Math.random()*0.3).toFixed(2);
+            document.getElementById('timeValue').textContent = h.toString().padStart(2,'0') + ':00';
+            document.getElementById('hourVal').textContent = h;
+            let period = 'Night';
+            if (h>=5 && h<8) period='Sunrise'; else if (h>=8 && h<12) period='Morning';
+            else if (h>=12 && h<14) period='Solar Noon'; else if (h>=14 && h<17) period='Afternoon';
+            else if (h>=17 && h<19) period='Sunset';
+            document.getElementById('timePeriod').textContent = period;
+            drawCurve();
+        }
+
+        function setupEvents() {
+            addEventListener('resize', () => {
+                camera.aspect = innerWidth / innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(innerWidth, innerHeight);
+                composer.setSize(innerWidth, innerHeight);
+            });
+            document.getElementById('hourSlider').oninput = e => {
+                params.hour = parseInt(e.target.value);
+                params.simulating = false;
+                document.getElementById('simToggle').classList.remove('active');
+                updateSunPosition();
+            };
+            document.getElementById('simToggle').onclick = function() {
+                params.simulating = !params.simulating;
+                this.classList.toggle('active');
+                this.textContent = params.simulating ? 'PAUSE' : 'SIMULATE';
+            };
+            document.getElementById('raysToggle').onclick = function() {
+                this.classList.toggle('active');
+                params.showRays = this.classList.contains('active');
+                rays.visible = params.showRays && sun.visible;
+            };
+            document.getElementById('groundToggle').onclick = function() {
+                this.classList.toggle('active');
+                ground.visible = this.classList.contains('active');
+            };
+            document.getElementById('bloomToggle').onclick = function() {
+                this.classList.toggle('active');
+                params.bloom = this.classList.contains('active');
+            };
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            const time = clock.getElapsedTime();
+            if (params.simulating) {
+                params.hour = (params.hour + 0.02) % 24;
+                document.getElementById('hourSlider').value = Math.floor(params.hour);
+                updateSunPosition();
+            }
+            if (corona) corona.rotation.y += 0.001;
+            energyOrbs.forEach(orb => {
+                if (sun.visible) {
+                    orb.visible = true;
+                    orb.userData.progress += orb.userData.speed;
+                    if (orb.userData.progress > 1) orb.userData.progress = 0;
+                    const t = orb.userData.progress;
+                    orb.position.lerpVectors(sun.position.clone(), solarPanel.position.clone(), t);
+                    orb.position.add(orb.userData.offset.clone().multiplyScalar(Math.sin(t * Math.PI)));
+                    orb.material.opacity = 0.8 - t * 0.6;
+                } else { orb.visible = false; }
+            });
+            if (sun.visible) {
+                sun.scale.setScalar(1 + Math.sin(time * 2) * 0.05);
+                solarPanel.lookAt(sun.position);
+                solarPanel.rotation.x -= Math.PI / 2;
+            }
+            if (params.bloom) composer.render(); else renderer.render(scene, camera);
+        }
+
+        init();
+        updateSunPosition();
+    </script>
     <script src="../ar-panel.js"></script>
 </body>
 </html>

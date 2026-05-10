@@ -1,1753 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <style>
+      /* ── Offline Fonts ─────────────────────────────────── */
+      @font-face { font-family: 'Outfit'; font-weight: 200; src: url('../vendor/fonts/outfit-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 400; src: url('../vendor/fonts/outfit-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 600; src: url('../vendor/fonts/outfit-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 900; src: url('../vendor/fonts/outfit-900.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 400; src: url('../vendor/fonts/space-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 700; src: url('../vendor/fonts/space-mono-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 200; src: url('../vendor/fonts/inter-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 300; src: url('../vendor/fonts/inter-300.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 400; src: url('../vendor/fonts/inter-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 600; src: url('../vendor/fonts/inter-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 800; src: url('../vendor/fonts/inter-800.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url('../vendor/fonts/jetbrains-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url('../vendor/fonts/jetbrains-mono-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 400; src: url('../vendor/fonts/cairo-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 600; src: url('../vendor/fonts/cairo-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 700; src: url('../vendor/fonts/cairo-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 400; src: url('../vendor/fonts/cinzel-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 700; src: url('../vendor/fonts/cinzel-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 900; src: url('../vendor/fonts/cinzel-900.ttf') format('truetype'); font-display: swap; }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Layer 5: BiLSTM | Temporal Memory Cathedral</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <title>Layer 5: BiLSTM — Temporal Memory Core | PI-Hybrid</title>
+<link rel="stylesheet" href="../ar-panel.css">
     <style>
-        :root {
-            /* Unifying to Blue/Cyan Theme */
-            --cyan: #06B6D4;
-            --purple: #8B5CF6;
-            --gold: #06B6D4;
-            --green: #10B981;
-            --blue: #3B82F6;
-            --bg-dark: #050510;
-            --panel-bg: rgba(5, 5, 20, 0.95);
-            --glass-border: rgba(6, 182, 212, 0.3);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Outfit', sans-serif;
-            font-size: 15px;
-            font-weight: 400;
-            line-height: 1.6;
-            background: linear-gradient(135deg, #050510 0%, #0a0a20 50%, #050510 100%);
-            color: #fff;
-        }
-
-        #canvas-container {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-        }
-
-        /* Header - Cinematic Style */
-        .header {
-            position: fixed;
-            top: 24px;
-            left: 24px;
-            right: 24px;
-            height: 64px;
-            background: rgba(10, 10, 20, 0.7);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 28px;
-            box-shadow:
-                0 16px 40px rgba(0, 0, 0, 0.4),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-        }
-
-        .layer-badge {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
-
-        .layer-icon {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, var(--cyan), var(--purple));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 0 50px rgba(139, 92, 246, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.1);
-            animation: iconGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes iconGlow {
-
-            0%,
-            100% {
-                box-shadow: 0 0 50px rgba(139, 92, 246, 0.6);
-            }
-
-            50% {
-                box-shadow: 0 0 80px rgba(6, 182, 212, 0.8);
-            }
-        }
-
-        .layer-title h1 {
-            font-size: 18px;
-            font-weight: 300;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, var(--cyan), var(--purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .layer-title p {
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.5);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .header-metrics {
-            display: flex;
-            gap: 20px;
-        }
-
-        .metric-box {
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid var(--glass-border);
-            padding: 8px 16px;
-            border-radius: 12px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .metric-label {
-            font-size: 8px;
-            color: var(--purple);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        .metric-value {
-            font-size: 16px;
-            font-weight: 200;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-        }
-
-        .nav-group {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .nav-btn {
-            padding: 10px 18px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 11px;
-            font-weight: 600;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .nav-btn:hover:not(.disabled) {
-            background: rgba(139, 92, 246, 0.1);
-            color: var(--purple);
-            border-color: var(--purple);
-            transform: translateY(-1px);
-        }
-
-        .nav-btn.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .back-btn {
-            padding: 10px 18px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 11px;
-            font-weight: 600;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .back-btn:hover {
-            background: rgba(139, 92, 246, 0.1);
-            color: var(--purple);
-            border-color: var(--purple);
-            transform: translateY(-1px);
-        }
-
-        /* Crystalline Panels */
-        .left-panel {
-            position: fixed;
-            left: 24px;
-            top: 112px;
-            width: 300px;
-            max-height: calc(100vh - 140px);
-            background: rgba(10, 10, 20, 0.8);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 24px;
-            z-index: 50;
-            overflow-y: auto;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-        }
-
-        .section-title {
-            font-size: 11px;
-            color: var(--purple);
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* Memory Cell Diagram */
-        .memory-cell {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1));
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 20px;
-            position: relative;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-        }
-
-        .cell-visual {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .gate-box {
-            aspect-ratio: 1;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-
-        .gate-box:hover {
-            transform: scale(1.1);
-        }
-
-        .gate-box.active {
-            border-color: #fff;
-            box-shadow: 0 0 20px currentColor;
-        }
-
-        .gate-box.forget {
-            background: linear-gradient(135deg, #EF4444, #B91C1C);
-            color: #fff;
-        }
-
-        .gate-box.input {
-            background: linear-gradient(135deg, #10B981, #059669);
-            color: #fff;
-        }
-
-        .gate-box.cell {
-            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-            color: #fff;
-        }
-
-        .gate-box.output {
-            background: linear-gradient(135deg, #F59E0B, #D97706);
-            color: #fff;
-        }
-
-        .gate-icon {
-            font-size: 16px;
-        }
-
-        .gate-label {
-            font-size: 8px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        /* State Bars */
-        .state-bars {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .state-bar {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            padding: 12px 15px;
-        }
-
-        .state-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .state-name {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .state-value {
-            font-size: 11px;
-            color: var(--cyan);
-            font-family: 'Courier New', monospace;
-        }
-
-        .state-progress {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .state-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.5s;
-        }
-
-        .state-fill.hidden {
-            background: linear-gradient(90deg, var(--cyan), var(--purple));
-        }
-
-        .state-fill.cell-state {
-            background: linear-gradient(90deg, var(--blue), var(--green));
-        }
-
-        /* Direction Cards */
-        .direction-cards {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .direction-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .direction-card:hover {
-            background: rgba(139, 92, 246, 0.1);
-        }
-
-        .direction-card.active {
-            border-color: var(--cyan);
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
-        }
-
-        .direction-card.backward.active {
-            border-color: var(--purple);
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
-        }
-
-        .direction-icon {
-            font-size: 18px;
-            margin-bottom: 6px;
-        }
-
-        .direction-name {
-            font-size: 12px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .direction-units {
-            font-size: 10px;
-            color: var(--cyan);
-            font-family: 'Courier New', monospace;
-        }
-
-        /* Right Panel */
-        .right-panel {
-            position: fixed;
-            right: 20px;
-            top: 90px;
-            width: 280px;
-            max-height: calc(100vh - 110px);
-            background: rgba(10, 10, 25, 0.75);
-            backdrop-filter: blur(30px) saturate(140%);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 20px;
-            padding: 20px;
-            z-index: 50;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-        }
-
-        /* Control Sliders */
-        .control-row {
-            margin-bottom: 22px;
-        }
-
-        .control-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .control-label {
-            font-size: 11px;
-            color: var(--purple);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .control-value {
-            font-size: 12px;
-            color: var(--cyan);
-            font-family: 'Courier New', monospace;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            -webkit-appearance: none;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: linear-gradient(135deg, var(--cyan), var(--purple));
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
-        }
-
-        /* Toggle Buttons */
-        .toggle-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .toggle-btn {
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 8px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .toggle-btn:hover {
-            background: rgba(139, 92, 246, 0.1);
-            border-color: var(--purple);
-            color: #fff;
-        }
-
-        .toggle-btn.active {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2));
-            border-color: var(--purple);
-            color: #fff;
-        }
-
-        /* Equations */
-        .equation-card {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-            border-left: 3px solid var(--purple);
-        }
-
-        .equation-title {
-            font-size: 10px;
-            color: var(--purple);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 12px;
-        }
-
-        .equation-content {
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: var(--cyan);
-            line-height: 2;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 16px;
-            font-weight: 200;
-            color: var(--cyan);
-            font-family: 'Courier New', monospace;
-        }
-
-        .stat-label {
-            font-size: 8px;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-
-        /* Loading */
-        .loading {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-dark);
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.6s;
-        }
-
-        .loading.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loading-dna {
-            display: flex;
-            gap: 8px;
-        }
-
-        .dna-strand {
-            width: 8px;
-            height: 60px;
-            border-radius: 4px;
-            animation: dnaWave 1.5s ease-in-out infinite;
-        }
-
-        .dna-strand:nth-child(1) {
-            background: var(--cyan);
-            animation-delay: 0s;
-        }
-
-        .dna-strand:nth-child(2) {
-            background: var(--purple);
-            animation-delay: 0.1s;
-        }
-
-        .dna-strand:nth-child(3) {
-            background: var(--cyan);
-            animation-delay: 0.2s;
-        }
-
-        .dna-strand:nth-child(4) {
-            background: var(--purple);
-            animation-delay: 0.3s;
-        }
-
-        .dna-strand:nth-child(5) {
-            background: var(--cyan);
-            animation-delay: 0.4s;
-        }
-
-        @keyframes dnaWave {
-
-            0%,
-            100% {
-                transform: scaleY(1);
-            }
-
-            50% {
-                transform: scaleY(0.4);
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--purple);
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        /* NEW VISUAL EFFECTS */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        #cursor {
-            width: 30px;
-            height: 30px;
-            border: 2px solid var(--purple);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-            transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1);
-            mix-blend-mode: difference;
-        }
-
-        #cursor-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--cyan);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-            box-shadow: 0 0 10px var(--purple);
-        }
-
-        .layer-title h1 {
-            text-shadow: 0 0 30px rgba(139, 92, 246, 0.5), 0 0 60px rgba(6, 182, 212, 0.3);
-            animation: breathe 4s ease-in-out infinite;
-        }
-
-        @keyframes breathe {
-
-            0%,
-            100% {
-                text-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
-            }
-
-            50% {
-                text-shadow: 0 0 50px rgba(139, 92, 246, 0.8), 0 0 80px rgba(6, 182, 212, 0.5);
-            }
-        }
-
-        /* Panel Tilt Effect */
-        .left-panel,
-        .right-panel {
-            transition: transform 0.1s;
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-
-        .left-panel:hover,
-        .right-panel:hover {
-            box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
-            border-color: rgba(139, 92, 246, 0.5);
-        }
-
-        /* ═══════════════════════════════════════════════════
-           INFO MODAL (Detailed Explanation)
-           ═══════════════════════════════════════════════════ */
-        #info-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        #info-modal.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            background: rgba(10, 10, 25, 0.95);
-            border: 1px solid rgba(139, 92, 246, 0.4);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 40px;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 40px rgba(139, 92, 246, 0.2);
-            transform: translateY(20px);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            color: #fff;
-            direction: rtl;
-        }
-
-        #info-modal.show .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 24px;
-            left: 24px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(1.1);
-        }
-
-        .modal-body h2 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            color: var(--cyan);
-            font-weight: 500;
-        }
-
-        .modal-body p {
-            font-size: 15px;
-            line-height: 1.8;
-            color: #d0d0e0;
-            margin-bottom: 16px;
-        }
-
-        .modal-body h3 {
-            font-size: 18px;
-            margin-top: 32px;
-            margin-bottom: 12px;
-            color: var(--purple);
-            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
-            padding-bottom: 8px;
-        }
-
-        @keyframes pulse-attn-border {
-
-            0%,
-            100% {
-                box-shadow: 0 0 15px rgba(245, 158, 11, 0.3), inset 0 0 10px rgba(245, 158, 11, 0.1);
-                border-color: rgba(245, 158, 11, 0.5);
-            }
-
-            50% {
-                box-shadow: 0 0 30px rgba(245, 158, 11, 0.7), inset 0 0 20px rgba(245, 158, 11, 0.3);
-                border-color: rgba(245, 158, 11, 1);
-                transform: scale(1.02);
-            }
-        }
-
-        @keyframes shine-attn {
-            0% {
-                left: -100%;
-            }
-
-            20% {
-                left: 200%;
-            }
-
-            100% {
-                left: 200%;
-            }
-        }
-
-        #btn-compare-attn {
-            background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15));
-            border: 1px solid rgba(245, 158, 11, 0.8);
-            border-radius: 8px;
-            color: #F59E0B;
-            padding: 8px 20px;
-            margin-left: 20px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
-            animation: pulse-attn-border 2.5s infinite ease-in-out;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-
-        #btn-compare-attn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.4), transparent);
-            transform: skewX(-20deg);
-            animation: shine-attn 3s infinite;
-        }
-
-        #btn-compare-attn:hover {
-            background: linear-gradient(90deg, rgba(245, 158, 11, 0.8), rgba(239, 68, 68, 0.8));
-            color: #fff;
-            box-shadow: 0 0 40px rgba(245, 158, 11, 0.9);
-            transform: translateY(-2px) scale(1.05);
-            border-color: #fff;
-        }
+        :root { --primary:#3B82F6; --accent:#06B6D4; --success:#10B981; --warn:#F59E0B; --danger:#EF4444; --purple:#8B5CF6; --bg:#030712; --panel-bg:rgba(3,7,18,0.88); --border:rgba(59,130,246,0.25); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); color:#e2e8f0; font-family:'Outfit',sans-serif; overflow:hidden; width:100vw; height:100vh; }
+        #canvas-container { position:fixed; inset:0; z-index:1; }
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-thumb { background:var(--primary); border-radius:2px; }
+
+        .hud-top {
+            position:fixed; top:0; left:0; right:0; height:60px; z-index:20;
+            display:flex; justify-content:space-between; align-items:center;
+            background:rgba(3,7,18,0.92); backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border); padding:0 30px; pointer-events:auto;
+        }
+        .hud-title { font-size:16px; font-weight:700; letter-spacing:3px; color:#fff; display:flex; align-items:center; gap:15px; text-transform:uppercase; }
+        .hud-title .tag { color:var(--accent); font-family:'Space Mono',monospace; font-size:13px; }
+        .nav-links { display:flex; gap:10px; }
+        .nav-btn { padding:8px 16px; border:1px solid var(--border); color:var(--accent); text-decoration:none; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1px; transition:all 0.3s; border-radius:6px; text-transform:uppercase; }
+        .nav-btn:hover { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+        .hud-wrapper { position:fixed; inset:0; z-index:10; pointer-events:none; display:grid; grid-template-columns:320px 1fr 300px; padding:75px 20px 20px; gap:20px; }
+        .hud-panel { pointer-events:auto; background:var(--panel-bg); border:1px solid var(--border); border-radius:14px; padding:20px; backdrop-filter:blur(25px); box-shadow:0 0 20px rgba(59,130,246,0.15); display:flex; flex-direction:column; gap:16px; overflow-y:auto; position:relative; }
+        .hud-panel::before { content:''; position:absolute; top:0; left:20px; width:40px; height:2px; background:var(--primary); box-shadow:0 0 10px var(--primary); }
+
+        .section-hdr { font-size:11px; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:3px; display:flex; align-items:center; gap:8px; }
+        .section-hdr::before { content:''; width:8px; height:8px; background:var(--primary); box-shadow:0 0 8px var(--primary); border-radius:2px; }
+
+        .step-list { display:flex; flex-direction:column; gap:8px; }
+        .step-btn { padding:14px 16px; background:rgba(59,130,246,0.05); border:1px solid rgba(59,130,246,0.2); border-radius:8px; color:rgba(255,255,255,0.6); text-align:left; font-family:'Space Mono',monospace; font-size:12px; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; gap:12px; }
+        .step-btn:hover { background:rgba(59,130,246,0.15); color:#fff; }
+        .step-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); box-shadow:0 0 15px rgba(59,130,246,0.4); }
+
+        .explain-card { background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.15); border-radius:10px; padding:16px; }
+        .explain-card h4 { font-size:14px; color:var(--accent); margin-bottom:8px; }
+        .explain-card p { font-size:12px; color:rgba(255,255,255,0.6); line-height:1.6; }
+        .explain-card .math { display:inline-block; font-family:'Space Mono',monospace; color:#fff; background:rgba(0,0,0,0.5); padding:6px 10px; border-radius:6px; margin-top:10px; font-size:13px; border-left:3px solid var(--accent); }
+
+        .scada-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .scada-card { background:rgba(0,0,0,0.4); border:1px solid rgba(59,130,246,0.15); padding:12px; border-radius:8px; border-left:3px solid var(--accent); }
+        .scada-label { font-size:9px; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:2px; margin-bottom:4px; }
+        .scada-val { font-family:'Space Mono',monospace; font-size:18px; color:#fff; }
+
+        .control-group { margin-bottom:10px; }
+        .control-label { font-size:10px; color:var(--primary); margin-bottom:8px; display:flex; justify-content:space-between; text-transform:uppercase; letter-spacing:1px; }
+        .control-value { color:var(--accent); font-family:'Space Mono',monospace; }
+        input[type="range"] { width:100%; height:4px; background:rgba(255,255,255,0.12); outline:none; -webkit-appearance:none; border-radius:2px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; background:var(--primary); border-radius:50%; cursor:pointer; box-shadow:0 0 10px var(--primary); }
+
+        .gate-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .gate-btn { padding:12px; background:rgba(0,0,0,0.3); border:2px solid rgba(59,130,246,0.2); border-radius:10px; cursor:pointer; transition:all 0.3s; text-align:center; }
+        .gate-btn:hover { border-color:rgba(59,130,246,0.5); background:rgba(59,130,246,0.1); }
+        .gate-btn.active { border-color:var(--accent); box-shadow:0 0 20px rgba(6,182,212,0.3); background:rgba(6,182,212,0.1); }
+        .gate-btn .icon { font-size:20px; margin-bottom:4px; }
+        .gate-btn .label { font-size:10px; color:rgba(255,255,255,0.7); font-weight:700; letter-spacing:1px; }
+
+        .dir-btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .dir-btn { padding:10px; border:1px solid rgba(59,130,246,0.2); border-radius:8px; cursor:pointer; text-align:center; font-size:11px; font-family:'Space Mono',monospace; transition:all 0.3s; background:rgba(0,0,0,0.3); color:rgba(255,255,255,0.5); }
+        .dir-btn:hover { border-color:var(--primary); color:#fff; }
+        .dir-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); box-shadow:0 0 15px rgba(59,130,246,0.4); }
+
+        .ar-hud-btn { background:rgba(59,130,246,0.15); border:2px solid var(--primary); color:var(--primary); font-size:20px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; cursor:pointer; transition:all 0.3s; animation:pulseAr 2.5s infinite; }
+        .ar-hud-btn:hover { background:var(--primary); color:#fff; box-shadow:0 0 30px var(--primary); transform:scale(1.1); }
+        @keyframes pulseAr { 0%,100%{box-shadow:0 0 8px rgba(59,130,246,0.2)} 50%{box-shadow:0 0 20px rgba(59,130,246,0.5)} }
     </style>
 </head>
-
 <body>
-    <div id="cursor"></div>
-    <div id="cursor-dot"></div>
-    <canvas id="bg-canvas"></canvas>
-    <div class="loading" id="loading">
-        <div class="loading-dna">
-            <div class="dna-strand"></div>
-            <div class="dna-strand"></div>
-            <div class="dna-strand"></div>
-            <div class="dna-strand"></div>
-            <div class="dna-strand"></div>
-        </div>
-        <p style="margin-top: 25px; color: var(--purple); letter-spacing: 3px;">LOADING MEMORY...</p>
-    </div>
-
-    <header class="header">
-        <div class="layer-badge">
-            <div class="layer-icon">🧠</div>
-            <div class="layer-title">
-                <h1>BiLSTM Mastery</h1>
-                <p>Temporal Context Extraction · OutputMode='last'</p>
-            </div>
-        </div>
-
-        <div class="nav-group">
-            <a href="layer4-dropout1.html" class="nav-btn">← PREV</a>
-            <a href="../index.html" class="nav-btn">HOME</a>
-            <a href="layer6-dropout2.html" class="nav-btn">NEXT →</a>
-            <a href="layer5b-attention.html" class="nav-btn" id="btn-compare-attn"><span
-                    style="font-size: 16px; margin-bottom: 2px;">⑂</span> RESEARCH: ATTENTION PATH</a>
-        </div>
-
-        <div class="header-metrics">
-            <div class="metric-box">
-                <div class="metric-label">Input Seq</div>
-                <div class="metric-value">24×64</div>
-            </div>
-            <div class="metric-box">
-                <div class="metric-label">Hidden</div>
-                <div class="metric-value">210×2</div>
-            </div>
-            <div class="metric-box">
-                <div class="metric-label">Output</div>
-                <div class="metric-value">420</div>
-            </div>
-            <div class="metric-box">
-                <div class="metric-label">Params</div>
-                <div class="metric-value">462K</div>
-            </div>
-        </div>
-    </header>
-
     <div id="canvas-container"></div>
 
-    <!-- Left Panel -->
-    <div class="left-panel">
-        <div class="section-title" style="justify-content: space-between;">
-            <div>🧠 Memory Cell Architecture</div>
-            <button id="btn-info"
-                style="pointer-events: auto; width:22px; height:22px; border-radius:50%; background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.5); color:#fff; cursor:pointer; font-size:12px; font-weight:bold; display:flex; align-items:center; justify-content:center; transition:0.2s;"
-                title="Detailed Explanation">i</button>
+    <div class="hud-top">
+        <div class="hud-title">
+            <span class="tag">L5</span> BiLSTM — Temporal Memory Core
+            <div class="ar-hud-btn" onclick="openArPanel('arch_bilstm')" title="شرح عربي">ع</div>
         </div>
+        <div class="nav-links">
+            <a href="layer4-dropout1.html" class="nav-btn">← Prev</a>
+            <a href="../index.html" class="nav-btn">Hub</a>
+            <a href="layer6-dropout2.html" class="nav-btn">Next →</a>
+        </div>
+    </div>
 
-        <div class="memory-cell">
-            <div class="cell-visual">
-                <div class="gate-box forget active" data-gate="forget">
-                    <span class="gate-icon">🚪</span>
-                    <span class="gate-label">FORGET</span>
-                </div>
-                <div class="gate-box input" data-gate="input">
-                    <span class="gate-icon">📥</span>
-                    <span class="gate-label">INPUT</span>
-                </div>
-                <div class="gate-box cell" data-gate="cell">
-                    <span class="gate-icon">💾</span>
-                    <span class="gate-label">CELL</span>
-                </div>
-                <div class="gate-box output" data-gate="output">
-                    <span class="gate-icon">📤</span>
-                    <span class="gate-label">OUTPUT</span>
-                </div>
+    <div class="hud-wrapper">
+        <!-- LEFT PANEL -->
+        <div class="hud-panel">
+            <div class="section-hdr">LSTM Gate Explorer</div>
+            <div class="gate-grid">
+                <div class="gate-btn active" onclick="setGate('forget')"><div class="icon">🗑️</div><div class="label">FORGET</div></div>
+                <div class="gate-btn" onclick="setGate('input')"><div class="icon">📥</div><div class="label">INPUT</div></div>
+                <div class="gate-btn" onclick="setGate('cell')"><div class="icon">🧠</div><div class="label">CELL STATE</div></div>
+                <div class="gate-btn" onclick="setGate('output')"><div class="icon">📤</div><div class="label">OUTPUT</div></div>
             </div>
 
-            <div class="state-bars">
-                <div class="state-bar">
-                    <div class="state-header">
-                        <span class="state-name">Hidden State (hₜ)</span>
-                        <span class="state-value" id="hiddenVal">210-dim</span>
-                    </div>
-                    <div class="state-progress">
-                        <div class="state-fill hidden" style="width: 75%;"></div>
-                    </div>
-                </div>
-                <div class="state-bar">
-                    <div class="state-header">
-                        <span class="state-name">Cell State (Cₜ)</span>
-                        <span class="state-value" id="cellVal">210-dim</span>
-                    </div>
-                    <div class="state-progress">
-                        <div class="state-fill cell-state" style="width: 60%;"></div>
-                    </div>
-                </div>
+            <div class="section-hdr">Direction</div>
+            <div class="dir-btns">
+                <div class="dir-btn active" onclick="setDirection('forward')">→ Forward</div>
+                <div class="dir-btn" onclick="setDirection('backward')">← Backward</div>
+            </div>
+
+            <div class="explain-card" style="flex-grow:1;">
+                <h4 id="desc-title">Forget Gate (f_t)</h4>
+                <p id="desc-text">Decides what information to discard from the cell state. A sigmoid layer outputs values between 0 (forget entirely) and 1 (keep entirely). In solar forecasting, this allows the network to forget stale weather patterns that no longer apply.</p>
+                <div class="math" id="desc-math">f_t = σ(W_f · [h_t-1, x_t] + b_f)</div>
             </div>
         </div>
 
-        <div class="section-title">↔️ Bidirectional Streams</div>
+        <div></div> <!-- 3D Space -->
 
-        <div class="direction-cards">
-            <div class="direction-card active" id="forwardCard">
-                <div class="direction-icon">➡️</div>
-                <div class="direction-name">Forward</div>
-                <div class="direction-units">t=0 → t=23</div>
+        <!-- RIGHT PANEL -->
+        <div class="hud-panel">
+            <div class="section-hdr">Live Cell Stats</div>
+            <div class="scada-grid">
+                <div class="scada-card" style="border-left-color:var(--accent);">
+                    <div class="scada-label">Hidden Units</div>
+                    <div class="scada-val">210</div>
+                </div>
+                <div class="scada-card" style="border-left-color:var(--purple);">
+                    <div class="scada-label">Output Dim</div>
+                    <div class="scada-val">420</div>
+                </div>
+                <div class="scada-card" style="border-left-color:var(--success);">
+                    <div class="scada-label">Parameters</div>
+                    <div class="scada-val" id="stat-params">462K</div>
+                </div>
+                <div class="scada-card" style="border-left-color:var(--warn);">
+                    <div class="scada-label">Sequence Len</div>
+                    <div class="scada-val">24</div>
+                </div>
             </div>
-            <div class="direction-card backward active" id="backwardCard">
-                <div class="direction-icon">⬅️</div>
-                <div class="direction-name">Backward</div>
-                <div class="direction-units">t=23 → t=0</div>
-            </div>
-        </div>
 
-        <div class="equation-card">
-            <div class="equation-title">Gate Equations</div>
-            <div class="equation-content">
-                fₜ = σ(Wf·[hₜ₋₁, xₜ] + bf)<br>
-                iₜ = σ(Wi·[hₜ₋₁, xₜ] + bi)<br>
-                oₜ = σ(Wo·[hₜ₋₁, xₜ] + bo)
+            <div class="section-hdr">Gate Activation</div>
+            <div class="scada-grid">
+                <div class="scada-card" id="card-gate-val">
+                    <div class="scada-label">Gate Value</div>
+                    <div class="scada-val" id="stat-gate">0.00</div>
+                </div>
+                <div class="scada-card" id="card-cell-val">
+                    <div class="scada-label">Cell State</div>
+                    <div class="scada-val" id="stat-cell">0.00</div>
+                </div>
             </div>
-        </div>
 
-        <div class="equation-card" style="border-left: 3px solid #FFD740;">
-            <div class="equation-title" style="color: #FFD740;">⚡ OutputMode = 'last'</div>
-            <div class="equation-content" style="font-size: 12px;">
-                Only the <strong>final hidden state</strong> (t=24) is output.<br>
-                24 timesteps → <strong>1 vector</strong><br>
-                [64×24] → <strong>[420]</strong> (210 fwd + 210 bwd)
+            <div class="section-hdr" style="margin-top:5px;">Time Step Control</div>
+            <div class="control-group">
+                <div class="control-label"><span>Time Step (t)</span><span class="control-value" id="val-timestep">12</span></div>
+                <input type="range" id="slider-timestep" min="1" max="24" step="1" value="12">
             </div>
-        </div>
+            <div class="control-group">
+                <div class="control-label"><span>Gate Bias</span><span class="control-value" id="val-bias">0.0</span></div>
+                <input type="range" id="slider-bias" min="-3" max="3" step="0.1" value="0">
+            </div>
 
-        <div class="equation-card" style="border-left: 3px solid #40C4FF;">
-            <div class="equation-title" style="color: #40C4FF;">🔗 Data Flow</div>
-            <div class="equation-content" style="font-size: 11px;">
-                Dropout1 [64×24] → BiLSTM → <strong>[420]</strong> → Dropout2 → Dense [64]
+            <div class="explain-card" style="margin-top:auto;">
+                <h4>Why Bidirectional?</h4>
+                <p>Forward pass reads past→present. Backward pass reads future→present. Concatenating both (210+210=420) gives full causal understanding of weather dynamics — crucial for cloud anticipation.</p>
             </div>
         </div>
     </div>
 
-    <!-- Right Panel -->
-    <div class="right-panel">
-        <div class="section-title">🎛️ Controls</div>
-
-        <div class="control-row">
-            <div class="control-header">
-                <span class="control-label">Animation Speed</span>
-                <span class="control-value" id="speedVal">1.0×</span>
-            </div>
-            <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
-        </div>
-
-        <div class="control-row">
-            <div class="control-header">
-                <span class="control-label">Helix Rotation</span>
-                <span class="control-value" id="rotateVal">0.5</span>
-            </div>
-            <input type="range" id="rotateSlider" min="0" max="2" step="0.1" value="0.5">
-        </div>
-
-        <div class="control-row">
-            <div class="control-header">
-                <span class="control-label">Particle Density</span>
-                <span class="control-value" id="densityVal">100%</span>
-            </div>
-            <input type="range" id="densitySlider" min="10" max="100" step="10" value="100">
-        </div>
-
-        <div class="toggle-grid">
-            <button class="toggle-btn active" id="forwardToggle">➡️ Forward</button>
-            <button class="toggle-btn active" id="backwardToggle">⬅️ Backward</button>
-            <button class="toggle-btn active" id="nodesToggle">⚪ Nodes</button>
-            <button class="toggle-btn active" id="flowToggle">🌊 Flow</button>
-            <button class="toggle-btn" id="pauseToggle">⏸️ Pause</button>
-            <button class="toggle-btn active" id="bloomToggle">✨ Bloom</button>
-        </div>
-
-        <div class="section-title">📊 Statistics</div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number">210</div>
-                <div class="stat-label">Forward</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">210</div>
-                <div class="stat-label">Backward</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">420</div>
-                <div class="stat-label">Combined</div>
-            </div>
-        </div>
-
-        <div class="equation-card">
-            <div class="equation-title">Cell & Hidden Update</div>
-            <div class="equation-content">
-                Cₜ = fₜ ⊙ Cₜ₋₁ + iₜ ⊙ tanh(Wc·[hₜ₋₁,xₜ])<br>
-                hₜ = oₜ ⊙ tanh(Cₜ)
-            </div>
-        </div>
-
-        <div class="stat-card"
-            style="background: rgba(255,215,64,0.08); padding: 14px; border-radius: 12px; border-left: 3px solid #FFD740; margin-top: 12px;">
-            <div
-                style="font-size: 10px; color: #FFD740; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
-                BayesOpt Tuned</div>
-            <div style="font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.7;">
-                BiLSTM units optimized via Bayesian search in range <strong>[100, 250]</strong>.<br>
-                Current: <strong>210 units</strong> per direction.
-            </div>
-        </div>
+    <div id="ar-panel-overlay" onclick="closeArPanel()"></div>
+    <div id="ar-panel">
+        <div class="ar-close"><div class="ar-close-btn" onclick="closeArPanel()">✕</div></div>
+        <div class="ar-panel-content" id="ar-panel-inner"></div>
     </div>
 
-
-    <!-- Info Modal -->
-    <!-- Info Modal -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-    </style>
-    <div id="info-modal">
-        <div class="modal-content"
-            style="border-color: var(--purple); font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; direction: rtl; text-align: right;">
-            <button class="modal-close" id="btn-close-modal">✕</button>
-            <div class="modal-body">
-                <h2 style="color: var(--cyan); font-weight: 700; margin-bottom: 20px; font-size: 26px;">
-                    الذاكرة الزمنية: شبكة BiLSTM
-                </h2>
-
-                <div
-                    style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-right: 4px solid var(--purple); margin-bottom: 20px;">
-                    <h3 style="color: var(--purple); font-size: 18px; margin-bottom: 10px;">المحرك الزمني للنموذج</h3>
-                    <p style="font-size: 15px; line-height: 1.8; color: #e0e0e0; margin: 0;">
-                        تعتبر طبقة الذاكرة طويلة وقصيرة المدى ثنائية الاتجاه (BiLSTM) بمثابة "الدماغ الزمني" للنموذج
-                        الهجين. على عكس الشبكات التقليدية، تمتلك هذه الشبكة "بوابات" داخلية (بوابة النسيان، الإدخال،
-                        والإخراج) قادرة على تنظيم تدفق المعلومات، مما يسمح لها بتذكر تفاصيل الطقس على المدى الطويل
-                        وتجاهل الضوضاء اللحظية.
-                    </p>
-                </div>
-
-                <div
-                    style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-right: 4px solid var(--cyan); margin-bottom: 20px;">
-                    <h3 style="color: var(--cyan); font-size: 18px; margin-bottom: 10px;">نظرة للمستقبل والماضي في آن
-                        واحد</h3>
-                    <p style="font-size: 15px; line-height: 1.8; color: #e0e0e0; margin: 0;">
-                        تقوم هذه الطبقة بمعالجة تسلسل الـ 24 ساعة في اتجاهين متزامنين: المسار الأمامي يدرس كيف تؤثر شمس
-                        الصباح على فترة الظهيرة، بينما المسار الخلفي يقيم الساعات الأخيرة في سياق اليوم بأكمله. يخلق هذا
-                        رؤية كاملة للديناميكية الزمنية، مدعومة بـ 210 خلية في كل اتجاه كجسر أخير قبل التنبؤ المعقد.
-                    </p>
-                </div>
-
-                <div
-                    style="margin-top:25px; text-align:center; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <p style="font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 1px;">
-                        للتواصل: <span
-                            style="color: var(--cyan); font-weight: bold; letter-spacing: 2px;">IZZELDEENM@GMAIL.COM</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Three.js Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-    <script>
-        // ═══════════════════════════════════════════════════════════════════════════
-        // CONFIGURATION
-        // ═══════════════════════════════════════════════════════════════════════════
-        const CONFIG = {
-            helix: {
-                radius: 10,
-                height: 60,
-                turns: 5,
-                segments: 300
-            },
-            colors: {
-                forward: 0x06B6D4,
-                backward: 0x8B5CF6,
-                node: 0xFFFFFF,
-                particle: 0x10B981
-            },
-            particles: {
-                count: 150,
-                size: 0.4
-            }
-        };
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // GLOBALS
-        // ═══════════════════════════════════════════════════════════════════════════
-        let scene, camera, renderer, controls, composer, clock;
-        let forwardHelix, backwardHelix, nodesGroup, particlesGroup;
-        let forwardParticles = [], backwardParticles = [];
-        let nodes = [];
-        let params = {
-            speed: 1.0,
-            paused: false,
-            showForward: true,
-            showBackward: true,
-            showNodes: true,
-            showFlow: true,
-            bloom: true,
-            currentStep: 0
-        };
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // INIT
-        // ═══════════════════════════════════════════════════════════════════════════
-        function init() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x050510);
-            scene.fog = new THREE.FogExp2(0x050510, 0.006);
-
-            camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 500);
-            camera.position.set(0, 35, 70);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(innerWidth, innerHeight);
-            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.03;
-            controls.autoRotate = true;
-            controls.autoRotateSpeed = 0.5;
-            controls.target.set(0, 15, 0);
-            controls.maxPolarAngle = Math.PI * 0.85;
-
-            clock = new THREE.Clock();
-
-            setupLights();
-            createDoubleHelix();
-            createMemoryNodes();
-            createDataFlow();
-            createCenterCore();
-            setupPostProcessing();
-            setupEvents();
-
-            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 800);
-            animate();
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // LIGHTS
-        // ═══════════════════════════════════════════════════════════════════════════
-        function setupLights() {
-            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-
-            const cyanlLight = new THREE.PointLight(CONFIG.colors.forward, 4, 150);
-            cyanlLight.position.set(-40, 60, 40);
-            scene.add(cyanlLight);
-
-            const purpleLight = new THREE.PointLight(CONFIG.colors.backward, 4, 150);
-            purpleLight.position.set(40, 60, 40);
-            scene.add(purpleLight);
-
-            const topLight = new THREE.PointLight(0xffffff, 2, 120);
-            topLight.position.set(0, 80, 0);
-            scene.add(topLight);
-
-            // Reflector Ground Plane
-            const groundGeo = new THREE.PlaneGeometry(1000, 1000);
-            const groundMat = new THREE.MeshStandardMaterial({
-                color: 0x020205,
-                metalness: 0.95,
-                roughness: 0.05
-            });
-            const ground = new THREE.Mesh(groundGeo, groundMat);
-            ground.rotation.x = -Math.PI / 2;
-            ground.position.y = -10;
-            scene.add(ground);
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // DOUBLE HELIX - DNA Style
-        // ═══════════════════════════════════════════════════════════════════════════
-        function createDoubleHelix() {
-            const { radius, height, turns, segments } = CONFIG.helix;
-
-            // Forward Helix (Cyan)
-            const forwardPoints = [];
-            for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const angle = t * Math.PI * 2 * turns;
-                forwardPoints.push(new THREE.Vector3(
-                    Math.cos(angle) * radius,
-                    t * height,
-                    Math.sin(angle) * radius
-                ));
-            }
-            const forwardCurve = new THREE.CatmullRomCurve3(forwardPoints);
-            const forwardGeo = new THREE.TubeGeometry(forwardCurve, segments, 0.8, 12, false);
-            const forwardMat = new THREE.MeshPhongMaterial({
-                color: CONFIG.colors.forward,
-                emissive: CONFIG.colors.forward,
-                emissiveIntensity: 0.4,
-                transparent: true,
-                opacity: 0.9,
-                shininess: 100
-            });
-            forwardHelix = new THREE.Mesh(forwardGeo, forwardMat);
-            scene.add(forwardHelix);
-
-            // Backward Helix (Purple) - Phase shifted
-            const backwardPoints = [];
-            for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const angle = t * Math.PI * 2 * turns + Math.PI;
-                backwardPoints.push(new THREE.Vector3(
-                    Math.cos(angle) * radius,
-                    t * height,
-                    Math.sin(angle) * radius
-                ));
-            }
-            const backwardCurve = new THREE.CatmullRomCurve3(backwardPoints);
-            const backwardGeo = new THREE.TubeGeometry(backwardCurve, segments, 0.8, 12, false);
-            const backwardMat = new THREE.MeshPhongMaterial({
-                color: CONFIG.colors.backward,
-                emissive: CONFIG.colors.backward,
-                emissiveIntensity: 0.4,
-                transparent: true,
-                opacity: 0.9,
-                shininess: 100
-            });
-            backwardHelix = new THREE.Mesh(backwardGeo, backwardMat);
-            scene.add(backwardHelix);
-
-            // Connection rungs between helixes
-            const rungCount = turns * 4;
-            for (let i = 0; i < rungCount; i++) {
-                const t = (i + 0.5) / rungCount;
-                const y = t * height;
-                const angle1 = t * Math.PI * 2 * turns;
-                const angle2 = angle1 + Math.PI;
-
-                const start = new THREE.Vector3(Math.cos(angle1) * radius, y, Math.sin(angle1) * radius);
-                const end = new THREE.Vector3(Math.cos(angle2) * radius, y, Math.sin(angle2) * radius);
-
-                const rungGeo = new THREE.CylinderGeometry(0.15, 0.15, start.distanceTo(end), 8);
-                const rungMat = new THREE.MeshPhongMaterial({
-                    color: 0xffffff,
-                    emissive: 0xffffff,
-                    emissiveIntensity: 0.3,
-                    transparent: true,
-                    opacity: 0.6
-                });
-                const rung = new THREE.Mesh(rungGeo, rungMat);
-                rung.position.copy(start.clone().add(end).multiplyScalar(0.5));
-                rung.lookAt(end);
-                rung.rotateX(Math.PI / 2);
-                scene.add(rung);
-            }
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // MEMORY NODES (Timestep markers)
-        // ═══════════════════════════════════════════════════════════════════════════
-        function createMemoryNodes() {
-            nodesGroup = new THREE.Group();
-            const { height, turns } = CONFIG.helix;
-
-            for (let i = 0; i < 24; i++) {
-                const t = i / 23;
-                const y = t * height;
-
-                // Node sphere
-                const nodeGeo = new THREE.SphereGeometry(0.8, 24, 24);
-                const nodeMat = new THREE.MeshPhongMaterial({
-                    color: 0xffffff,
-                    emissive: 0xffffff,
-                    emissiveIntensity: 0.5
-                });
-                const node = new THREE.Mesh(nodeGeo, nodeMat);
-                node.position.set(0, y, 0);
-                node.userData = { index: i, baseScale: 0.8 };
-                nodes.push(node);
-                nodesGroup.add(node);
-
-                // Ring around node
-                const ringGeo = new THREE.TorusGeometry(1.5, 0.1, 8, 32);
-                const ringMat = new THREE.MeshBasicMaterial({
-                    color: i < 12 ? CONFIG.colors.forward : CONFIG.colors.backward,
-                    transparent: true,
-                    opacity: 0.4
-                });
-                const ring = new THREE.Mesh(ringGeo, ringMat);
-                ring.position.set(0, y, 0);
-                ring.rotation.x = Math.PI / 2;
-                nodesGroup.add(ring);
-            }
-
-            scene.add(nodesGroup);
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // DATA FLOW PARTICLES
-        // ═══════════════════════════════════════════════════════════════════════════
-        function createDataFlow() {
-            particlesGroup = new THREE.Group();
-            const { radius, height, turns } = CONFIG.helix;
-
-            // Forward particles
-            for (let i = 0; i < CONFIG.particles.count; i++) {
-                const geo = new THREE.SphereGeometry(CONFIG.particles.size, 8, 8);
-                const mat = new THREE.MeshBasicMaterial({
-                    color: CONFIG.colors.forward,
-                    transparent: true,
-                    opacity: 0.9
-                });
-                const p = new THREE.Mesh(geo, mat);
-                p.userData = {
-                    progress: Math.random(),
-                    speed: 0.002 + Math.random() * 0.003,
-                    offset: 0
-                };
-                forwardParticles.push(p);
-                particlesGroup.add(p);
-            }
-
-            // Backward particles
-            for (let i = 0; i < CONFIG.particles.count; i++) {
-                const geo = new THREE.SphereGeometry(CONFIG.particles.size, 8, 8);
-                const mat = new THREE.MeshBasicMaterial({
-                    color: CONFIG.colors.backward,
-                    transparent: true,
-                    opacity: 0.9
-                });
-                const p = new THREE.Mesh(geo, mat);
-                p.userData = {
-                    progress: Math.random(),
-                    speed: 0.002 + Math.random() * 0.003,
-                    offset: Math.PI
-                };
-                backwardParticles.push(p);
-                particlesGroup.add(p);
-            }
-
-            scene.add(particlesGroup);
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // CENTER CORE
-        // ═══════════════════════════════════════════════════════════════════════════
-        function createCenterCore() {
-            const { height } = CONFIG.helix;
-
-            // Central column
-            const coreGeo = new THREE.CylinderGeometry(0.5, 0.5, height, 16);
-            const coreMat = new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-                emissive: 0xffffff,
-                emissiveIntensity: 0.2,
-                transparent: true,
-                opacity: 0.3
-            });
-            const core = new THREE.Mesh(coreGeo, coreMat);
-            core.position.set(0, height / 2, 0);
-            scene.add(core);
-
-            // Bottom platform
-            const baseGeo = new THREE.CylinderGeometry(15, 18, 2, 32);
-            const baseMat = new THREE.MeshPhongMaterial({
-                color: 0x1a1a2e,
-                emissive: CONFIG.colors.backward,
-                emissiveIntensity: 0.1
-            });
-            const base = new THREE.Mesh(baseGeo, baseMat);
-            base.position.set(0, -1, 0);
-            scene.add(base);
-
-            // Top platform
-            const topGeo = new THREE.CylinderGeometry(12, 15, 2, 32);
-            const topMat = new THREE.MeshPhongMaterial({
-                color: 0x1a1a2e,
-                emissive: CONFIG.colors.forward,
-                emissiveIntensity: 0.1
-            });
-            const top = new THREE.Mesh(topGeo, topMat);
-            top.position.set(0, height + 1, 0);
-            scene.add(top);
-
-            // Labels
-            const labelBottom = createLabel('INPUT (24×64)', CONFIG.colors.forward);
-            labelBottom.position.set(0, -5, 0);
-            scene.add(labelBottom);
-
-            const labelTop = createLabel('OUTPUT (420)', CONFIG.colors.backward);
-            labelTop.position.set(0, height + 6, 0);
-            scene.add(labelTop);
-        }
-
-        function createLabel(text, color) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 512; canvas.height = 96;
-            ctx.fillStyle = '#' + color.toString(16).padStart(6, '0');
-            ctx.font = 'bold 40px Segoe UI';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(text, 256, 48);
-            const tex = new THREE.CanvasTexture(canvas);
-            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-            const sprite = new THREE.Sprite(mat);
-            sprite.scale.set(20, 4, 1);
-            return sprite;
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // POST-PROCESSING
-        // ═══════════════════════════════════════════════════════════════════════════
-        function setupPostProcessing() {
-            composer = new THREE.EffectComposer(renderer);
-            composer.addPass(new THREE.RenderPass(scene, camera));
-            composer.addPass(new THREE.UnrealBloomPass(
-                new THREE.Vector2(innerWidth, innerHeight),
-                1.5, // Strength (God-Tier)
-                0.5, // Radius
-                0.85 // Threshold
-            ));
-        }
-
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // EVENTS
-        // ═══════════════════════════════════════════════════════════════════════════
-        function setupEvents() {
-            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 500);
-            setupTheme();
-            addEventListener('resize', () => {
-                camera.aspect = innerWidth / innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(innerWidth, innerHeight);
-                composer.setSize(innerWidth, innerHeight);
-            });
-
-            document.getElementById('speedSlider').oninput = e => {
-                params.speed = parseFloat(e.target.value);
-                document.getElementById('speedVal').textContent = params.speed.toFixed(1) + '×';
-            };
-
-            document.getElementById('rotateSlider').oninput = e => {
-                controls.autoRotateSpeed = parseFloat(e.target.value);
-                document.getElementById('rotateVal').textContent = e.target.value;
-            };
-
-            document.getElementById('densitySlider').oninput = e => {
-                const val = parseInt(e.target.value);
-                document.getElementById('densityVal').textContent = val + '%';
-                const visible = Math.floor(CONFIG.particles.count * val / 100);
-                forwardParticles.forEach((p, i) => p.visible = i < visible);
-                backwardParticles.forEach((p, i) => p.visible = i < visible);
-            };
-
-            document.getElementById('forwardToggle').onclick = function () {
-                this.classList.toggle('active');
-                params.showForward = this.classList.contains('active');
-                forwardHelix.visible = params.showForward;
-            };
-
-            document.getElementById('backwardToggle').onclick = function () {
-                this.classList.toggle('active');
-                params.showBackward = this.classList.contains('active');
-                backwardHelix.visible = params.showBackward;
-            };
-
-            document.getElementById('nodesToggle').onclick = function () {
-                this.classList.toggle('active');
-                nodesGroup.visible = this.classList.contains('active');
-            };
-
-            document.getElementById('flowToggle').onclick = function () {
-                this.classList.toggle('active');
-                particlesGroup.visible = this.classList.contains('active');
-            };
-
-            document.getElementById('pauseToggle').onclick = function () {
-                params.paused = !params.paused;
-                this.classList.toggle('active');
-                this.innerHTML = params.paused ? '▶️ Play' : '⏸️ Pause';
-                controls.autoRotate = !params.paused;
-            };
-
-            document.getElementById('bloomToggle').onclick = function () {
-                this.classList.toggle('active');
-                params.bloom = this.classList.contains('active');
-            };
-
-            // Gate boxes
-            document.querySelectorAll('.gate-box').forEach(box => {
-                box.onclick = function () {
-                    document.querySelectorAll('.gate-box').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                };
-            });
-
-            // Direction cards
-            document.getElementById('forwardCard').onclick = function () {
-                this.classList.toggle('active');
-            };
-            document.getElementById('backwardCard').onclick = function () {
-                this.classList.toggle('active');
-            };
-        }
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // ANIMATION
-        // ═══════════════════════════════════════════════════════════════════════════
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-
-            if (!params.paused) {
-                const time = clock.getElapsedTime() * params.speed;
-                const { radius, height, turns } = CONFIG.helix;
-
-                // Animate particles
-                forwardParticles.forEach(p => {
-                    p.userData.progress += p.userData.speed * params.speed;
-                    if (p.userData.progress > 1) p.userData.progress = 0;
-
-                    const t = p.userData.progress;
-                    const angle = t * Math.PI * 2 * turns + p.userData.offset;
-                    p.position.set(
-                        Math.cos(angle) * radius,
-                        t * height,
-                        Math.sin(angle) * radius
-                    );
-                });
-
-                backwardParticles.forEach(p => {
-                    p.userData.progress += p.userData.speed * params.speed;
-                    if (p.userData.progress > 1) p.userData.progress = 0;
-
-                    const t = 1 - p.userData.progress;
-                    const angle = t * Math.PI * 2 * turns + p.userData.offset;
-                    p.position.set(
-                        Math.cos(angle) * radius,
-                        t * height,
-                        Math.sin(angle) * radius
-                    );
-                });
-
-                // Pulse nodes
-                nodes.forEach((n, i) => {
-                    const pulse = Math.sin(time * 2 + i * 0.3) * 0.15 + 1;
-                    if (i !== params.currentStep) {
-                        n.scale.setScalar(n.userData.baseScale * pulse);
-                    }
-                });
-
-                // Update state bars
-                const h = 50 + Math.sin(time) * 25;
-                const c = 40 + Math.cos(time * 0.7) * 20;
-                document.querySelector('.state-fill.hidden').style.width = h + '%';
-                document.querySelector('.state-fill.cell-state').style.width = c + '%';
-            }
-
-            if (params.bloom) {
-                composer.render();
-            } else {
-                renderer.render(scene, camera);
-            }
-        }
-
-        function setupTheme() {
-            // Cursor
-            const cursor = document.getElementById('cursor');
-            const cursorDot = document.getElementById('cursor-dot');
-            document.addEventListener('mousemove', e => {
-                cursor.style.left = e.clientX - 15 + 'px';
-                cursor.style.top = e.clientY - 15 + 'px';
-                cursorDot.style.left = e.clientX - 4 + 'px';
-                cursorDot.style.top = e.clientY - 4 + 'px';
-            });
-
-            // BG Particles
-            const canvas = document.getElementById('bg-canvas');
-            const bgScene = new THREE.Scene();
-            const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const bgRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-            bgRenderer.setSize(window.innerWidth, window.innerHeight);
-
-            const particleCount = 200;
-            const particles = new THREE.BufferGeometry();
-            const posArray = new Float32Array(particleCount * 3);
-            const particlesData = [];
-
-            for (let i = 0; i < particleCount; i++) {
-                posArray[i * 3] = (Math.random() - 0.5) * 30;
-                posArray[i * 3 + 1] = (Math.random() - 0.5) * 30;
-                posArray[i * 3 + 2] = (Math.random() - 0.5) * 30;
-                particlesData.push({
-                    velocity: new THREE.Vector3(-0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02)
-                });
-            }
-            particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const particleMat = new THREE.PointsMaterial({ size: 0.1, color: 0x06B6D4, transparent: true, opacity: 0.6 });
-            const particleMesh = new THREE.Points(particles, particleMat);
-            bgScene.add(particleMesh);
-
-            const lineGeo = new THREE.BufferGeometry();
-            const lineMat = new THREE.LineBasicMaterial({ color: 0x8B5CF6, transparent: true, opacity: 0.15 });
-            const lines = new THREE.LineSegments(lineGeo, lineMat);
-            bgScene.add(lines);
-
-            bgCamera.position.z = 10;
-            let mouseX = 0, mouseY = 0;
-            document.addEventListener('mousemove', (e) => {
-                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-                mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-            });
-
-            function animateBG() {
-                requestAnimationFrame(animateBG);
-                bgScene.rotation.y += 0.001;
-                bgScene.rotation.x += (mouseY * 0.05 - bgScene.rotation.x) * 0.05;
-                bgScene.rotation.y += (mouseX * 0.05 - bgScene.rotation.y) * 0.05;
-
-                const positions = particles.attributes.position.array;
-                const linePositions = [];
-
-                for (let i = 0; i < particleCount; i++) {
-                    positions[i * 3] += particlesData[i].velocity.x;
-                    positions[i * 3 + 1] += particlesData[i].velocity.y;
-                    positions[i * 3 + 2] += particlesData[i].velocity.z;
-
-                    if (positions[i * 3] < -15) positions[i * 3] = 15;
-                    if (positions[i * 3] > 15) positions[i * 3] = -15;
-                    if (positions[i * 3 + 1] < -15) positions[i * 3 + 1] = 15;
-                    if (positions[i * 3 + 1] > 15) positions[i * 3 + 1] = -15;
-                    if (positions[i * 3 + 2] < -15) positions[i * 3 + 2] = 15;
-                    if (positions[i * 3 + 2] > 15) positions[i * 3 + 2] = -15;
-
-                    for (let j = i + 1; j < particleCount; j++) {
-                        const dx = positions[i * 3] - positions[j * 3];
-                        const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
-                        const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
-                        if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 4) {
-                            linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2], positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]);
-                        }
-                    }
-                }
-                particles.attributes.position.needsUpdate = true;
-                lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-                bgRenderer.render(bgScene, bgCamera);
-            }
-            animateBG();
-
-            // Tilt Effect
-            document.querySelectorAll('.left-panel, .right-panel').forEach(panel => {
-                panel.addEventListener('mousemove', (e) => {
-                    const rect = panel.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotateX = ((y - centerY) / centerY) * -2;
-                    const rotateY = ((x - centerX) / centerX) * 2;
-                    panel.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                });
-                panel.addEventListener('mouseleave', () => {
-                    panel.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
-                });
-            });
-
-            // Info Modal Logic
-            const infoModal = document.getElementById('info-modal');
-            document.getElementById('btn-info').addEventListener('click', () => {
-                infoModal.classList.add('show');
-            });
-            document.getElementById('btn-close-modal').addEventListener('click', () => {
-                infoModal.classList.remove('show');
-            });
-            infoModal.addEventListener('click', (e) => {
-                if (e.target === infoModal) {
-                    infoModal.classList.remove('show');
-                }
-            });
-        }
-
-        init();
-    </script>
+    <script src="../assets/lib/three/three.min.js"></script>
+    <script src="../assets/lib/three/controls/OrbitControls.js"></script>
+    <script src="layer5-bilstm-scene.js"></script>
+    <script src="../ar-panel.js"></script>
 </body>
-
 </html>

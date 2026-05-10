@@ -1,1136 +1,378 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <style>
+      /* ── Offline Fonts ─────────────────────────────────── */
+      @font-face { font-family: 'Outfit'; font-weight: 200; src: url('../vendor/fonts/outfit-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 400; src: url('../vendor/fonts/outfit-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 600; src: url('../vendor/fonts/outfit-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Outfit'; font-weight: 900; src: url('../vendor/fonts/outfit-900.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 400; src: url('../vendor/fonts/space-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Space Mono'; font-weight: 700; src: url('../vendor/fonts/space-mono-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 200; src: url('../vendor/fonts/inter-200.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 300; src: url('../vendor/fonts/inter-300.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 400; src: url('../vendor/fonts/inter-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 600; src: url('../vendor/fonts/inter-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Inter'; font-weight: 800; src: url('../vendor/fonts/inter-800.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url('../vendor/fonts/jetbrains-mono-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url('../vendor/fonts/jetbrains-mono-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 400; src: url('../vendor/fonts/cairo-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 600; src: url('../vendor/fonts/cairo-600.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; font-weight: 700; src: url('../vendor/fonts/cairo-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 400; src: url('../vendor/fonts/cinzel-400.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 700; src: url('../vendor/fonts/cinzel-700.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cinzel'; font-weight: 900; src: url('../vendor/fonts/cinzel-900.ttf') format('truetype'); font-display: swap; }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Layer 4: Dropout (1) | Physics-Informed CNN-BiLSTM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>Layer 4: Dropout (1) | PI-Hybrid</title>
+<link rel="stylesheet" href="../ar-panel.css">
     <style>
-        :root {
-            /* Map to Blue/Cyan Theme (CNN Style) */
-            --cyan: #06B6D4;
-            --red: #EC4899;
-            --gold: #06B6D4;
-            --green: #10B981;
-            --bg-dark: #050510;
-            --panel-bg: rgba(5, 5, 20, 0.95);
-            --glass-border: rgba(6, 182, 212, 0.3);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Outfit', sans-serif;
-            font-size: 15px;
-            font-weight: 400;
-            line-height: 1.6;
-            background: linear-gradient(135deg, #050510 0%, #0a0a20 50%, #050510 100%);
-            color: #fff;
-        }
-
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .header {
-            position: fixed;
-            top: 24px;
-            left: 24px;
-            right: 24px;
-            height: 64px;
-            background: rgba(10, 10, 20, 0.7);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 28px;
-            box-shadow: 
-                0 16px 40px rgba(0, 0, 0, 0.4),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-        }
-
-        .layer-badge {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .layer-num {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, var(--cyan), #0099CC);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 900;
-            color: #000;
-            box-shadow: 0 0 40px rgba(0, 242, 255, 0.6);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                box-shadow: 0 0 40px rgba(0, 242, 255, 0.6);
-            }
-
-            50% {
-                box-shadow: 0 0 60px rgba(0, 242, 255, 0.9);
-            }
-        }
-
-        .layer-title h1 {
-            font-size: 18px;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, var(--cyan), var(--green));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .layer-title p {
-            font-size: 9px;
-            color: var(--gold);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .back-btn {
-            padding: 10px 18px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 11px;
-            font-weight: 600;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .back-btn:hover {
-            background: rgba(0, 242, 255, 0.1);
-            color: var(--cyan);
-            border-color: var(--cyan);
-            transform: translateY(-1px);
-        }
-
-        .header-stats {
-            display: flex;
-            gap: 15px;
-        }
-
-        .stat-box {
-            background: var(--panel-bg);
-            padding: 10px 18px;
-            border-radius: 10px;
-            border: 1px solid var(--glass-border);
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-        }
-
-        .stat-value {
-            font-size: 18px;
-            color: var(--cyan);
-            font-weight: 700;
-            font-family: monospace;
-        }
-
-        .nav-group {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .nav-btn {
-            padding: 10px 18px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 11px;
-            font-weight: 600;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .nav-btn:hover:not(.disabled) {
-            background: rgba(0, 242, 255, 0.1);
-            color: var(--cyan);
-            border-color: var(--cyan);
-            transform: translateY(-1px);
-        }
-
-        .nav-btn.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .left-panel,
-        .right-panel {
-            position: fixed;
-            top: 112px;
-            max-height: calc(100vh - 140px);
-            background: rgba(10, 10, 20, 0.8);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 24px;
-            z-index: 50;
-            overflow-y: auto;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-        }
-
-        .left-panel {
-            left: 24px;
-            width: 300px;
-        }
-
-        .right-panel {
-            right: 24px;
-            width: 320px;
-        }
-
-        .panel-title {
-            font-size: 13px;
-            color: var(--cyan);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .rate-display {
-            background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(255, 60, 60, 0.1));
-            border: 2px solid var(--cyan);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .rate-value {
-            font-size: 60px;
-            font-weight: 900;
-            background: linear-gradient(90deg, var(--cyan), var(--red));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .rate-label {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 5px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 18px;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .stat-card.active {
-            border-left: 3px solid var(--green);
-        }
-
-        .stat-card.dropped {
-            border-left: 3px solid var(--red);
-        }
-
-        .stat-card-value {
-            font-size: 26px;
-            font-weight: 700;
-            font-family: monospace;
-        }
-
-        .stat-card-value.active-color {
-            color: var(--green);
-        }
-
-        .stat-card-value.dropped-color {
-            color: var(--red);
-        }
-
-        .stat-card-label {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            margin-top: 5px;
-        }
-
-        .mode-toggle {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .mode-btn {
-            flex: 1;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .mode-btn:hover {
-            background: rgba(0, 242, 255, 0.1);
-        }
-
-        .mode-btn.active {
-            border-color: var(--cyan);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
-        }
-
-        .mode-btn-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .mode-btn-desc {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 4px;
-        }
-
-        .control-group {
-            margin-bottom: 18px;
-        }
-
-        .control-label {
-            font-size: 11px;
-            color: var(--cyan);
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .control-value {
-            color: var(--gold);
-            font-family: monospace;
-            font-weight: 600;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            outline: none;
-            appearance: none;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(135deg, var(--cyan), #0099CC);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
-        }
-
-        .toggle-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .toggle-btn {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            border-radius: 10px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .toggle-btn:hover {
-            border-color: var(--cyan);
-        }
-
-        .toggle-btn.active {
-            background: var(--cyan);
-            color: #000;
-        }
-
-        .action-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--cyan), #0099CC);
-            border: none;
-            border-radius: 12px;
-            color: #000;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 10px;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 242, 255, 0.4);
-        }
-
-        .equation-box {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 12px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 11px;
-            color: var(--gold);
-            -webkit-background-clip: padding-box;
-            background-clip: padding-box;
-            border-left: 3px solid var(--cyan);
-            line-height: 1.6;
-            font-size: 10px;
-            color: var(--cyan);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .equation-label {
-            font-size: 10px;
-            color: var(--cyan);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .equation {
-            font-size: 13px;
-            color: var(--gold);
-            margin: 6px 0;
-        }
-
-        .info-card {
-            background: linear-gradient(135deg, rgba(0, 242, 255, 0.08), rgba(0, 255, 136, 0.05));
-            padding: 18px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--cyan);
-        }
-
-        .info-card h4 {
-            font-size: 13px;
-            color: var(--gold);
-            margin-bottom: 10px;
-        }
-
-        .info-card p {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.7;
-        }
-
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-dark);
-            z-index: 2000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.5s;
-        }
-
-        .loading.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(0, 242, 255, 0.2);
-            border-top-color: var(--cyan);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--cyan);
-            border-radius: 3px;
-        }
-
-        /* INFO MODAL */
-        #info-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        #info-modal.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            background: rgba(10, 10, 25, 0.95);
-            border: 1px solid rgba(0, 242, 255, 0.4);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 40px;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 242, 255, 0.15);
-            transform: translateY(20px);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            color: #fff;
-            direction: rtl;
-        }
-
-        #info-modal.show .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 24px;
-            left: 24px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-    </style>
-        /* NEW VISUAL EFFECTS */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        #cursor {
-            width: 30px;
-            height: 30px;
-            border: 2px solid var(--red);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-            transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1);
-            mix-blend-mode: difference;
-        }
-
-        #cursor-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--gold);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-            box-shadow: 0 0 10px var(--red);
-        }
-
-        .layer-title h1 {
-            text-shadow: 0 0 30px rgba(255, 60, 60, 0.5), 0 0 60px rgba(255, 215, 0, 0.3);
-            animation: breathe 4s ease-in-out infinite;
-        }
-
-        @keyframes breathe {
-
-            0%,
-            100% {
-                text-shadow: 0 0 30px rgba(255, 60, 60, 0.5);
-            }
-
-            50% {
-                text-shadow: 0 0 50px rgba(255, 60, 60, 0.8), 0 0 80px rgba(255, 215, 0, 0.5);
-            }
-        }
-
-        /* Panel Tilt Effect */
-        .left-panel,
-        .right-panel {
-            transition: transform 0.1s;
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-
-        .left-panel:hover,
-        .right-panel:hover {
-            box-shadow: 0 0 40px rgba(255, 60, 60, 0.15);
-            border-color: rgba(255, 60, 60, 0.5);
-        }
+        :root { --primary:#3B82F6; --accent:#06B6D4; --success:#10B981; --warn:#F59E0B; --danger:#EF4444; --bg:#030712; --panel-bg:rgba(3,7,18,0.88); --border:rgba(59,130,246,0.25); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); color:#e2e8f0; font-family:'Outfit',sans-serif; overflow:hidden; width:100vw; height:100vh; }
+        #canvas-container { position:fixed; inset:0; z-index:1; }
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-thumb { background:var(--primary); border-radius:2px; }
+
+        .hud-top {
+            position:fixed; top:0; left:0; right:0; height:60px; z-index:20;
+            display:flex; justify-content:space-between; align-items:center;
+            background:rgba(3,7,18,0.92); backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border); padding:0 30px; pointer-events:auto;
+        }
+        .hud-title { font-size:16px; font-weight:700; letter-spacing:3px; color:#fff; display:flex; align-items:center; gap:15px; text-transform:uppercase; }
+        .hud-title .tag { color:var(--primary); font-family:'Space Mono',monospace; font-size:13px; }
+        .nav-links { display:flex; gap:10px; }
+        .nav-btn { padding:8px 16px; border:1px solid var(--border); color:var(--accent); text-decoration:none; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1px; transition:all 0.3s; border-radius:6px; text-transform:uppercase; }
+        .nav-btn:hover { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+        .hud-wrapper { position:fixed; inset:0; z-index:10; pointer-events:none; display:grid; grid-template-columns:330px 1fr 330px; padding:75px 20px 20px; gap:20px; }
+        .hud-panel { pointer-events:auto; background:var(--panel-bg); border:1px solid var(--border); border-radius:14px; padding:20px; backdrop-filter:blur(25px); box-shadow:0 0 20px rgba(59,130,246,0.15); display:flex; flex-direction:column; gap:20px; }
+        .hud-panel::before { content:''; position:absolute; top:0; left:20px; width:40px; height:2px; background:var(--primary); box-shadow:0 0 10px var(--primary); }
+
+        .section-hdr { font-size:11px; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:3px; display:flex; align-items:center; gap:8px; }
+        .section-hdr::before { content:''; width:8px; height:8px; background:var(--primary); box-shadow:0 0 8px var(--primary); border-radius:2px; }
+
+        .step-btn { padding:14px 16px; background:rgba(59,130,246,0.05); border:1px solid rgba(59,130,246,0.2); border-radius:8px; color:rgba(255,255,255,0.6); text-align:left; font-family:'Space Mono',monospace; font-size:12px; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+        .step-btn:hover { background:rgba(59,130,246,0.15); color:#fff; }
+        .step-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); box-shadow:0 0 15px rgba(59,130,246,0.4); }
+
+        .explain-card { background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.15); border-radius:10px; padding:16px; }
+        .explain-card h4 { font-size:14px; color:var(--accent); margin-bottom:8px; }
+        .explain-card p { font-size:12px; color:rgba(255,255,255,0.6); line-height:1.6; }
+        .math-box { font-family:'Space Mono',monospace; color:#fff; background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; margin-top:10px; font-size:12px; border-left:3px solid var(--accent); }
+
+        .scada-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .scada-card { background:rgba(0,0,0,0.4); border:1px solid rgba(59,130,246,0.15); padding:12px; border-radius:8px; border-left:3px solid var(--accent); }
+        .scada-label { font-size:9px; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:2px; margin-bottom:4px; }
+        .scada-val { font-family:'Space Mono',monospace; font-size:22px; color:#fff; font-weight:700; }
+
+        .control-group { margin-bottom:15px; }
+        .control-label { font-size:10px; color:var(--primary); margin-bottom:8px; display:flex; justify-content:space-between; text-transform:uppercase; letter-spacing:1px; }
+        .control-value { color:var(--accent); font-family:'Space Mono',monospace; }
+        input[type="range"] { width:100%; height:4px; background:rgba(255,255,255,0.12); outline:none; -webkit-appearance:none; border-radius:2px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; background:var(--primary); border-radius:50%; cursor:pointer; box-shadow:0 0 10px var(--primary); }
+
+        .mode-toggle { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px; }
+        .mode-btn { padding:12px; background:rgba(59,130,246,0.05); border:1px solid rgba(59,130,246,0.2); border-radius:8px; color:rgba(255,255,255,0.6); font-family:'Space Mono',monospace; font-size:11px; cursor:pointer; transition:0.3s; text-transform:uppercase; letter-spacing:1px; text-align:center; }
+        .mode-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); box-shadow:0 0 15px rgba(59,130,246,0.3); }
+
+        .action-btn { width:100%; padding:12px; background:linear-gradient(135deg,var(--primary),var(--accent)); border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.3s; margin-top:10px; font-family:'Outfit',sans-serif; letter-spacing:1px; }
+        .action-btn:hover { transform:translateY(-2px); box-shadow:0 10px 25px rgba(59,130,246,0.4); }
+
+        .ar-hud-btn { background:rgba(59,130,246,0.15); border:2px solid var(--primary); color:var(--primary); font-size:20px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; cursor:pointer; transition:all 0.3s; animation:pulseAr 2.5s infinite; }
+        .ar-hud-btn:hover { background:var(--primary); color:#fff; box-shadow:0 0 30px var(--primary); transform:scale(1.1); }
+        @keyframes pulseAr { 0%,100%{box-shadow:0 0 8px rgba(59,130,246,0.2)} 50%{box-shadow:0 0 20px rgba(59,130,246,0.5)} }
+
+        #loading { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; transition:opacity 0.6s; }
+        .load-spinner { width:40px; height:40px; border:3px solid rgba(59,130,246,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite; }
+        @keyframes spin { 100%{transform:rotate(360deg)} }
     </style>
 </head>
-
 <body>
-    <div id="cursor"></div>
-    <div id="cursor-dot"></div>
-    <canvas id="bg-canvas"></canvas>
-    <div class="loading" id="loading">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <header class="header">
-        <div class="layer-badge">
-            <div class="layer-icon" style="background: linear-gradient(135deg, var(--cyan), var(--blue)); border-radius: 12px; font-size: 24px; color: #fff; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-weight: 800;">04</div>
-            <div class="layer-title-text">
-                <h1 style="font-size: 18px; margin: 0; color: #fff;">Dropout (1)</h1>
-                <p style="font-size: 10px; color: var(--cyan); margin: 0; text-transform: uppercase;">Post-ReLU Regularization</p>
-            </div>
-        </div>
-
-        <div class="header-stats">
-            <div class="stat-box">
-                <div class="stat-label">Rate</div>
-                <div class="stat-value" style="color: var(--cyan);">20%</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Input</div>
-                <div class="stat-value" style="color: var(--cyan);">24×64</div>
-            </div>
-            <div class="stat-box" style="border-right: none;">
-                <div class="stat-label">Params</div>
-                <div class="stat-value" style="color: var(--cyan);">0</div>
-            </div>
-        </div>
-
-        <div class="nav-group">
-            <a href="layer3-relu.html" class="nav-btn">
-                <span style="font-size: 1.2em; line-height: 0;">←</span> Prev
-            </a>
-            <a href="../index.html" class="nav-btn">
-                <span style="font-size: 1.1em; line-height: 0;">⬡</span> HUB
-            </a>
-            <a href="layer5-bilstm.html" class="nav-btn">
-                Next <span style="font-size: 1.2em; line-height: 0;">→</span>
-            </a>
-        </div>
-    </header>
-
     <div id="canvas-container"></div>
 
-    <div class="left-panel">
-        <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--glass-border); padding-bottom:12px;">
-            <div class="panel-title" style="margin-bottom:0; border-bottom:none; padding-bottom:0;">📊 Dropout Rate</div>
-            <button id="btn-info" style="pointer-events: auto; width:22px; height:22px; border-radius:50%; background:rgba(0,242,255,0.2); border:1px solid rgba(0,242,255,0.5); color:#fff; cursor:pointer; font-size:12px; font-weight:bold; display:flex; align-items:center; justify-content:center; transition:0.2s;" title="Detailed Explanation">i</button>
+    <div class="hud-top">
+        <div class="hud-title">
+            <span class="tag">L4</span> Dropout Layer
+            <div class="ar-hud-btn" onclick="openArPanel('layer4_dropout')" title="شرح عربي">ع</div>
         </div>
-        <div class="rate-display">
-            <div class="rate-value" id="rateDisplay">20%</div>
-            <div class="rate-label">Drop Probability (p)</div>
-            <div
-                style="display:inline-block; padding:3px 10px; background:rgba(255,215,0,0.15); border:1px solid #FFD700; border-radius:20px; font-size:9px; color:#FFD700; letter-spacing:1px; margin-top:8px;">
-                ⚡ BAYESIAN OPTIMIZED (0.1–0.5)</div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card active">
-                <div class="stat-card-value active-color" id="activeCount">123</div>
-                <div class="stat-card-label">Active Neurons</div>
-            </div>
-            <div class="stat-card dropped">
-                <div class="stat-card-value dropped-color" id="droppedCount">31</div>
-                <div class="stat-card-label">Dropped Neurons</div>
-            </div>
-        </div>
-
-        <div class="panel-title">🔄 Mode</div>
-        <div class="mode-toggle">
-            <div class="mode-btn active" data-mode="training">
-                <div class="mode-btn-name">Training</div>
-                <div class="mode-btn-desc">Random dropping</div>
-            </div>
-            <div class="mode-btn" data-mode="inference">
-                <div class="mode-btn-name">Inference</div>
-                <div class="mode-btn-desc">All neurons active</div>
-            </div>
-        </div>
-
-        <div class="equation-box">
-            <div class="equation-label">Inverted Dropout</div>
-            <div class="equation">y = x × mask / (1 - p)</div>
-            <div class="equation">mask ~ Bernoulli(1-p)</div>
-        </div>
-
-        <div class="info-card">
-            <h4>🎯 Purpose</h4>
-            <p>Dropout prevents overfitting by randomly deactivating neurons during training, forcing the network to
-                learn redundant representations.</p>
-        </div>
-
-        <div class="info-card">
-            <h4>🔗 Position in Pipeline</h4>
-            <p>Operates on <strong>[64×24] tensor</strong> (64 CNN channels × 24 timesteps) after ReLU activation. This
-                is a 2D dropout — random elements across both channels and time are masked before BiLSTM ingestion.</p>
+        <div class="nav-links">
+            <a href="layer3-relu.html" class="nav-btn">← Prev</a>
+            <a href="../index.html" class="nav-btn">Hub</a>
+            <a href="layer5-bilstm.html" class="nav-btn">Next →</a>
         </div>
     </div>
 
-    <div class="right-panel">
-        <div class="panel-title">🎮 Controls</div>
-
-        <button class="action-btn" id="regenerateBtn">🔄 Regenerate Mask</button>
-        <button class="action-btn" id="playBtn" style="background: linear-gradient(135deg, var(--green), #00CC66);">▶️
-            Play Animation</button>
-
-        <div class="control-group">
-            <div class="control-label"><span>Dropout Rate</span><span class="control-value" id="rateValue">0.20</span>
+    <div class="hud-wrapper">
+        <!-- LEFT PANEL -->
+        <div class="hud-panel">
+            <div class="section-hdr">Dropout Mechanics</div>
+            <div>
+                <button class="step-btn active" onclick="setStep(1)">1. Fully Connected (Inference)</button>
+                <button class="step-btn" onclick="setStep(2)">2. Random Drop (Training)</button>
+                <button class="step-btn" onclick="setStep(3)">3. Inverted Scaling</button>
             </div>
-            <input type="range" id="rateSlider" min="0" max="0.5" step="0.05" value="0.2">
-        </div>
-        <div class="control-group">
-            <div class="control-label"><span>Animation Speed</span><span class="control-value"
-                    id="speedValue">1.0x</span></div>
-            <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
-        </div>
-
-        <div class="toggle-grid">
-            <button class="toggle-btn active" id="connectionsToggle">🔗 Connections</button>
-            <button class="toggle-btn" id="rotateToggle">🔄 Auto Rotate</button>
-        </div>
-
-        <div class="panel-title">📐 Scale Factor</div>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-card-value" style="color: var(--gold);" id="scaleFactor">1.25</div>
-                <div class="stat-card-label">1 / (1-p)</div>
+            
+            <div class="explain-card" style="flex-grow:1;">
+                <h4 id="desc-title">1. Fully Connected</h4>
+                <p id="desc-text">During Inference (when making actual predictions), all neurons are fully active and connected. No data is dropped.</p>
+                <div class="math-box" id="desc-math">Output = Input</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-card-value" style="color: var(--cyan);" id="keepProb">0.80</div>
-                <div class="stat-card-label">Keep Prob</div>
+
+            <div class="section-hdr">Network Mode</div>
+            <div class="mode-toggle">
+                <button class="mode-btn" id="mode-train">Training</button>
+                <button class="mode-btn active" id="mode-infer">Inference</button>
             </div>
         </div>
 
-        <div class="info-card">
-            <h4>⚖️ Inverted Dropout</h4>
-            <p>Scaling active neurons by 1/(1-p) during training ensures expected values remain consistent at inference
-                time.</p>
-        </div>
+        <div></div> <!-- 3D Space -->
 
-        <div class="info-card">
-            <h4>🎭 Ensemble Effect</h4>
-            <p>Training with dropout is like training an ensemble of sub-networks, improving generalization.</p>
+        <!-- RIGHT PANEL -->
+        <div class="hud-panel">
+            <div class="section-hdr">Network Status</div>
+            <div class="scada-grid">
+                <div class="scada-card" style="border-left-color:var(--success);">
+                    <div class="scada-label">Active Neurons</div>
+                    <div class="scada-val" id="stat-active">100%</div>
+                </div>
+                <div class="scada-card" style="border-left-color:var(--danger);">
+                    <div class="scada-label">Dropped (p)</div>
+                    <div class="scada-val" id="stat-dropped">0%</div>
+                </div>
+            </div>
+            
+            <div class="scada-card" style="margin-top:-10px; border-left-color:var(--warn);">
+                <div class="scada-label">Compensation Scale Factor (1 / 1-p)</div>
+                <div class="scada-val" id="stat-scale">1.00x</div>
+            </div>
+
+            <div class="section-hdr" style="margin-top:10px;">Controls</div>
+            <div class="control-group">
+                <div class="control-label"><span>Drop Probability (p)</span><span class="control-value" id="val-rate">0.20</span></div>
+                <input type="range" id="slider-rate" min="0" max="0.8" step="0.05" value="0.2">
+            </div>
+
+            <button class="action-btn" id="btn-regenerate">Regenerate Mask</button>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <div id="loading">
+        <div class="load-spinner"></div>
+        <div style="color:var(--primary);font-family:'Space Mono';font-size:14px;letter-spacing:4px;margin-top:20px;">LOADING...</div>
+    </div>
+
+    <div id="ar-panel-overlay" onclick="closeArPanel()"></div>
+    <div id="ar-panel">
+        <div class="ar-close"><div class="ar-close-btn" onclick="closeArPanel()">✕</div></div>
+        <div class="ar-panel-content" id="ar-panel-inner"></div>
+    </div>
+
+    <script src="../assets/lib/three/three.min.js"></script>
+    <script src="../assets/lib/three/controls/OrbitControls.js"></script>
+    
     <script>
-        let scene, camera, renderer, controls, clock;
-        let neurons = [], connections = [];
-        let dropoutMask = [];
-        let isPlaying = false, animSpeed = 1.0;
-        let dropoutRate = 0.2;
-        let isTraining = true;
-        let showConnections = true;
+        let scene, camera, renderer, controls;
+        let layerA = [], layerB = [];
+        let connections = [];
+        
+        let isTraining = false;
+        let dropRate = 0.2;
+        let currentStep = 1;
 
-        const NEURON_COUNT = 150;
+        const colors = {
+            active: 0x06B6D4,
+            dropped: 0x1e293b,
+            line: 0x3B82F6
+        };
+
+        const descriptions = {
+            1: { title: '1. Fully Connected (Inference)', math: 'Output = Input', text: 'During Inference (testing/prediction), all neurons are kept active. The network uses all its learned pathways to make the best possible prediction.' },
+            2: { title: '2. Random Drop (Training)', math: 'Mask ~ Bernoulli(1 - p)', text: 'To prevent overfitting, we randomly "drop" (turn off) a percentage (p) of neurons during each training step. This breaks codependency and forces other neurons to learn robust features.' },
+            3: { title: '3. Inverted Scaling', math: 'Output = (Input × Mask) / (1 - p)', text: 'Because we dropped neurons, the total signal strength decreases. To fix this without altering inference later, we scale up the remaining active neurons by 1/(1-p). Notice how they glow brighter!' }
+        };
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0a0f);
-            scene.fog = new THREE.FogExp2(0x0a0a0f, 0.015);
+            scene.background = new THREE.Color(0x030712);
+            scene.fog = new THREE.FogExp2(0x030712, 0.015);
 
-            camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 500);
-            camera.position.set(0, 20, 40);
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+            camera.position.set(-25, 10, 45);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(innerWidth, innerHeight);
-            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
-            clock = new THREE.Clock();
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.5;
 
-            setupLights();
-            createNeurons();
-            generateMask();
-            setupEventListeners();
+            scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+            
+            buildNetwork();
+            setupEvents();
+            updateNetwork();
 
-            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 500);
-            setTimeout(() => document.getElementById('loading').classList.add('hidden'), 500);
-            setupTheme();
+            document.getElementById('loading').style.opacity = '0';
+            setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 600);
+            
             animate();
         }
 
-        function setupLights() {
-            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-            const l1 = new THREE.PointLight(0x00F2FF, 2, 80); l1.position.set(30, 40, 30); scene.add(l1);
-            const l2 = new THREE.PointLight(0xFF3C3C, 1.5, 80); l2.position.set(-30, 30, 30); scene.add(l2);
-        }
+        function buildNetwork() {
+            const gridSize = 5;
+            const spacing = 4;
+            const geo = new THREE.SphereGeometry(0.6, 16, 16);
 
-        function createNeurons() {
-            const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-
-            for (let i = 0; i < NEURON_COUNT; i++) {
-                const material = new THREE.MeshPhongMaterial({
-                    color: 0x00F2FF,
-                    emissive: 0x00F2FF,
-                    emissiveIntensity: 0.3,
-                    transparent: true,
-                    opacity: 0.9
-                });
-
-                const neuron = new THREE.Mesh(geometry, material);
-
-                // Arrange in a grid-like pattern
-                const row = Math.floor(i / 15);
-                const col = i % 15;
-                neuron.position.set(
-                    (col - 7) * 2,
-                    (row - 5) * 2,
-                    (Math.random() - 0.5) * 3
-                );
-
-                neuron.userData = { index: i, baseY: neuron.position.y };
-                scene.add(neuron);
-                neurons.push(neuron);
-            }
-
-            // Create some sample connections
-            for (let i = 0; i < 50; i++) {
-                const idx1 = Math.floor(Math.random() * NEURON_COUNT);
-                const idx2 = Math.floor(Math.random() * NEURON_COUNT);
-                if (idx1 !== idx2) {
-                    const points = [neurons[idx1].position, neurons[idx2].position];
-                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                    const material = new THREE.LineBasicMaterial({
-                        color: 0x00F2FF,
-                        transparent: true,
-                        opacity: 0.15
-                    });
-                    const line = new THREE.Line(geometry, material);
-                    line.userData = { from: idx1, to: idx2 };
-                    scene.add(line);
-                    connections.push(line);
+            // Layer A (Input)
+            for(let y=0; y<gridSize; y++) {
+                for(let x=0; x<gridSize; x++) {
+                    let mat = new THREE.MeshBasicMaterial({ color: colors.active });
+                    let mesh = new THREE.Mesh(geo, mat);
+                    mesh.position.set((x - 2)*spacing, (y - 2)*spacing, -15);
+                    scene.add(mesh);
+                    layerA.push({ mesh, isDropped: false, baseIntensity: 1 });
                 }
             }
+
+            // Layer B (Output)
+            for(let y=0; y<gridSize; y++) {
+                for(let x=0; x<gridSize; x++) {
+                    let mat = new THREE.MeshBasicMaterial({ color: colors.active });
+                    let mesh = new THREE.Mesh(geo, mat);
+                    mesh.position.set((x - 2)*spacing, (y - 2)*spacing, 15);
+                    scene.add(mesh);
+                    layerB.push(mesh);
+                }
+            }
+
+            // Connections
+            const lineMat = new THREE.LineBasicMaterial({ color: colors.line, transparent: true, opacity: 0.15 });
+            layerA.forEach(nodeA => {
+                let nodeLines = [];
+                layerB.forEach(meshB => {
+                    const lineGeo = new THREE.BufferGeometry().setFromPoints([nodeA.mesh.position, meshB.position]);
+                    const line = new THREE.Line(lineGeo, lineMat);
+                    scene.add(line);
+                    nodeLines.push(line);
+                });
+                connections.push({ nodeA, lines: nodeLines });
+            });
         }
 
         function generateMask() {
-            dropoutMask = [];
-            let active = 0, dropped = 0;
+            if(!isTraining) return;
+            layerA.forEach(node => {
+                node.isDropped = Math.random() < dropRate;
+            });
+            updateNetwork();
+        }
 
-            neurons.forEach((neuron, i) => {
-                const keep = isTraining ? (Math.random() > dropoutRate) : true;
-                dropoutMask.push(keep);
+        function updateNetwork() {
+            let activeCount = 0;
+            const total = layerA.length;
+            const scaleFactor = isTraining ? (1 / (1 - dropRate)) : 1;
 
-                if (keep) {
-                    active++;
-                    neuron.material.color.setHex(0x00FF88);
-                    neuron.material.emissive.setHex(0x00FF88);
-                    neuron.material.opacity = 0.9;
-                    neuron.scale.setScalar(1);
+            layerA.forEach((node, i) => {
+                if(isTraining && node.isDropped) {
+                    node.mesh.material.color.setHex(colors.dropped);
+                    node.mesh.scale.set(0.7, 0.7, 0.7);
+                    connections[i].lines.forEach(l => l.visible = false);
                 } else {
-                    dropped++;
-                    neuron.material.color.setHex(0xFF3C3C);
-                    neuron.material.emissive.setHex(0xFF3C3C);
-                    neuron.material.opacity = 0.3;
-                    neuron.scale.setScalar(0.5);
+                    node.mesh.material.color.setHex(colors.active);
+                    
+                    // Apply scale factor glow effect
+                    if(isTraining && currentStep === 3) {
+                        node.mesh.scale.set(1 + (scaleFactor-1)*0.5, 1 + (scaleFactor-1)*0.5, 1 + (scaleFactor-1)*0.5);
+                        let c = new THREE.Color(colors.active);
+                        c.lerp(new THREE.Color(0xffffff), Math.min((scaleFactor-1)*0.5, 0.8));
+                        node.mesh.material.color = c;
+                    } else {
+                        node.mesh.scale.set(1, 1, 1);
+                    }
+                    
+                    connections[i].lines.forEach(l => l.visible = true);
+                    activeCount++;
                 }
             });
 
-            // Update connections visibility
-            connections.forEach(conn => {
-                const fromActive = dropoutMask[conn.userData.from];
-                const toActive = dropoutMask[conn.userData.to];
-                conn.material.opacity = (fromActive && toActive) ? 0.3 : 0.05;
+            // Update Stats UI
+            const activePct = (activeCount / total) * 100;
+            const dropPct = 100 - activePct;
+            
+            document.getElementById('stat-active').innerText = Math.round(activePct) + '%';
+            document.getElementById('stat-dropped').innerText = Math.round(dropPct) + '%';
+            document.getElementById('stat-scale').innerText = scaleFactor.toFixed(2) + 'x';
+        }
+
+        function setStep(s) {
+            currentStep = s;
+            document.querySelectorAll('.step-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx + 1 === s);
             });
+            document.getElementById('desc-title').innerText = descriptions[s].title;
+            document.getElementById('desc-text').innerText = descriptions[s].text;
+            document.getElementById('desc-math').innerText = descriptions[s].math;
 
-            document.getElementById('activeCount').textContent = active;
-            document.getElementById('droppedCount').textContent = dropped;
+            if(s === 1) {
+                isTraining = false;
+                document.getElementById('mode-infer').classList.add('active');
+                document.getElementById('mode-train').classList.remove('active');
+            } else {
+                isTraining = true;
+                document.getElementById('mode-train').classList.add('active');
+                document.getElementById('mode-infer').classList.remove('active');
+                generateMask();
+            }
+            updateNetwork();
         }
 
-        function updateDropoutRate() {
-            document.getElementById('rateDisplay').textContent = Math.round(dropoutRate * 100) + '%';
-            document.getElementById('rateValue').textContent = dropoutRate.toFixed(2);
-            document.getElementById('scaleFactor').textContent = (1 / (1 - dropoutRate)).toFixed(2);
-            document.getElementById('keepProb').textContent = (1 - dropoutRate).toFixed(2);
-            generateMask();
-        }
-
-        function setupEventListeners() {
+        function setupEvents() {
             window.addEventListener('resize', () => {
-                camera.aspect = innerWidth / innerHeight;
+                camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
-                renderer.setSize(innerWidth, innerHeight);
+                renderer.setSize(window.innerWidth, window.innerHeight);
             });
 
-            document.getElementById('regenerateBtn').addEventListener('click', generateMask);
-
-            document.getElementById('playBtn').addEventListener('click', function () {
-                isPlaying = !isPlaying;
-                this.innerHTML = isPlaying ? '⏸️ Pause' : '▶️ Play Animation';
+            document.getElementById('slider-rate').addEventListener('input', (e) => {
+                dropRate = parseFloat(e.target.value);
+                document.getElementById('val-rate').innerText = dropRate.toFixed(2);
+                if(isTraining) generateMask();
             });
 
-            document.getElementById('rateSlider').addEventListener('input', (e) => {
-                dropoutRate = parseFloat(e.target.value);
-                updateDropoutRate();
+            document.getElementById('btn-regenerate').addEventListener('click', () => {
+                if(isTraining) generateMask();
+                else setStep(2); // Auto switch to training to show it
             });
 
-            document.getElementById('speedSlider').addEventListener('input', (e) => {
-                animSpeed = parseFloat(e.target.value);
-                document.getElementById('speedValue').textContent = animSpeed.toFixed(1) + 'x';
-            });
-
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    isTraining = this.dataset.mode === 'training';
-                    generateMask();
-                });
-            });
-
-            document.getElementById('connectionsToggle').addEventListener('click', function () {
-                showConnections = !showConnections;
-                connections.forEach(c => c.visible = showConnections);
-                this.classList.toggle('active');
-            });
-
-            document.getElementById('rotateToggle').addEventListener('click', function () {
-                controls.autoRotate = !controls.autoRotate;
-                this.classList.toggle('active');
-            });
+            document.getElementById('mode-train').addEventListener('click', () => setStep(2));
+            document.getElementById('mode-infer').addEventListener('click', () => setStep(1));
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            const elapsed = clock.getElapsedTime() * animSpeed;
             controls.update();
 
-            if (isPlaying) {
-                neurons.forEach((neuron, i) => {
-                    if (dropoutMask[i] || !isTraining) {
-                        neuron.position.y = neuron.userData.baseY + Math.sin(elapsed * 2 + i * 0.1) * 0.3;
-                        neuron.material.emissiveIntensity = 0.3 + Math.sin(elapsed * 3 + i * 0.2) * 0.15;
-                    }
-                });
-            }
+            // Pulse effect for lines
+            const t = Date.now() * 0.002;
+            connections.forEach(conn => {
+                if(!conn.nodeA.isDropped || !isTraining) {
+                    conn.lines.forEach((l, i) => {
+                        l.material.opacity = 0.05 + Math.sin(t + i*0.1)*0.1;
+                    });
+                }
+            });
 
             renderer.render(scene, camera);
         }
 
         init();
-        function setupTheme() {
-            // Cursor
-            const cursor = document.getElementById('cursor');
-            const cursorDot = document.getElementById('cursor-dot');
-            document.addEventListener('mousemove', e => {
-                cursor.style.left = e.clientX - 15 + 'px';
-                cursor.style.top = e.clientY - 15 + 'px';
-                cursorDot.style.left = e.clientX - 4 + 'px';
-                cursorDot.style.top = e.clientY - 4 + 'px';
-            });
-
-            // BG Particles
-            const canvas = document.getElementById('bg-canvas');
-            const bgScene = new THREE.Scene();
-            const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const bgRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-            bgRenderer.setSize(window.innerWidth, window.innerHeight);
-
-            const particleCount = 200;
-            const particles = new THREE.BufferGeometry();
-            const posArray = new Float32Array(particleCount * 3);
-            const particlesData = [];
-
-            for (let i = 0; i < particleCount; i++) {
-                posArray[i * 3] = (Math.random() - 0.5) * 30;
-                posArray[i * 3 + 1] = (Math.random() - 0.5) * 30;
-                posArray[i * 3 + 2] = (Math.random() - 0.5) * 30;
-                particlesData.push({
-                    velocity: new THREE.Vector3(-0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02, -0.01 + Math.random() * 0.02)
-                });
-            }
-            particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const particleMat = new THREE.PointsMaterial({ size: 0.1, color: 0xFFD700, transparent: true, opacity: 0.6 });
-            const particleMesh = new THREE.Points(particles, particleMat);
-            bgScene.add(particleMesh);
-
-            const lineGeo = new THREE.BufferGeometry();
-            const lineMat = new THREE.LineBasicMaterial({ color: 0xFF3C3C, transparent: true, opacity: 0.15 });
-            const lines = new THREE.LineSegments(lineGeo, lineMat);
-            bgScene.add(lines);
-
-            bgCamera.position.z = 10;
-            let mouseX = 0, mouseY = 0;
-            document.addEventListener('mousemove', (e) => {
-                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-                mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-            });
-
-            function animateBG() {
-                requestAnimationFrame(animateBG);
-                bgScene.rotation.y += 0.001;
-                bgScene.rotation.x += (mouseY * 0.05 - bgScene.rotation.x) * 0.05;
-                bgScene.rotation.y += (mouseX * 0.05 - bgScene.rotation.y) * 0.05;
-
-                const positions = particles.attributes.position.array;
-                const linePositions = [];
-
-                for (let i = 0; i < particleCount; i++) {
-                    positions[i * 3] += particlesData[i].velocity.x;
-                    positions[i * 3 + 1] += particlesData[i].velocity.y;
-                    positions[i * 3 + 2] += particlesData[i].velocity.z;
-
-                    if (positions[i * 3] < -15) positions[i * 3] = 15;
-                    if (positions[i * 3] > 15) positions[i * 3] = -15;
-                    if (positions[i * 3 + 1] < -15) positions[i * 3 + 1] = 15;
-                    if (positions[i * 3 + 1] > 15) positions[i * 3 + 1] = -15;
-                    if (positions[i * 3 + 2] < -15) positions[i * 3 + 2] = 15;
-                    if (positions[i * 3 + 2] > 15) positions[i * 3 + 2] = -15;
-
-                    for (let j = i + 1; j < particleCount; j++) {
-                        const dx = positions[i * 3] - positions[j * 3];
-                        const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
-                        const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
-                        if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 4) {
-                            linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2], positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]);
-                        }
-                    }
-                }
-                particles.attributes.position.needsUpdate = true;
-                lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-                bgRenderer.render(bgScene, bgCamera);
-            }
-            animateBG();
-
-            // Tilt Effect
-            document.querySelectorAll('.left-panel, .right-panel').forEach(panel => {
-                panel.addEventListener('mousemove', (e) => {
-                    const rect = panel.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotateX = ((y - centerY) / centerY) * -2;
-                    const rotateY = ((x - centerX) / centerX) * 2;
-                    panel.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                });
-                panel.addEventListener('mouseleave', () => {
-                    panel.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
-                });
-            });
-        }
     </script>
-
-    <!-- Info Modal -->
-    <style>@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');</style>
-    <div id="info-modal">
-        <div class="modal-content" style="border-color: var(--cyan); font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; direction: rtl; text-align: right;">
-            <button class="modal-close" id="btn-close-modal">✕</button>
-            <div class="modal-body">
-                <h2 style="color: var(--cyan); font-weight: 700; margin-bottom: 20px; font-size: 26px;">
-                    نظرة عميقة: استراتيجية الإسقاط العشوائي (Dropout)
-                </h2>
-
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-right: 4px solid var(--red); margin-bottom: 20px;">
-                    <h3 style="color: var(--red); font-size: 18px; margin-bottom: 10px;">لماذا "نحذف" البيانات عمداً؟</h3>
-                    <p style="font-size: 15px; line-height: 1.8; color: #e0e0e0; margin: 0;">
-                        قد يبدو إيقاف بعض الخلايا العصبية أمراً غريباً، لكنه سر القوة والذكاء. في هذه الطبقة، يتم إغلاق 20% من مسارات المعطيات عشوائياً أثناء التدريب. هذا التجاهل المتعمد يجبر بقية الشبكة على "الاعتماد على نفسها" وعدم الاتكال على مسار واحد مفضل، مما يزيد من مرونة النموذج بشكل هائل.
-                    </p>
-                </div>
-
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-right: 4px solid var(--cyan); margin-bottom: 20px;">
-                    <h3 style="color: var(--cyan); font-size: 18px; margin-bottom: 10px;">منع الحفظ التلقائي (فرط التكيف)</h3>
-                    <p style="font-size: 15px; line-height: 1.8; color: #e0e0e0; margin: 0;">
-                        يمنع هذا التكتيك مشكلة خطيرة جداً تعرف بـ "فرط التكيف" (Overfitting)، حيث يصبح النموذج بارعاً في حفظ البيانات التاريخية للطقس فاشلاً في التنبؤ الحقيقي. من خلال هذه العشوائية المنظمة، نضمن أن النموذج يتعلم القواعد العامة والمخفية، بدلاً من مجرد حفظ أرقام عابرة لا تتكرر.
-                    </p>
-                </div>
-
-                <div style="margin-top:25px; text-align:center; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <p style="font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 1px;">
-                        للتواصل: <span style="color: var(--cyan); font-weight: bold; letter-spacing: 2px;">IZZELDEENM@GMAIL.COM</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-        const infoModal = document.getElementById('info-modal');
-        document.getElementById('btn-info').addEventListener('click', () => infoModal.classList.add('show'));
-        document.getElementById('btn-close-modal').addEventListener('click', () => infoModal.classList.remove('show'));
-        infoModal.addEventListener('click', (e) => { if (e.target === infoModal) infoModal.classList.remove('show'); });
-    </script>
+    <script src="../ar-panel.js"></script>
 </body>
-
 </html>

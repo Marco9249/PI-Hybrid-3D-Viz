@@ -133,3 +133,5 @@ desktop.ini
 *.py
 *.bat
 *.ps1
+*.bak
+probe_out.txt
