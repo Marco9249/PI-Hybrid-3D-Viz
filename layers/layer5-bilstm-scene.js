@@ -27,22 +27,22 @@ const gateInfo = {
     forget: {
         title: 'Forget Gate (f_t)',
         text: 'Decides what information to discard from the cell state. A sigmoid layer outputs values between 0 (forget entirely) and 1 (keep entirely). In solar forecasting, this allows the network to forget stale weather patterns that no longer apply.',
-        math: 'f_t = σ(W_f · [h_t-1, x_t] + b_f)'
+        math: 'f_t = \\sigma(W_f \\cdot [h_{t-1}, x_t] + b_f)'
     },
     input: {
         title: 'Input Gate (i_t)',
         text: 'Controls what new information gets stored in the cell state. First, a sigmoid decides which values to update. Then, a tanh creates a candidate vector of new values. Together they filter only the most relevant new solar irradiance patterns into memory.',
-        math: 'i_t = σ(W_i · [h_t-1, x_t] + b_i)\nC̃_t = tanh(W_C · [h_t-1, x_t] + b_C)'
+        math: 'i_t = \\sigma(W_i \\cdot [h_{t-1}, x_t] + b_i) \\\\ \\tilde{C}_t = \\tanh(W_C \\cdot [h_{t-1}, x_t] + b_C)'
     },
     cell: {
         title: 'Cell State Update (C_t)',
         text: 'The cell state is the highway of information flow through time. Old state is multiplied by the forget gate (erasing irrelevant data), then new candidate values scaled by the input gate are added. This is the core mechanism that prevents vanishing gradients.',
-        math: 'C_t = f_t ⊙ C_t-1 + i_t ⊙ C̃_t'
+        math: 'C_t = f_t \\odot C_{t-1} + i_t \\odot \\tilde{C}_t'
     },
     output: {
         title: 'Output Gate (o_t)',
         text: 'Determines what parts of the cell state to expose as the hidden state output. The cell state passes through tanh (squashing to [-1,1]) and is filtered by the sigmoid output gate. This hidden state feeds into the next Dense layer for GHI prediction.',
-        math: 'o_t = σ(W_o · [h_t-1, x_t] + b_o)\nh_t = o_t ⊙ tanh(C_t)'
+        math: 'o_t = \\sigma(W_o \\cdot [h_{t-1}, x_t] + b_o) \\\\ h_t = o_t \\odot \\tanh(C_t)'
     }
 };
 
@@ -263,7 +263,7 @@ function setGate(gate) {
     const info = gateInfo[gate];
     document.getElementById('desc-title').innerText = info.title;
     document.getElementById('desc-text').innerText = info.text;
-    document.getElementById('desc-math').innerText = info.math;
+    katex.render(info.math, document.getElementById('desc-math'), { throwOnError: false, displayMode: true });
     document.querySelectorAll('.gate-btn').forEach(btn => btn.classList.remove('active'));
     if (event && event.currentTarget) event.currentTarget.classList.add('active');
     const col = gateColors[gate];

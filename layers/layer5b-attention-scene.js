@@ -276,7 +276,7 @@ function setStep(s) {
     const info = stepInfo[s];
     document.getElementById('desc-title').innerText = info.title;
     document.getElementById('desc-text').innerText = info.text;
-    document.getElementById('desc-math').innerText = info.math;
+    katex.render(info.math, document.getElementById('desc-math'), { throwOnError: false, displayMode: true });
 
     document.querySelectorAll('.step-btn').forEach((btn, idx) => {
         btn.classList.toggle('active', idx === s);

@@ -1,4 +1,0 @@
-start=45331
-end=58364
-BEFORE: '<section class="sec" id="sec4">\n        <div class="reveal" style="text-align:ce'
-AFTER: '<section class="sec" id="sec8" style="padding-bottom:100px">\n        <div class='

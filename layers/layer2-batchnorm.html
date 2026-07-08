@@ -80,9 +80,143 @@
         .ar-hud-btn { background:rgba(59,130,246,0.15); border:2px solid var(--primary); color:var(--primary); font-size:20px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; cursor:pointer; transition:all 0.3s; animation:pulseAr 2.5s infinite; }
         .ar-hud-btn:hover { background:var(--primary); color:#fff; box-shadow:0 0 30px var(--primary); transform:scale(1.1); }
         @keyframes pulseAr { 0%,100%{box-shadow:0 0 8px rgba(59,130,246,0.2)} 50%{box-shadow:0 0 20px rgba(59,130,246,0.5)} }
+    
+        /* ─── Premium Glassmorphism & UI Style Overrides ─── */
+        :root {
+            --cyan: #06B6D4 !important;
+            --purple: #8B5CF6 !important;
+            --gold: #F59E0B !important;
+            --green: #10B981 !important;
+            --blue: #3B82F6 !important;
+            --red: #EF4444 !important;
+            --bg: #030308 !important;
+        }
+        
+        /* Modern Glassmorphic Panels */
+        .left-panel, .right-panel, .hud-panel {
+            background: rgba(8, 8, 22, 0.65) !important;
+            backdrop-filter: blur(35px) saturate(140%) !important;
+            -webkit-backdrop-filter: blur(35px) saturate(140%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(255, 255, 255, 0.02) !important;
+            border-radius: 24px !important;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+        }
+
+        .left-panel:hover, .right-panel:hover, .hud-panel:hover {
+            border-color: rgba(6, 182, 212, 0.3) !important;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), inset 0 0 35px rgba(6, 182, 212, 0.15) !important;
+        }
+
+        /* Glassmorphic Headers */
+        .header, .hud-top {
+            background: rgba(8, 8, 22, 0.65) !important;
+            backdrop-filter: blur(35px) saturate(140%) !important;
+            -webkit-backdrop-filter: blur(35px) saturate(140%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(255, 255, 255, 0.02) !important;
+            border-radius: 18px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .header:hover, .hud-top:hover {
+            border-color: rgba(6, 182, 212, 0.2) !important;
+        }
+
+        /* Reusable Micro-animations for buttons & items */
+        .nav-btn {
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1) !important;
+        }
+
+        .nav-btn:hover {
+            background: rgba(6, 182, 212, 0.15) !important;
+            border-color: var(--cyan) !important;
+            color: #fff !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 10px 20px rgba(6, 182, 212, 0.15) !important;
+        }
+
+        .step-btn, .category-btn, .feature-item, .feature-chip, .stat-box, .stat-card, .scada-card {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 12px !important;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1) !important;
+        }
+
+        .step-btn:hover, .category-btn:hover, .feature-item:hover, .feature-chip:hover {
+            background: rgba(255, 255, 255, 0.06) !important;
+            transform: translateX(4px) scale(1.02) !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .step-btn.active, .category-btn.active, .feature-item.active, .feature-chip.active {
+            background: rgba(6, 182, 212, 0.1) !important;
+            border-color: var(--cyan) !important;
+            color: #fff !important;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2) !important;
+        }
+
+        /* Range Sliders */
+        input[type="range"] {
+            height: 6px !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-radius: 6px !important;
+            outline: none !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            transition: background 0.3s !important;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none !important;
+            width: 16px !important;
+            height: 16px !important;
+            background: #fff !important;
+            border: 2px solid var(--cyan) !important;
+            border-radius: 50% !important;
+            cursor: pointer !important;
+            box-shadow: 0 0 10px var(--cyan) !important;
+            transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1) !important;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.25) !important;
+            box-shadow: 0 0 15px var(--cyan) !important;
+        }
+
+        /* Arabic Overlay Info Panel */
+        #ar-panel {
+            background: rgba(8, 8, 22, 0.65) !important;
+            backdrop-filter: blur(40px) saturate(140%) !important;
+            -webkit-backdrop-filter: blur(40px) saturate(140%) !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
+            box-shadow: -30px 0 80px rgba(0, 0, 0, 0.9), inset 30px 0 30px rgba(255, 255, 255, 0.01) !important;
+        }
+
+        .ar-close {
+            background: rgba(8, 8, 22, 0.75) !important;
+            backdrop-filter: blur(20px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* Desktop cursor only */
+        @media (max-width: 1024px) {
+            #cursor, #cursor-dot {
+                display: none !important;
+            }
+            * {
+                cursor: auto !important;
+            }
+        }
+
     </style>
 </head>
 <body>
+    <!-- Ambient Background Glows -->
+    <div style="position: fixed; top: 50%; left: 20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%); transform: translate(-50%, -50%); pointer-events: none; z-index: 0;"></div>
+    <div style="position: fixed; top: 50%; right: 20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%); transform: translate(50%, -50%); pointer-events: none; z-index: 0;"></div>
+
     <div id="canvas-container"></div>
 
     <div class="hud-top">
@@ -111,7 +245,7 @@
             <div class="explain-card" style="flex-grow:1;">
                 <h4 id="desc-title">1. Raw Input Data</h4>
                 <p id="desc-text">Data arriving from the previous layer is arbitrarily shifted and scaled. This 3D cloud represents a batch of data. Notice how it is far from the center (origin) and has an irregular, wide spread. This phenomenon causes "internal covariate shift", making training unstable.</p>
-                <div class="math" id="desc-math">x</div>
+                <div class="math" id="desc-math">$$x$$</div>
             </div>
         </div>
 
@@ -177,9 +311,9 @@
 
         const descriptions = {
             1: { title: '1. Raw Input Data', math: 'x', text: 'Data arriving from the previous layer is arbitrarily shifted and scaled. This 3D cloud represents a batch of data. Notice how it is far from the center (origin) and has an irregular, wide spread. This phenomenon causes "internal covariate shift", making training unstable.' },
-            2: { title: '2. Mean Centering', math: 'x - μ', text: 'First, we calculate the geometric center (μ) of the batch and subtract it from every point. Watch as the entire data cluster glides to perfectly center itself around the origin (0,0,0). This removes bias.' },
-            3: { title: '3. Variance Scaling', math: '(x - μ) / √(σ² + ε)', text: 'Next, we divide the data by its standard deviation (σ). The widely spread cluster is squeezed into a neat, uniform sphere with a variance of exactly 1. All features are now equally weighted.' },
-            4: { title: '4. Scale & Shift', math: 'y = γ · x̂ + β', text: 'Finally, the network applies learnable parameters Gamma (γ) to scale, and Beta (β) to shift the data. Use the sliders to see how the network can dynamically mold the distribution to optimize learning.' }
+            2: { title: '2. Mean Centering', math: 'x - \\mu', text: 'First, we calculate the geometric center (μ) of the batch and subtract it from every point. Watch as the entire data cluster glides to perfectly center itself around the origin (0,0,0). This removes bias.' },
+            3: { title: '3. Variance Scaling', math: '\\frac{x - \\mu}{\\sqrt{\\sigma^2 + \\epsilon}}', text: 'Next, we divide the data by its standard deviation (σ). The widely spread cluster is squeezed into a neat, uniform sphere with a variance of exactly 1. All features are now equally weighted.' },
+            4: { title: '4. Scale & Shift', math: 'y = \\gamma \\cdot \\hat{x} + \\beta', text: 'Finally, the network applies learnable parameters Gamma (γ) to scale, and Beta (β) to shift the data. Use the sliders to see how the network can dynamically mold the distribution to optimize learning.' }
         };
 
         function init() {
@@ -281,7 +415,7 @@
             
             document.getElementById('desc-title').innerText = descriptions[s].title;
             document.getElementById('desc-text').innerText = descriptions[s].text;
-            document.getElementById('desc-math').innerText = descriptions[s].math;
+            katex.render(descriptions[s].math, document.getElementById('desc-math'), { throwOnError: false, displayMode: true });
             
             const slidersDisabled = (s !== 4);
             document.getElementById('slider-gamma').disabled = slidersDisabled;

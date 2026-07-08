@@ -1,0 +1,266 @@
+/* 
+  Core Presentation Style System (100% Offline Compatible)
+  Designed for Premium Dark-Mode & Sci-Fi Aesthetics
+*/
+
+/* ─── Color Variables ─── */
+:root {
+    --cyan: #06B6D4;
+    --purple: #8B5CF6;
+    --gold: #F59E0B;
+    --green: #10B981;
+    --blue: #3B82F6;
+    --red: #EF4444;
+    --bg: #030308;
+    --card-bg: rgba(10, 10, 25, 0.4);
+    --border: rgba(139, 92, 246, 0.2);
+    --glow: rgba(139, 92, 246, 0.15);
+}
+
+/* ─── Reset & Scrollbar ─── */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: auto !important;
+}
+
+@media (min-width: 1024px) {
+    * {
+        cursor: none !important; /* Enable custom cursor on desktop */
+    }
+}
+
+body {
+    background-color: var(--bg);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Hide Scrollbar */
+::-webkit-scrollbar {
+    display: none;
+}
+html {
+    scrollbar-width: none;
+}
+
+/* ─── Typography ─── */
+p {
+    font-size: 15px;
+    line-height: 1.95;
+    color: rgba(255, 255, 255, 0.72);
+    margin-bottom: 22px;
+    font-weight: 300;
+    letter-spacing: 0.2px;
+}
+
+strong, b {
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+em, i {
+    color: var(--cyan);
+    font-style: italic;
+}
+
+/* ─── Layout: Grid and Sections ─── */
+.story-section {
+    padding: 130px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* Subtle divider between sections */
+.story-section + .story-section::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(180deg, transparent, var(--border), transparent);
+    margin: 0 auto -130px;
+    position: relative;
+    z-index: 1;
+}
+
+.story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 90px;
+    align-items: center;
+}
+
+@media(max-width: 1024px) {
+    .story-grid {
+        grid-template-columns: 1fr;
+        gap: 50px;
+    }
+    .story-section {
+        padding: 80px 30px;
+    }
+}
+
+/* ─── Title & Headers ─── */
+.story-content h2,
+.story-content > div > h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.4rem, 3.5vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: 28px;
+    background: linear-gradient(120deg, #ffffff 0%, var(--cyan) 50%, var(--purple) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    transition: filter 0.3s;
+}
+
+.story-content h2:hover {
+    filter: brightness(1.15) drop-shadow(0 0 20px rgba(6,182,212,0.35));
+}
+
+.story-content h3 {
+    color: var(--gold);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* ─── Custom Premium Cursor ─── */
+#cursor {
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+    transition: transform 0.1s;
+    mix-blend-mode: difference;
+    display: none;
+}
+
+#cursor-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--purple);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    #cursor, #cursor-dot {
+        display: block;
+    }
+}
+
+/* ─── Premium Cards & Glassmorphism ─── */
+.glass-card {
+    background: rgba(10, 10, 25, 0.7);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 0 20px rgba(139,92,246,0.1);
+    transition: all 0.4s ease;
+}
+
+.glass-card:hover {
+    border-color: rgba(6,182,212,0.3);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), inset 0 0 25px rgba(6,182,212,0.15);
+}
+
+.highlight-card {
+    background: rgba(8, 8, 22, 0.65);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    padding: 45px;
+    border-radius: 32px;
+    backdrop-filter: blur(35px) saturate(140%);
+    -webkit-backdrop-filter: blur(35px) saturate(140%);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45),
+                inset 0 0 30px rgba(255, 255, 255, 0.02);
+    transition: all 0.55s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.highlight-card:hover {
+    transform: translateY(-12px) scale(1.01);
+    border-color: rgba(6, 182, 212, 0.45);
+    box-shadow: 0 50px 110px rgba(0, 0, 0, 0.65),
+                0 0 40px rgba(6, 182, 212, 0.12),
+                inset 0 0 30px rgba(6, 182, 212, 0.05);
+}
+
+/* ─── Premium UI Elements ─── */
+.premium-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.premium-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.premium-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    transition: 0.4s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.premium-slider:before {
+    content: "";
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+input:checked + .premium-slider {
+    background: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 15px rgba(16,185,129,0.3);
+}
+
+input:checked + .premium-slider:before {
+    transform: translateX(20px);
+}
+
+/* Progress Tracks */
+.progress-track {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}

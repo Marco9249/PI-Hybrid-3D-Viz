@@ -85,9 +85,143 @@
         #loading { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; transition:opacity 0.6s; }
         .load-spinner { width:40px; height:40px; border:3px solid rgba(59,130,246,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite; }
         @keyframes spin { 100%{transform:rotate(360deg)} }
+    
+        /* ─── Premium Glassmorphism & UI Style Overrides ─── */
+        :root {
+            --cyan: #06B6D4 !important;
+            --purple: #8B5CF6 !important;
+            --gold: #F59E0B !important;
+            --green: #10B981 !important;
+            --blue: #3B82F6 !important;
+            --red: #EF4444 !important;
+            --bg: #030308 !important;
+        }
+        
+        /* Modern Glassmorphic Panels */
+        .left-panel, .right-panel, .hud-panel {
+            background: rgba(8, 8, 22, 0.65) !important;
+            backdrop-filter: blur(35px) saturate(140%) !important;
+            -webkit-backdrop-filter: blur(35px) saturate(140%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(255, 255, 255, 0.02) !important;
+            border-radius: 24px !important;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+        }
+
+        .left-panel:hover, .right-panel:hover, .hud-panel:hover {
+            border-color: rgba(6, 182, 212, 0.3) !important;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), inset 0 0 35px rgba(6, 182, 212, 0.15) !important;
+        }
+
+        /* Glassmorphic Headers */
+        .header, .hud-top {
+            background: rgba(8, 8, 22, 0.65) !important;
+            backdrop-filter: blur(35px) saturate(140%) !important;
+            -webkit-backdrop-filter: blur(35px) saturate(140%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(255, 255, 255, 0.02) !important;
+            border-radius: 18px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .header:hover, .hud-top:hover {
+            border-color: rgba(6, 182, 212, 0.2) !important;
+        }
+
+        /* Reusable Micro-animations for buttons & items */
+        .nav-btn {
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1) !important;
+        }
+
+        .nav-btn:hover {
+            background: rgba(6, 182, 212, 0.15) !important;
+            border-color: var(--cyan) !important;
+            color: #fff !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 10px 20px rgba(6, 182, 212, 0.15) !important;
+        }
+
+        .step-btn, .category-btn, .feature-item, .feature-chip, .stat-box, .stat-card, .scada-card {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 12px !important;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1) !important;
+        }
+
+        .step-btn:hover, .category-btn:hover, .feature-item:hover, .feature-chip:hover {
+            background: rgba(255, 255, 255, 0.06) !important;
+            transform: translateX(4px) scale(1.02) !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .step-btn.active, .category-btn.active, .feature-item.active, .feature-chip.active {
+            background: rgba(6, 182, 212, 0.1) !important;
+            border-color: var(--cyan) !important;
+            color: #fff !important;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2) !important;
+        }
+
+        /* Range Sliders */
+        input[type="range"] {
+            height: 6px !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-radius: 6px !important;
+            outline: none !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            transition: background 0.3s !important;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none !important;
+            width: 16px !important;
+            height: 16px !important;
+            background: #fff !important;
+            border: 2px solid var(--cyan) !important;
+            border-radius: 50% !important;
+            cursor: pointer !important;
+            box-shadow: 0 0 10px var(--cyan) !important;
+            transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1) !important;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.25) !important;
+            box-shadow: 0 0 15px var(--cyan) !important;
+        }
+
+        /* Arabic Overlay Info Panel */
+        #ar-panel {
+            background: rgba(8, 8, 22, 0.65) !important;
+            backdrop-filter: blur(40px) saturate(140%) !important;
+            -webkit-backdrop-filter: blur(40px) saturate(140%) !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
+            box-shadow: -30px 0 80px rgba(0, 0, 0, 0.9), inset 30px 0 30px rgba(255, 255, 255, 0.01) !important;
+        }
+
+        .ar-close {
+            background: rgba(8, 8, 22, 0.75) !important;
+            backdrop-filter: blur(20px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* Desktop cursor only */
+        @media (max-width: 1024px) {
+            #cursor, #cursor-dot {
+                display: none !important;
+            }
+            * {
+                cursor: auto !important;
+            }
+        }
+
     </style>
 </head>
 <body>
+    <!-- Ambient Background Glows -->
+    <div style="position: fixed; top: 50%; left: 20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%); transform: translate(-50%, -50%); pointer-events: none; z-index: 0;"></div>
+    <div style="position: fixed; top: 50%; right: 20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%); transform: translate(50%, -50%); pointer-events: none; z-index: 0;"></div>
+
     <div id="canvas-container"></div>
 
     <div class="hud-top">
@@ -158,9 +292,13 @@
         </div>
     </div>
 
-    <div id="loading">
-        <div class="load-spinner"></div>
-        <div style="color:var(--primary);font-family:'Space Mono';font-size:14px;letter-spacing:4px;margin-top:20px;">INITIALIZING REGULARIZER...</div>
+    <div class="loading" id="loading">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 100px; height: 100px;">
+            <div style="position: absolute; width: 80px; height: 80px; border: 2px dashed var(--cyan); border-radius: 50%; animation: spin 4s linear infinite;"></div>
+            <div style="position: absolute; width: 60px; height: 60px; border: 2px solid rgba(139, 92, 246, 0.3); border-top-color: var(--purple); border-radius: 50%; animation: spin 1.5s linear infinite;"></div>
+            <div style="font-family: 'Space Mono', monospace; font-size: 14px; color: #fff; font-weight: bold; animation: pulse 2s infinite;">PI</div>
+        </div>
+        <p style="margin-top: 25px; font-family: 'Outfit', sans-serif; font-size: 12px; color: rgba(255,255,255,0.6); letter-spacing: 3px; text-transform: uppercase;">Initializing Neural Layer...</p>
     </div>
 
     <div id="ar-panel-overlay" onclick="closeArPanel()"></div>
