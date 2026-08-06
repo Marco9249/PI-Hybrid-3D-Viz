@@ -1126,25 +1126,135 @@
 
     <canvas id="bg-canvas"></canvas>
 
+    <style>
+        /* ── NAV DROPDOWN CARDS ── */
+        .nav-menu { display: flex; gap: 8px; align-items: center; z-index: 100000; pointer-events: auto !important; }
+        .nav-item { position: relative; }
+        .nav-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; font-size: 10px; font-family: 'Outfit', sans-serif;
+            font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+            border-radius: 30px; border: 1px solid; text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.19,1,0.22,1);
+            backdrop-filter: blur(10px); cursor: pointer; white-space: nowrap;
+        }
+        .nav-btn:hover { transform: translateY(-2px); }
+        .nav-btn .nb-icon { font-size: 13px; }
+        /* Dropdown card */
+        .nav-dropdown {
+            position: absolute; top: calc(100% + 14px); right: 0;
+            min-width: 230px;
+            background: rgba(5,5,18,0.92);
+            backdrop-filter: blur(30px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            opacity: 0; pointer-events: none;
+            transform: translateY(8px) scale(0.97);
+            transition: all 0.28s cubic-bezier(0.19,1,0.22,1);
+            z-index: 200000;
+        }
+        .nav-item:hover .nav-dropdown,
+        .nav-item:focus-within .nav-dropdown {
+            opacity: 1; pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+        /* small arrow */
+        .nav-dropdown::before {
+            content: '';
+            position: absolute; top: -6px; right: 20px;
+            width: 12px; height: 12px;
+            background: rgba(5,5,18,0.95);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            transform: rotate(45deg);
+        }
+        .nd-icon {
+            font-size: 28px; margin-bottom: 10px;
+            display: block; line-height: 1;
+        }
+        .nd-title {
+            font-family: 'Outfit', sans-serif; font-weight: 800;
+            font-size: 14px; color: #fff; margin-bottom: 5px; letter-spacing: 0.5px;
+        }
+        .nd-desc {
+            font-size: 11.5px; color: rgba(255,255,255,0.5);
+            line-height: 1.6; margin: 0; font-weight: 300;
+        }
+        .nd-arrow {
+            display: inline-flex; align-items: center; margin-top: 12px;
+            font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+            text-transform: uppercase; gap: 5px; text-decoration: none;
+            transition: gap 0.2s;
+        }
+        .nd-arrow:hover { gap: 8px; }
+        @media (max-width: 768px) {
+            .nav-dropdown { right: auto; left: 0; min-width: 200px; }
+            .nav-dropdown::before { left: 20px; right: auto; }
+        }
+    </style>
+
     <nav id="nav">
         <div class="logo">PI-HYBRID</div>
-        <div class="cta-group" style="gap: 12px; z-index: 100000; pointer-events: auto !important;">
-            <a href="https://doi.org/10.36227/techrxiv.176827103.31624241/v1" target="_blank" class="btn-ghost"
-                style="padding: 8px 16px; font-size: 10px; border-color: rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.05); color: var(--gold);">
-                <span style="font-size:12px;">📄</span> PAPER
-            </a>
-            <a href="presentation-intro.html" class="btn-ghost"
-                style="padding: 8px 16px; font-size: 10px; border-color: rgba(6, 182, 212, 0.4); background: rgba(6, 182, 212, 0.05);">
-                <span style="font-size:12px;">📘</span> PROLOGUE
-            </a>
-            <a href="presentation-control.html" class="btn-ghost"
-                style="padding: 8px 16px; font-size: 10px; border-color: rgba(139, 92, 246, 0.5); background: rgba(139, 92, 246, 0.05);">
-                <span style="font-size:12px;">⚙️</span> CONTROL
-            </a>
-            <a href="presentation-conclusion.html" class="btn-ghost"
-                style="padding: 8px 16px; font-size: 10px; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.05);">
-                <span style="font-size:12px;">📜</span> SUMMARY
-            </a>
+        <div class="nav-menu">
+
+            <!-- PAPER -->
+            <div class="nav-item">
+                <a href="https://doi.org/10.36227/techrxiv.176827103.31624241/v1" target="_blank" class="nav-btn"
+                   style="border-color:rgba(245,158,11,0.45); background:rgba(245,158,11,0.06); color:var(--gold);">
+                    <span class="nb-icon">📄</span> PAPER
+                </a>
+            </div>
+
+            <!-- PROLOGUE -->
+            <div class="nav-item">
+                <button class="nav-btn" aria-haspopup="true"
+                   style="border-color:rgba(6,182,212,0.45); background:rgba(6,182,212,0.06); color:rgba(255,255,255,0.85);">
+                    <span class="nb-icon">📘</span> PROLOGUE
+                </button>
+                <div class="nav-dropdown" style="border-color:rgba(6,182,212,0.2);">
+                    <span class="nd-icon">📘</span>
+                    <div class="nd-title">Chapter I — The Problem</div>
+                    <p class="nd-desc">Background, research gap, physics-guided strategy, and project objectives. The story of why standard AI fails in arid solar forecasting.</p>
+                    <a href="presentation-intro.html" class="nd-arrow" style="color:var(--cyan);">
+                        Enter Prologue <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- CONTROL -->
+            <div class="nav-item">
+                <button class="nav-btn" aria-haspopup="true"
+                   style="border-color:rgba(139,92,246,0.5); background:rgba(139,92,246,0.06); color:rgba(255,255,255,0.85);">
+                    <span class="nb-icon">⚙️</span> CONTROL
+                </button>
+                <div class="nav-dropdown" style="border-color:rgba(139,92,246,0.25);">
+                    <span class="nd-icon">⚙️</span>
+                    <div class="nd-title">Chapter II — The Control System</div>
+                    <p class="nd-desc">Deep-dive into the Simulink MPC + FOPID hierarchical controller. Interactive block diagrams, hysteresis logic, and 72-hour simulation results.</p>
+                    <a href="presentation-control.html" class="nd-arrow" style="color:var(--purple);">
+                        Enter Control Lab <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SUMMARY -->
+            <div class="nav-item">
+                <button class="nav-btn" aria-haspopup="true"
+                   style="border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.06); color:rgba(255,255,255,0.85);">
+                    <span class="nb-icon">📜</span> SUMMARY
+                </button>
+                <div class="nav-dropdown" style="border-color:rgba(245,158,11,0.2);">
+                    <span class="nd-icon">📜</span>
+                    <div class="nd-title">Chapter III — Results & Conclusion</div>
+                    <p class="nd-desc">Final benchmarks, R²=0.997 achievement, RMSE reduction, and the key takeaway: Physics beats Attention in arid climate forecasting.</p>
+                    <a href="presentation-conclusion.html" class="nd-arrow" style="color:var(--gold);">
+                        View Conclusion <span>→</span>
+                    </a>
+                </div>
+            </div>
+
         </div>
     </nav>
 
